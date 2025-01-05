@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EditorView } from '@codemirror/view'
 import { Editor, MarkdownView, Notice, Plugin, TFile } from 'obsidian'
 

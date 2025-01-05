@@ -295,7 +295,7 @@ export class AnthropicProvider implements BaseLLMProvider {
         `Anthropic only supports string content for system messages`,
       )
     }
-    return systemMessage
+    return systemMessage as string
   }
 
   private static isMessageEmpty(message: RequestMessage) {

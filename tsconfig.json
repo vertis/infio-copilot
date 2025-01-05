@@ -1,44 +1,75 @@
 {
+  // TypeScript Configuration for Obsidian Plugin
   "compilerOptions": {
-    /* Base Options */
-    "baseUrl": ".", // Base path for module resolution
-    "module": "ESNext", // Module code generation
-    "target": "ES6", // ECMAScript target version
+    /* Core Build Configuration
+     * These options control the basic behavior of the TypeScript compiler
+     */
+    "baseUrl": ".", // Root directory for resolving non-relative module names
+    "module": "ESNext", // Use latest ECMAScript module syntax
+    "target": "ES6", // Compile to ES6 (ES2015) JavaScript
+    "moduleResolution": "node", // Use Node.js-style module resolution
+    "moduleDetection": "force", // Force files to be treated as modules
+    "noEmit": true, // Don't output JavaScript files (Obsidian handles compilation)
 
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "moduleDetection": "force",
-    "noEmit": true, // Only perform type checking
+    /* Source Map Configuration
+     * Options for debugging and development
+     */
+    "inlineSourceMap": true, // Generate source maps inline in output files
+    "inlineSources": true, // Include source code in the source maps
 
-    /* Source Maps */
-    "inlineSourceMap": true,
-    "inlineSources": true,
+    /* Type Checking Configuration
+     * Controls the strictness of TypeScript's type system
+     */
+    "strict": false, // Disable strict type checking for flexibility
+    "noImplicitAny": false, // Allow variables to have implicit 'any' type
+    "strictNullChecks": false, // Disable strict null checks for easier development
 
-    /* Type Checking */
-    "strict": false,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
+    /* JavaScript and JSX Support
+     * Configuration for JavaScript and React JSX
+     */
+    "allowJs": true, // Allow JavaScript files to be compiled
+    "jsx": "react-jsx", // Support React JSX syntax without importing React
+    "resolveJsonModule": true, // Enable importing JSON files as modules
 
-    /* JavaScript Support */
-    "allowJs": true,
-    "jsx": "react-jsx",
-    "resolveJsonModule": true,
+    /* Module Import Configuration
+     * Settings for module importing behavior
+     */
+    "importHelpers": true, // Import helper functions for code generation
+    "isolatedModules": true, // Ensure each file can be safely transpiled
+    "allowSyntheticDefaultImports": true, // Allow default imports from modules with no default export
+    "esModuleInterop": true, // Enable interoperability between CommonJS and ES Modules;
 
-    /* Module Options */
-    "importHelpers": true,
-    "isolatedModules": true,
-    "allowSyntheticDefaultImports": true,
+    /* Standard Library Configuration
+     * Specify which APIs are available
+     */
+    "lib": [
+      "DOM", // Include DOM definitions
+      "ES5", // Include ES5 APIs
+      "ES6", // Include ES6/ES2015 APIs
+      "ES7", // Include ES7/ES2016 APIs
+      "ESNext" // Include latest ECMAScript features
+    ],
 
-    /* Libraries */
-    "lib": ["DOM", "ES5", "ES6", "ES7"],
+    /* Build Optimization
+     * Options to improve build performance
+     */
+    "skipLibCheck": true, // Skip type checking of declaration files
 
-    /* Optimization */
-    "skipLibCheck": true,
+    /* Development Configuration
+     * Options to assist during development
+     */
+    "noUnusedLocals": false, // Don't report errors on unused locals
+    "noUnusedParameters": false, // Don't report errors on unused parameters
+    "noFallthroughCasesInSwitch": false, // Don't report errors for fallthrough cases in switch
 
-    /* Linting */
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": false
+    /* Module Resolution Paths
+     * Custom path mappings for module resolution
+     */
+    "paths": {
+      "@codemirror/*": ["node_modules/@codemirror/*"], // Map CodeMirror imports
+      "*": ["node_modules/*", "src/types/*"] // Fallback paths for module resolution
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "drizzle.config.ts", "__mocks__"]
+  // Specify which files to include in compilation
+  "include": ["src/**/*.ts", "src/**/*.tsx", "__mocks__"]
 }

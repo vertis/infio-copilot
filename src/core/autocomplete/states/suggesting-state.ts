@@ -1,8 +1,8 @@
 
-import { Settings } from "../../../settings/versions";
-import { extractNextWordAndRemaining } from "../utils";
 import EventListener from "../../../event-listener";
 import { DocumentChanges } from "../../../render-plugin/document-changes-listener";
+import { InfioSettings } from "../../../types/settings";
+import { extractNextWordAndRemaining } from "../utils";
 
 import State from "./state";
 
@@ -166,7 +166,7 @@ class SuggestingState extends State {
     return `Suggesting for ${this.context.context}`;
   }
 
-  handleSettingChanged(settings: Settings): void {
+	handleSettingChanged(settings: InfioSettings ): void {
     if (!settings.cacheSuggestions) {
       this.clearPrediction();
     }

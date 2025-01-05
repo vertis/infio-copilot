@@ -13,10 +13,10 @@ import { createRoot } from "react-dom/client";
 // } from '../constants'
 
 import InfioPlugin from '../main';
-import { findFilesMatchingPatterns } from '../utils/glob-utils.ts';
+import { findFilesMatchingPatterns } from '../utils/glob-utils';
 import { getOllamaModels } from '../utils/ollama';
 
-import AutoCompleteSettings from './AutoCompleteSettings.tsx';
+import AutoCompleteSettings from './AutoCompleteSettings';
 import CustomSettings from './CustomSettings';
 
 export class InfioSettingTab extends PluginSettingTab {

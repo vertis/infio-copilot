@@ -50,7 +50,7 @@ export function LLMProvider({ children }: PropsWithChildren) {
 		if (!model) {
 			throw new Error('Invalid chat model ID')
 		}
-		return model
+		return model as CustomLLMModel
 	}, [settings])
 
 	const applyModel = useMemo((): CustomLLMModel => {
@@ -62,12 +62,12 @@ export function LLMProvider({ children }: PropsWithChildren) {
 		}
 		if (model.provider === 'ollama') {
 			return {
-				provider: 'ollama',
-				baseURL: settings.ollamaApplyModel.baseUrl,
-				model: settings.ollamaApplyModel.model,
-			}
+				...model,
+				baseUrl: settings.ollamaApplyModel.baseUrl,
+				name: settings.ollamaApplyModel.model,
+			} as CustomLLMModel
 		}
-		return model
+		return model as CustomLLMModel
 	}, [settings])
 
 	useEffect(() => {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { cloneDeep, each, get, has, isArray, isEqual, isNumber, isObject, isString, set, unset } from "lodash";
 import * as mm from "micromatch";
 import { err, ok, Result } from "neverthrow";

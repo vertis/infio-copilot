@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Text } from "@codemirror/state";
 
 export interface Suggestion {

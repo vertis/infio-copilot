@@ -4,6 +4,7 @@ import {
 	GenerateContentResult,
 	GenerateContentStreamResult,
 	GoogleGenerativeAI,
+	Part,
 } from '@google/generative-ai'
 
 import { CustomLLMModel } from '../../types/llm/model'
@@ -207,7 +208,7 @@ export class GeminiProvider implements BaseLLMProvider {
 							}
 						}
 					}
-				}),
+				}) as Part[],
 			}
 		}
 

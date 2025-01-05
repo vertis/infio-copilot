@@ -51,6 +51,6 @@ We value your input and want to ensure you can easily share your thoughts and re
 
 - **Bug Reports**: If you encounter any bugs or unexpected behavior, please submit an issue on our [GitHub Issues](https://github.com/infiolab/infio-copilot/issues) page. Be sure to include as much detail as possible to help us reproduce and address the problem.
 - **Feature Requests**: For new feature ideas or enhancements, please use our [GitHub Discussions - Ideas &amp; Feature Requests](https://github.com/infiolab/infio-copilot/discussions/categories/ideas) page. Create a new discussion to share your suggestions.
-## License
+·## License
 
 This project is licensed under the [MIT License](LICENSE).

@@ -108,9 +108,9 @@ class AutoComplete implements AutocompleteService {
 			groq: settings.groqApiKey,
 			infio: settings.infioApiKey,
 		})
-		const model: CustomLLMModel = settings.activeModels.find(
+		const model = settings.activeModels.find(
 			(option) => option.name === settings.chatModelId,
-		)
+		) as CustomLLMModel;
 		const llm = new LLMClient(llm_manager, model);
 
 		return new AutoComplete(

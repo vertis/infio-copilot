@@ -7,12 +7,11 @@ import { SelectVector } from '../database/schema'
 import { ChatMessage, ChatUserMessage } from '../types/chat'
 import { ContentPart, RequestMessage } from '../types/llm/request'
 import {
-	MentionableBlock,
-	MentionableFile,
+	MentionableBlock, MentionableCurrentFile, MentionableFile,
 	MentionableFolder,
 	MentionableImage,
 	MentionableUrl,
-	MentionableVault,
+	MentionableVault
 } from '../types/mentionable'
 import { InfioSettings } from '../types/settings'
 
@@ -99,7 +98,7 @@ export class PromptGenerator {
 		const customInstructionMessage = this.getCustomInstructionMessage()
 
 		const currentFile = lastUserMessage.mentionables.find(
-			(m) => m.type === 'current-file',
+			(m): m is MentionableCurrentFile => m.type === 'current-file',
 		)?.file
 		const currentFileMessage = currentFile
 			? await this.getCurrentFileMessage(currentFile)

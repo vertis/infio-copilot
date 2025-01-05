@@ -681,7 +681,9 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
   height: 100%;
 }
 
-.infio-chat-code-block.has-filename .infio-chat-code-block-header-button button {
+.infio-chat-code-block.has-filename
+  .infio-chat-code-block-header-button
+  button {
   box-shadow: none;
   border: 0;
   padding: 0 var(--size-4-2);
@@ -960,9 +962,6 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
     }
   }
 }
-
-
-
 
 /* 
 * LLM Info
@@ -1383,7 +1382,7 @@ select.infio-ai-block-model-select::-ms-expand {
   box-sizing: content-box;
 }
 
- /*
+/*
 	Apply
  */
 

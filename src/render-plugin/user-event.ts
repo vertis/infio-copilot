@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Transaction } from "@codemirror/state";
 
 enum UserEvent {

@@ -1,23 +1,32 @@
 /* eslint-disable */
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'fs/promises'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 async function bundlePgliteResources() {
-	const pgliteVersion = '0.2.14';
-	const pglitePath = path.resolve(__dirname, '../node_modules/@electric-sql/pglite');
+	const pgliteVersion = '0.2.14'
+	const pglitePath = path.resolve(
+		__dirname,
+		'../node_modules/@electric-sql/pglite',
+	)
 
 	// Read the files
-	const wasmBuffer = await fs.readFile(path.join(pglitePath, 'dist/postgres.wasm'));
-	const dataBuffer = await fs.readFile(path.join(pglitePath, 'dist/postgres.data'));
-	const vectorBuffer = await fs.readFile(path.join(pglitePath, 'dist/vector.tar.gz'));
+	const wasmBuffer = await fs.readFile(
+		path.join(pglitePath, 'dist/postgres.wasm'),
+	)
+	const dataBuffer = await fs.readFile(
+		path.join(pglitePath, 'dist/postgres.data'),
+	)
+	const vectorBuffer = await fs.readFile(
+		path.join(pglitePath, 'dist/vector.tar.gz'),
+	)
 
 	// Convert to base64
-	const wasmBase64 = wasmBuffer.toString('base64');
-	const dataBase64 = dataBuffer.toString('base64');
-	const vectorBase64 = vectorBuffer.toString('base64');
+	const wasmBase64 = wasmBuffer.toString('base64')
+	const dataBase64 = dataBuffer.toString('base64')
+	const vectorBase64 = vectorBuffer.toString('base64')
 
 	// Create the output file
 	const output = `
@@ -27,13 +36,13 @@ export const pgliteResources = {
   dataBase64: '${dataBase64}',
   vectorBase64: '${vectorBase64}',
 };
-`;
+`
 
 	// Write the bundled resources
 	await fs.writeFile(
 		path.resolve(__dirname, '../src/database/pglite-resources.ts'),
-		output
-	);
+		output,
+	)
 }
 
-bundlePgliteResources().catch(console.error);
+bundlePgliteResources().catch(console.error)

@@ -111,7 +111,8 @@ export class VectorManager {
             return {
               path: file.path,
               mtime: file.stat.mtime,
-              content: chunk.pageContent,
+							content: chunk.pageContent,
+							embedding: [],
               metadata: {
                 startLine: chunk.metadata.loc.lines.from as number,
                 endLine: chunk.metadata.loc.lines.to as number,

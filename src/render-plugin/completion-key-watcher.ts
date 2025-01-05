@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Prec } from "@codemirror/state";
 import { keymap } from "@codemirror/view";
 

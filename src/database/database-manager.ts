@@ -1,5 +1,5 @@
 import { PGlite } from '@electric-sql/pglite'
-import { type PGliteWithLive, live } from '@electric-sql/pglite/live'
+import { type PGliteWithLive, live } from '@electric-sql/pglite/dist/live'
 // import { PgliteDatabase, drizzle } from 'drizzle-orm/pglite'
 import { App, normalizePath } from 'obsidian'
 

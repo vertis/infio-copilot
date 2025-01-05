@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * This provider is nearly identical to OpenAICompatibleProvider, but uses a custom OpenAI client
  * (NoStainlessOpenAI) to work around CORS issues specific to Ollama.

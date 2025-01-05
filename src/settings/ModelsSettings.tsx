@@ -179,7 +179,7 @@ const ModelsSettings: React.FC<ModelsSettingsProps> = ({ settings, setSettings }
 			<h2>Models</h2>
 			<div className="infio-llm-chat-setting-title infio-chat-setting-item-container">
 				<ModelList
-					models={activeModels}
+					models={activeModels as CustomLLMModel[]}
 					chatModelKey={settings.chatModelId}
 					applyModelKey={settings.applyModelId}
 					onUpdateModel={handleUpdateModel}

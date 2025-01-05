@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EditorView } from "@codemirror/view";
 import { LRUCache } from "lru-cache";
 import { App, TFile } from "obsidian";

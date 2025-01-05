@@ -1,12 +1,13 @@
-import { MarkdownView, Plugin } from "obsidian";
-import React, { useEffect, useRef, useState } from "react";
+import { MarkdownView, Plugin } from 'obsidian';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { APPLY_VIEW_TYPE } from "../../constants";
-import LLMManager from "../../core/llm/manager";
-import { InfioSettings } from "../../types/settings";
-import { manualApplyChangesToFile } from "../../utils/apply";
-import { removeAITags } from "../../utils/content-filter";
-import { PromptGenerator } from "../../utils/prompt-generator";
+import { APPLY_VIEW_TYPE } from '../../constants';
+import LLMManager from '../../core/llm/manager';
+import { CustomLLMModel } from '../../types/llm/model';
+import { InfioSettings } from '../../types/settings';
+import { manualApplyChangesToFile } from '../../utils/apply';
+import { removeAITags } from '../../utils/content-filter';
+import { PromptGenerator } from '../../utils/prompt-generator';
 
 interface InlineEditProps {
 	source: string;
@@ -172,7 +173,7 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
 
 			const chatModel = settings.activeModels.find(
 				(model) => model.name === selectedModel
-			);
+			) as CustomLLMModel;
 			if (!chatModel) {
 				setIsSubmitting(false);
 				throw new Error("Invalid chat model");

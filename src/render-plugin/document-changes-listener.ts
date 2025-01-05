@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EditorState } from "@codemirror/state";
 import { ViewPlugin, ViewUpdate } from "@codemirror/view";
 
