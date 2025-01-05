@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    /* Base Options */
+    "baseUrl": ".", // Base path for module resolution
+    "module": "ESNext", // Module code generation
+    "target": "ES6", // ECMAScript target version
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
+    "noEmit": true, // Only perform type checking
+
+    /* Source Maps */
+    "inlineSourceMap": true,
+    "inlineSources": true,
+
+    /* Type Checking */
+    "strict": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+
+    /* JavaScript Support */
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+
+    /* Module Options */
+    "importHelpers": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* Libraries */
+    "lib": ["DOM", "ES5", "ES6", "ES7"],
+
+    /* Optimization */
+    "skipLibCheck": true,
+
+    /* Linting */
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": false
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "drizzle.config.ts", "__mocks__"]
+}

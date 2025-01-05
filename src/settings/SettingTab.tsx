@@ -1,0 +1,855 @@
+import {
+	App,
+	DropdownComponent,
+	Modal,
+	PluginSettingTab,
+	Setting,
+	TFile,
+} from 'obsidian';
+import * as React from "react";
+import { createRoot } from "react-dom/client";
+// import {
+// 	EMBEDDING_MODEL_OPTIONS,
+// } from '../constants'
+
+import InfioPlugin from '../main';
+import { findFilesMatchingPatterns } from '../utils/glob-utils.ts';
+import { getOllamaModels } from '../utils/ollama';
+
+import AutoCompleteSettings from './AutoCompleteSettings.tsx';
+import CustomSettings from './CustomSettings';
+
+export class InfioSettingTab extends PluginSettingTab {
+	plugin: InfioPlugin
+
+	constructor(app: App, plugin: InfioPlugin) {
+		super(app, plugin)
+		this.plugin = plugin
+	}
+
+	display(): void {
+		const { containerEl } = this
+		containerEl.empty()
+		this.renderModelsSection(containerEl)
+		this.renderAPIKeysSection(containerEl)
+		this.renderDefaultModelSection(containerEl)
+		this.renderRAGSection(containerEl)
+		this.renderAutoCompleteSection(containerEl)
+	}
+
+	renderModelsSection(containerEl: HTMLElement): void {
+		const div = containerEl.createDiv("div");
+		const sections = createRoot(div);
+		sections.render(<CustomSettings plugin={this.plugin} />);
+	}
+
+	renderAPIKeysSection(containerEl: HTMLElement): void {
+		new Setting(containerEl)
+			.setHeading()
+			.setName('API keys')
+		new Setting(containerEl)
+			.setName('Infio API key')
+			.setClass("infio-chat-setting-item-container")
+			.addText((text) =>
+				text
+					.setPlaceholder('Enter your API key')
+					.setValue(this.plugin.settings.infioApiKey)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							infioApiKey: value,
+						})
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('Anthropic API key')
+			.setClass("infio-chat-setting-item-container-append")
+			.addText((text) =>
+				text
+					.setPlaceholder('Enter your API key')
+					.setValue(this.plugin.settings.anthropicApiKey)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							anthropicApiKey: value,
+						})
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('Deepseek API key')
+			.setClass("infio-chat-setting-item-container-append")
+			.addText((text) =>
+				text
+					.setPlaceholder('Enter your API key')
+					.setValue(this.plugin.settings.deepseekApiKey)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							deepseekApiKey: value,
+						})
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('OpenAI API key')
+			.setClass("infio-chat-setting-item-container-append")
+			.addText((text) =>
+				text
+					.setPlaceholder('Enter your API key')
+					.setValue(this.plugin.settings.openAIApiKey)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							openAIApiKey: value,
+						})
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('Gemini API key')
+			.setClass("infio-chat-setting-item-container-append")
+			.addText((text) =>
+				text
+					.setPlaceholder('Enter your API key')
+					.setValue(this.plugin.settings.geminiApiKey)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							geminiApiKey: value,
+						})
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('Groq API key')
+			.setClass("infio-chat-setting-item-container-append")
+			.addText((text) =>
+				text
+					.setPlaceholder('Enter your API key')
+					.setValue(this.plugin.settings.groqApiKey)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							groqApiKey: value,
+						})
+					}),
+			)
+	}
+
+	renderDefaultModelSection(containerEl: HTMLElement): void {
+		new Setting(containerEl).setHeading().setName('Default Model')
+		new Setting(containerEl)
+			.setName('Default chat model')
+			.setClass("infio-chat-setting-item-container")
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions(
+						this.plugin.settings.activeModels
+							.reduce<Record<string, string>>((acc, option) => {
+								if (!option.isEmbeddingModel && option.enabled) {
+									acc[option.name] = option.name
+								}
+								return acc
+							}, {}),
+					)
+					.setValue(this.plugin.settings.chatModelId)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							chatModelId: value,
+						})
+						// Force refresh to show/hide Ollama and OpenAI-compatible settings
+						this.display()
+					}),
+			)
+		if (this.plugin.settings.chatModelId === 'ollama') {
+			this.renderOllamaChatModelSettings(containerEl)
+		}
+		if (this.plugin.settings.chatModelId === 'openai-compatible') {
+			this.renderOpenAICompatibleChatModelSettings(containerEl)
+		}
+
+		new Setting(containerEl)
+			.setName('Default apply model')
+			.setClass("infio-chat-setting-item-container-append")
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions(
+						this.plugin.settings.activeModels
+							.reduce<Record<string, string>>(
+								(acc, option) => {
+									if (!option.isEmbeddingModel && option.enabled) {
+										acc[option.name] = option.name
+									}
+									return acc
+								},
+								{},
+							),
+					)
+					.setValue(this.plugin.settings.applyModelId)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							applyModelId: value,
+						})
+						// Force refresh to show/hide Ollama and OpenAI-compatible settings
+						this.display()
+					}),
+			)
+		if (this.plugin.settings.applyModelId === 'ollama') {
+			this.renderOllamaApplyModelSettings(containerEl)
+		}
+		if (this.plugin.settings.applyModelId === 'openai-compatible') {
+			this.renderOpenAICompatibleApplyModelSettings(containerEl)
+		}
+
+		new Setting(containerEl)
+			.setName('Default embedding model')
+			.setClass("infio-chat-setting-item-container-append")
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions(
+						this.plugin.settings.activeModels
+							.reduce<Record<string, string>>(
+								(acc, option) => {
+									if (option.isEmbeddingModel && option.enabled) {
+										acc[option.name] = option.name
+									}
+									return acc
+								},
+								{},
+							),
+					)
+					.setValue(this.plugin.settings.embeddingModelId)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							embeddingModelId: value,
+						})
+						// Force refresh to show/hide Ollama settings
+						this.display()
+					}),
+			)
+		if (this.plugin.settings.embeddingModelId.startsWith('ollama/')) {
+			this.renderOllamaEmbeddingModelSettings(containerEl)
+		}
+
+		new Setting(containerEl)
+			.setHeading()
+			.setName('System prompt')
+			.setDesc('This prompt will be added to the beginning of every chat.')
+
+		new Setting(containerEl)
+			.setClass('infio-chat-settings-textarea')
+			.addTextArea((text) =>
+				text
+					.setValue(this.plugin.settings.systemPrompt)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							systemPrompt: value,
+						})
+					}),
+			)
+	}
+
+	renderOllamaChatModelSettings(containerEl: HTMLElement): void {
+		const ollamaContainer = containerEl.createDiv(
+			'infio-chat-settings-model-container',
+		)
+		let modelDropdown: DropdownComponent | null = null // Store reference to the dropdown
+
+		// Base URL Setting
+		new Setting(ollamaContainer)
+			.setName('Base URL')
+			.setClass("infio-chat-setting-item-container-append")
+			.setDesc(
+				'The API endpoint for your Ollama service (e.g., http://127.0.0.1:11434)',
+			)
+			.addText((text) => {
+				text
+					.setPlaceholder('http://127.0.0.1:11434')
+					.setValue(this.plugin.settings.ollamaChatModel.baseUrl || '')
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							ollamaChatModel: {
+								...this.plugin.settings.ollamaChatModel,
+								baseUrl: value,
+							},
+						})
+						if (modelDropdown) {
+							await this.updateOllamaModelOptions({
+								baseUrl: value,
+								dropdown: modelDropdown,
+								onModelChange: async (model: string) => {
+									await this.plugin.setSettings({
+										...this.plugin.settings,
+										ollamaChatModel: {
+											...this.plugin.settings.ollamaChatModel,
+											model,
+										},
+									})
+								},
+							})
+						}
+					})
+			})
+
+		// Model Setting
+		new Setting(ollamaContainer)
+			.setName('Model Name')
+			.setDesc('Select a model from your Ollama instance')
+			.addDropdown(async (dropdown) => {
+				const currentModel = this.plugin.settings.ollamaChatModel.model
+				modelDropdown = dropdown
+					.addOption(currentModel, currentModel)
+					.setValue(currentModel)
+				await this.updateOllamaModelOptions({
+					baseUrl: this.plugin.settings.ollamaChatModel.baseUrl,
+					dropdown,
+					onModelChange: async (model: string) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							ollamaChatModel: {
+								...this.plugin.settings.ollamaChatModel,
+								model,
+							},
+						})
+					},
+				})
+			})
+	}
+
+	renderOpenAICompatibleChatModelSettings(containerEl: HTMLElement): void {
+		const openAICompatContainer = containerEl.createDiv(
+			'infio-chat-settings-model-container',
+		)
+
+		new Setting(openAICompatContainer)
+			.setName('Base URL')
+			.setDesc(
+				'The API endpoint for your OpenAI-compatible service (e.g., https://api.example.com/v1)',
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder('https://api.example.com/v1')
+					.setValue(
+						this.plugin.settings.openAICompatibleChatModel.baseUrl || '',
+					)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							openAICompatibleChatModel: {
+								...this.plugin.settings.openAICompatibleChatModel,
+								baseUrl: value,
+							},
+						})
+					}),
+			)
+
+		new Setting(openAICompatContainer)
+			.setName('API Key')
+			.setDesc('Your authentication key for the OpenAI-compatible service')
+			.addText((text) =>
+				text
+					.setPlaceholder('Enter your API key')
+					.setValue(this.plugin.settings.openAICompatibleChatModel.apiKey || '')
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							openAICompatibleChatModel: {
+								...this.plugin.settings.openAICompatibleChatModel,
+								apiKey: value,
+							},
+						})
+					}),
+			)
+
+		new Setting(openAICompatContainer)
+			.setName('Model Name')
+			.setDesc(
+				'The specific model to use with your service (e.g., llama-3.1-70b, mixtral-8x7b)',
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder('llama-3.1-70b')
+					.setValue(this.plugin.settings.openAICompatibleChatModel.model || '')
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							openAICompatibleChatModel: {
+								...this.plugin.settings.openAICompatibleChatModel,
+								model: value,
+							},
+						})
+					}),
+			)
+	}
+
+	renderOllamaApplyModelSettings(containerEl: HTMLElement): void {
+		const ollamaContainer = containerEl.createDiv(
+			'infio-chat-settings-model-container',
+		)
+		let modelDropdown: DropdownComponent | null = null // Store reference to the dropdown
+
+		// Base URL Setting
+		new Setting(ollamaContainer)
+			.setName('Base URL')
+			.setDesc(
+				'The API endpoint for your Ollama service (e.g., http://127.0.0.1:11434)',
+			)
+			.addText((text) => {
+				text
+					.setPlaceholder('http://127.0.0.1:11434')
+					.setValue(this.plugin.settings.ollamaApplyModel.baseUrl || '')
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							ollamaApplyModel: {
+								...this.plugin.settings.ollamaApplyModel,
+								baseUrl: value,
+							},
+						})
+						if (modelDropdown) {
+							await this.updateOllamaModelOptions({
+								baseUrl: value,
+								dropdown: modelDropdown,
+								onModelChange: async (model: string) => {
+									await this.plugin.setSettings({
+										...this.plugin.settings,
+										ollamaApplyModel: {
+											...this.plugin.settings.ollamaApplyModel,
+											model,
+										},
+									})
+								},
+							})
+						}
+					})
+			})
+
+		// Model Setting
+		new Setting(ollamaContainer)
+			.setName('Model Name')
+			.setDesc('Select a model from your Ollama instance')
+			.addDropdown(async (dropdown) => {
+				const currentModel = this.plugin.settings.ollamaApplyModel.model
+				modelDropdown = dropdown
+					.addOption(currentModel, currentModel)
+					.setValue(currentModel)
+				await this.updateOllamaModelOptions({
+					baseUrl: this.plugin.settings.ollamaApplyModel.baseUrl,
+					dropdown,
+					onModelChange: async (model: string) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							ollamaApplyModel: {
+								...this.plugin.settings.ollamaApplyModel,
+								model,
+							},
+						})
+					},
+				})
+			})
+	}
+
+	renderOpenAICompatibleApplyModelSettings(containerEl: HTMLElement): void {
+		const openAICompatContainer = containerEl.createDiv(
+			'infio-chat-settings-model-container',
+		)
+
+		new Setting(openAICompatContainer)
+			.setName('Base URL')
+			.setDesc(
+				'The API endpoint for your OpenAI-compatible service (e.g., https://api.example.com/v1)',
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder('https://api.example.com/v1')
+					.setValue(
+						this.plugin.settings.openAICompatibleApplyModel.baseUrl || '',
+					)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							openAICompatibleApplyModel: {
+								...this.plugin.settings.openAICompatibleApplyModel,
+								baseUrl: value,
+							},
+						})
+					}),
+			)
+
+		new Setting(openAICompatContainer)
+			.setName('API Key')
+			.setDesc('Your authentication key for the OpenAI-compatible service')
+			.addText((text) =>
+				text
+					.setPlaceholder('Enter your API key')
+					.setValue(
+						this.plugin.settings.openAICompatibleApplyModel.apiKey || '',
+					)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							openAICompatibleApplyModel: {
+								...this.plugin.settings.openAICompatibleApplyModel,
+								apiKey: value,
+							},
+						})
+					}),
+			)
+
+		new Setting(openAICompatContainer)
+			.setName('Model Name')
+			.setDesc(
+				'The specific model to use with your service (e.g., llama-3.1-70b, mixtral-8x7b)',
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder('llama-3.1-70b')
+					.setValue(this.plugin.settings.openAICompatibleApplyModel.model || '')
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							openAICompatibleApplyModel: {
+								...this.plugin.settings.openAICompatibleApplyModel,
+								model: value,
+							},
+						})
+					}),
+			)
+	}
+
+	renderOllamaEmbeddingModelSettings(containerEl: HTMLElement): void {
+		const ollamaContainer = containerEl.createDiv(
+			'infio-chat-settings-model-container',
+		)
+
+		new Setting(ollamaContainer)
+			.setName('Base URL')
+			.setDesc(
+				'The API endpoint for your Ollama service (e.g., http://127.0.0.1:11434)',
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder('http://127.0.0.1:11434')
+					.setValue(this.plugin.settings.ollamaEmbeddingModel.baseUrl || '')
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							ollamaEmbeddingModel: {
+								...this.plugin.settings.ollamaEmbeddingModel,
+								baseUrl: value,
+							},
+						})
+					}),
+			)
+	}
+
+	renderRAGSection(containerEl: HTMLElement): void {
+		new Setting(containerEl).setHeading().setName('RAG')
+
+		new Setting(containerEl)
+			.setName('Include patterns')
+			.setDesc(
+				'If any patterns are specified, ONLY files matching at least one pattern will be included in indexing. One pattern per line. Uses glob patterns (e.g., "notes/*", "*.md"). Leave empty to include all files not excluded by exclude patterns. After changing this, use the command "Rebuild entire vault index" to apply changes.',
+			)
+			.addButton((button) =>
+				button.setButtonText('Test patterns').onClick(async () => {
+					const patterns = this.plugin.settings.ragOptions.includePatterns
+					const includedFiles = await findFilesMatchingPatterns(
+						patterns,
+						this.plugin.app.vault,
+					)
+					new IncludedFilesModal(this.app, includedFiles, patterns).open()
+				}),
+			)
+		new Setting(containerEl)
+			.setClass('infio-chat-settings-textarea')
+			.addTextArea((text) =>
+				text
+					.setValue(this.plugin.settings.ragOptions.includePatterns.join('\n'))
+					.onChange(async (value) => {
+						const patterns = value
+							.split('\n')
+							.map((p) => p.trim())
+							.filter((p) => p.length > 0)
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							ragOptions: {
+								...this.plugin.settings.ragOptions,
+								includePatterns: patterns,
+							},
+						})
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('Exclude patterns')
+			.setDesc(
+				'Files matching ANY of these patterns will be excluded from indexing. One pattern per line. Uses glob patterns (e.g., "private/*", "*.tmp"). Leave empty to exclude nothing. After changing this, use the command "Rebuild entire vault index" to apply changes.',
+			)
+			.addButton((button) =>
+				button.setButtonText('Test patterns').onClick(async () => {
+					const patterns = this.plugin.settings.ragOptions.excludePatterns
+					const excludedFiles = await findFilesMatchingPatterns(
+						patterns,
+						this.plugin.app.vault,
+					)
+					new ExcludedFilesModal(this.app, excludedFiles).open()
+				}),
+			)
+		new Setting(containerEl)
+			.setClass('infio-chat-settings-textarea')
+			.addTextArea((text) =>
+				text
+					.setValue(this.plugin.settings.ragOptions.excludePatterns.join('\n'))
+					.onChange(async (value) => {
+						const patterns = value
+							.split('\n')
+							.map((p) => p.trim())
+							.filter((p) => p.length > 0)
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							ragOptions: {
+								...this.plugin.settings.ragOptions,
+								excludePatterns: patterns,
+							},
+						})
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('Chunk size')
+			.setDesc(
+				'Set the chunk size for text splitting. After changing this, please re-index the vault using the "Rebuild entire vault index" command.',
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder('1000')
+					.setValue(String(this.plugin.settings.ragOptions.chunkSize))
+					.onChange(async (value) => {
+						const chunkSize = parseInt(value, 10)
+						if (!isNaN(chunkSize)) {
+							await this.plugin.setSettings({
+								...this.plugin.settings,
+								ragOptions: {
+									...this.plugin.settings.ragOptions,
+									chunkSize,
+								},
+							})
+						}
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('Threshold tokens')
+			.setDesc(
+				'Maximum number of tokens before switching to RAG. If the total tokens from mentioned files exceed this, RAG will be used instead of including all file contents.',
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder('8192')
+					.setValue(String(this.plugin.settings.ragOptions.thresholdTokens))
+					.onChange(async (value) => {
+						const thresholdTokens = parseInt(value, 10)
+						if (!isNaN(thresholdTokens)) {
+							await this.plugin.setSettings({
+								...this.plugin.settings,
+								ragOptions: {
+									...this.plugin.settings.ragOptions,
+									thresholdTokens,
+								},
+							})
+						}
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('Minimum similarity')
+			.setDesc(
+				'Minimum similarity score for RAG results. Higher values return more relevant but potentially fewer results.',
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder('0.0')
+					.setValue(String(this.plugin.settings.ragOptions.minSimilarity))
+					.onChange(async (value) => {
+						const minSimilarity = parseFloat(value)
+						if (!isNaN(minSimilarity)) {
+							await this.plugin.setSettings({
+								...this.plugin.settings,
+								ragOptions: {
+									...this.plugin.settings.ragOptions,
+									minSimilarity,
+								},
+							})
+						}
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('Limit')
+			.setDesc(
+				'Maximum number of RAG results to include in the prompt. Higher values provide more context but increase token usage.',
+			)
+			.addText((text) =>
+				text
+					.setPlaceholder('10')
+					.setValue(String(this.plugin.settings.ragOptions.limit))
+					.onChange(async (value) => {
+						const limit = parseInt(value, 10)
+						if (!isNaN(limit)) {
+							await this.plugin.setSettings({
+								...this.plugin.settings,
+								ragOptions: {
+									...this.plugin.settings.ragOptions,
+									limit,
+								},
+							})
+						}
+					}),
+			)
+	}
+
+	renderAutoCompleteSection(containerEl: HTMLElement): void {
+		const div = containerEl.createDiv("div");
+
+		const sections = createRoot(div);
+		sections.render(
+			<React.StrictMode>
+				<AutoCompleteSettings
+					onSettingsChanged={async (settings) => {
+						this.plugin.setSettings(settings);
+					}}
+					settings={this.plugin.settings}
+				/>
+			</React.StrictMode>
+		);
+	}
+
+	private async updateOllamaModelOptions({
+		baseUrl,
+		dropdown,
+		onModelChange,
+	}: {
+		baseUrl: string
+		dropdown: DropdownComponent
+		onModelChange: (model: string) => Promise<void>
+	}): Promise<void> {
+		const currentValue = dropdown.getValue()
+		dropdown.selectEl.empty()
+
+		try {
+			const models = await getOllamaModels(baseUrl)
+			if (models.length > 0) {
+				const modelOptions = models.reduce<Record<string, string>>(
+					(acc, model) => {
+						acc[model] = model
+						return acc
+					},
+					{},
+				)
+
+				dropdown.addOptions(modelOptions)
+
+				if (models.includes(currentValue)) {
+					dropdown.setValue(currentValue)
+				} else {
+					dropdown.setValue(models[0])
+					await onModelChange(models[0])
+				}
+			} else {
+				dropdown.addOption('', 'No models found - check base URL')
+				dropdown.setValue('')
+				await onModelChange('')
+			}
+		} catch (error) {
+			console.error('Failed to fetch Ollama models:', error)
+			dropdown.addOption('', 'No models found - check base URL')
+			dropdown.setValue('')
+			await onModelChange('')
+		}
+
+		dropdown.onChange(async (value) => {
+			await onModelChange(value)
+		})
+	}
+}
+
+class ExcludedFilesModal extends Modal {
+	private files: TFile[]
+
+	constructor(app: App, files: TFile[]) {
+		super(app)
+		this.files = files
+	}
+
+	onOpen() {
+		const { contentEl } = this
+		contentEl.empty()
+
+		this.titleEl.setText(`Excluded Files (${this.files.length})`)
+
+		if (this.files.length === 0) {
+			contentEl.createEl('p', { text: 'No files match the exclusion patterns' })
+			return
+		}
+
+		const list = contentEl.createEl('ul')
+		this.files.forEach((file) => {
+			list.createEl('li', { text: file.path })
+		})
+	}
+
+	onClose() {
+		const { contentEl } = this
+		contentEl.empty()
+	}
+}
+
+class IncludedFilesModal extends Modal {
+	private files: TFile[]
+	private patterns: string[]
+
+	constructor(app: App, files: TFile[], patterns: string[]) {
+		super(app)
+		this.files = files
+		this.patterns = patterns
+	}
+
+	onOpen() {
+		const { contentEl } = this
+		contentEl.empty()
+
+		this.titleEl.setText(`Included Files (${this.files.length})`)
+
+		if (this.patterns.length === 0) {
+			contentEl.createEl('p', {
+				text: 'No inclusion patterns specified - all files will be included (except those matching exclusion patterns)',
+			})
+			return
+		}
+
+		if (this.files.length === 0) {
+			contentEl.createEl('p', {
+				text: 'No files match the inclusion patterns',
+			})
+			return
+		}
+
+		const list = contentEl.createEl('ul')
+		this.files.forEach((file) => {
+			list.createEl('li', { text: file.path })
+		})
+	}
+
+	onClose() {
+		const { contentEl } = this
+		contentEl.empty()
+	}
+}
