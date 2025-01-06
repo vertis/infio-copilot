@@ -37,17 +37,18 @@ jobs:
           cp main.js manifest.json styles.css ${{ env.PLUGIN_NAME }}
           zip -r ${{ env.PLUGIN_NAME }}-${{ steps.build.outputs.tag_name }}.zip ${{ env.PLUGIN_NAME }}
           ls
-          echo "::set-output name=tag_name::$(git tag --sort version:refname | tail -n 1)"
+          echo "tag_name=$(git tag --sort version:refname | tail -n 1)" >> $GITHUB_OUTPUT
 
       - name: Get release notes
         id: release_notes
         run: |
-          CHANGELOG=$(sed -n -e "/## ${{ steps.bundle.outputs.tag_name }}/,/## /p" CHANGELOG.md | sed '/## /d')
-          if [ -z "$CHANGELOG" ]; then  
-            echo "Error: No release notes found for this version in CHANGELOG.md"  
-            exit 1  
-          fi  
-          echo "::set-output name=body::${CHANGELOG}"
+          chmod +x .github/scripts/get-changelog.js
+          CHANGELOG=$(node .github/scripts/get-changelog.js ${{ steps.bundle.outputs.tag_name }})
+          if [ -z "$CHANGELOG" ]; then
+            echo "Error: No release notes found for this version in CHANGELOG.md"
+            exit 1
+          fi
+          echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -59,4 +60,4 @@ jobs:
             main.js
             manifest.json
             styles.css
-          body: ${{ steps.release_notes.outputs.body }}
+          body: ${{ steps.release_notes.outputs.changelog }}
