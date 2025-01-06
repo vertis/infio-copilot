@@ -41,9 +41,9 @@ import { openSettingsModalWithError } from '../../utils/open-settings-modal'
 import { PromptGenerator } from '../../utils/prompt-generator'
 
 import AssistantMessageActions from './AssistantMessageActions'
-import ChatUserInput, { ChatUserInputRef } from './chat-input/ChatUserInput'
+import PromptInputWithActions, { ChatUserInputRef } from './chat-input/PromptInputWithActions'
 import { editorStateToPlainText } from './chat-input/utils/editor-state-to-plain-text'
-import { ChatListDropdown } from './ChatListDropdown'
+import { ChatHistory } from './ChatHistory'
 import QueryProgress, { QueryProgressState } from './QueryProgress'
 import ReactMarkdown from './ReactMarkdown'
 import ShortcutInfo from './ShortcutInfo'
@@ -557,7 +557,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 					>
 						<Plus size={18} />
 					</button>
-					<ChatListDropdown
+					<ChatHistory
 						chatList={chatList}
 						currentConversationId={currentConversationId}
 						onSelect={async (conversationId) => {
@@ -583,7 +583,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						className="infio-chat-list-dropdown"
 					>
 						<History size={18} />
-					</ChatListDropdown>
+					</ChatHistory>
 				</div>
 			</div>
 			<div className="infio-chat-messages" ref={chatMessagesRef}>
@@ -604,21 +604,9 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 				{chatMessages.map((message, index) =>
 					message.role === 'user' ? (
 						<div key={message.id} className="infio-chat-messages-user">
-							<ChatUserInput
+							<PromptInputWithActions
 								ref={(ref) => registerChatUserInputRef(message.id, ref)}
 								initialSerializedEditorState={message.content}
-								onChange={(content) => {
-									setChatMessages((prevChatHistory) =>
-										prevChatHistory.map((msg) =>
-											msg.role === 'user' && msg.id === message.id
-												? {
-													...msg,
-													content,
-												}
-												: msg,
-										),
-									)
-								}}
 								onSubmit={(content, useVaultSearch) => {
 									if (editorStateToPlainText(content).trim() === '') return
 									handleSubmit(
@@ -674,16 +662,10 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 					</button>
 				)}
 			</div>
-			<ChatUserInput
-				key={inputMessage.id} // this is needed to clear the editor when the user submits a new message
+			<PromptInputWithActions
+				key={inputMessage.id}
 				ref={(ref) => registerChatUserInputRef(inputMessage.id, ref)}
 				initialSerializedEditorState={inputMessage.content}
-				onChange={(content) => {
-					setInputMessage((prevInputMessage) => ({
-						...prevInputMessage,
-						content,
-					}))
-				}}
 				onSubmit={(content, useVaultSearch) => {
 					if (editorStateToPlainText(content).trim() === '') return
 					handleSubmit(

@@ -1,9 +1,9 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import clsx from 'clsx'
 import {
-  $parseSerializedNode,
-  COMMAND_PRIORITY_NORMAL,
-  TextNode,
+	$parseSerializedNode,
+	COMMAND_PRIORITY_NORMAL,
+	TextNode,
 } from 'lexical'
 import { Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -13,8 +13,8 @@ import { useDatabase } from '../../../../../contexts/DatabaseContext'
 import { SelectTemplate } from '../../../../../database/schema'
 import { MenuOption } from '../shared/LexicalMenu'
 import {
-  LexicalTypeaheadMenuPlugin,
-  useBasicTypeaheadTriggerMatch,
+	LexicalTypeaheadMenuPlugin,
+	useBasicTypeaheadTriggerMatch,
 } from '../typeahead-menu/LexicalTypeaheadMenuPlugin'
 
 class TemplateTypeaheadOption extends MenuOption {

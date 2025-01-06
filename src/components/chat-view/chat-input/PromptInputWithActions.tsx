@@ -33,7 +33,6 @@ import { ModelSelect } from './ModelSelect'
 import { MentionNode } from './plugins/mention/MentionNode'
 import { NodeMutations } from './plugins/on-mutation/OnMutationPlugin'
 import { SubmitButton } from './SubmitButton'
-import { VaultChatButton } from './VaultChatButton'
 
 export type ChatUserInputRef = {
 	focus: () => void
@@ -41,7 +40,7 @@ export type ChatUserInputRef = {
 
 export type ChatUserInputProps = {
 	initialSerializedEditorState: SerializedEditorState | null
-	onChange: (content: SerializedEditorState) => void
+	onChange?: (content: SerializedEditorState) => void
 	onSubmit: (content: SerializedEditorState, useVaultSearch?: boolean) => void
 	onFocus: () => void
 	mentionables: Mentionable[]
@@ -50,7 +49,7 @@ export type ChatUserInputProps = {
 	addedBlockKey?: string | null
 }
 
-const ChatUserInput = forwardRef<ChatUserInputRef, ChatUserInputProps>(
+const PromptInputWithActions = forwardRef<ChatUserInputRef, ChatUserInputProps>(
 	(
 		{
 			initialSerializedEditorState,
@@ -279,11 +278,6 @@ const ChatUserInput = forwardRef<ChatUserInputRef, ChatUserInputProps>(
 					</div>
 					<div className="infio-chat-user-input-controls__buttons">
 						<SubmitButton onClick={() => handleSubmit()} />
-						{/* <VaultChatButton
-              onClick={() => {
-                handleSubmit({ useVaultSearch: true })
-              }}
-            /> */}
 					</div>
 				</div>
 			</div>
@@ -369,6 +363,6 @@ function MentionableContentPreview({
 	) : null
 }
 
-ChatUserInput.displayName = 'ChatUserInput'
+PromptInputWithActions.displayName = 'ChatUserInput'
 
-export default ChatUserInput
+export default PromptInputWithActions

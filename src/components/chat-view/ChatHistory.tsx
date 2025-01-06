@@ -106,7 +106,7 @@ function ChatListItem({
   )
 }
 
-export function ChatListDropdown({
+export function ChatHistory({
   chatList,
   currentConversationId,
   onSelect,
