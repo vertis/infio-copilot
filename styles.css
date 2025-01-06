@@ -268,7 +268,7 @@ button:not(.clickable-icon).infio-chat-list-dropdown {
   display: flex;
   flex-direction: column;
   -webkit-app-region: no-drag;
-  background: var(--background-modifier-form-field);
+  background: var(--background-secondary-alt);
   border: var(--input-border-width) solid var(--background-modifier-border);
   color: var(--text-normal);
   font-family: inherit;
@@ -1252,8 +1252,8 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
 }
 
 .infio-ai-block-container {
-  background: var(--background-primary);
-  border-radius: 6px;
+  background: var(--background-secondary-alt);
+  border-radius: 4px;
   padding: 0px;
   border: 1px solid var(--background-modifier-border);
 }

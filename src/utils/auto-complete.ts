@@ -4,15 +4,15 @@ import * as mm from "micromatch";
 import { err, ok, Result } from "neverthrow";
 import { z, ZodError, ZodIssueCode, ZodType } from 'zod';
 
-import { DEFAULT_SETTINGS, PluginData, Settings, settingsSchema } from "../settings/versions";
+import { DEFAULT_SETTINGS, PluginData, Settings } from "../settings/versions";
 import { isSettingsV0, isSettingsV1, migrateFromV0ToV1 } from "../settings/versions/migration";
-import { InfioSettings } from '../types/settings';
+import { InfioSettings, InfioSettingsSchema } from '../types/settings';
 
 type JSONObject = Record<string, any>;
 
 export function checkForErrors(settings: InfioSettings) {
 	const errors = new Map<string, string>();
-	const parsingResult = parseWithSchema(settingsSchema, settings);
+	const parsingResult = parseWithSchema(InfioSettingsSchema, settings);
 
 	if (parsingResult.isOk()) {
 		return errors;

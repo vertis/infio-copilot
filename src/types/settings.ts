@@ -57,7 +57,7 @@ export const triggerSchema = z.object({
 	}
 });
 
-const InfioSettingsSchema = z.object({
+export const InfioSettingsSchema = z.object({
 	// Version
 	version: z.literal(SETTINGS_SCHEMA_VERSION).catch(SETTINGS_SCHEMA_VERSION),
 

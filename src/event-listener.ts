@@ -212,7 +212,7 @@ class EventListener implements EventHandler {
   }
 
   getStatusBarText(): string {
-    return `Copilot: ${this.state.getStatusBarText()}`;
+    return `autocomplete: ${this.state.getStatusBarText()}`;
   }
 
   handleSettingChanged(settings: InfioSettings): void {
