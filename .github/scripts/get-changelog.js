@@ -25,11 +25,17 @@ if (!versionSection) {
     process.exit(1);
 }
 
-// Extract content between this version and next version
+// Extract and format the changelog entries
 const lines = versionSection
     .split('\n')
     .slice(1) // Remove the version line itself
+    .filter(line => line.trim().startsWith('- ')) // Only keep bullet points
     .join('\n')
     .trim();
+
+if (!lines) {
+    console.error('No bullet points found in changelog section');
+    process.exit(1);
+}
 
 console.log(lines);
