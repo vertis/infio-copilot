@@ -65,10 +65,10 @@
     /* Module Resolution Paths
      * Custom path mappings for module resolution
      */
-    "paths": {
-      "@codemirror/*": ["node_modules/@codemirror/*"], // Map CodeMirror imports
-      "*": ["node_modules/*", "src/types/*"] // Fallback paths for module resolution
-    }
+    // "paths": {
+    //   "@codemirror/*": ["node_modules/@codemirror/*"], // Map CodeMirror imports
+    //   "*": ["node_modules/*", "src/types/*"] // Fallback paths for module resolution
+    // }
   },
   // Specify which files to include in compilation
   "include": ["src/**/*.ts", "src/**/*.tsx", "__mocks__"]

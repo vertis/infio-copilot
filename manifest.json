@@ -5,7 +5,6 @@
 	"minAppVersion": "0.15.0",
 	"description": "A Cursor-inspired AI assistant for Obsidian that offers smart autocomplete and interactive chat with your selected notes",
 	"author": "Felix.D",
-	"authorUrl": "https://github.com/glowingjade",
-	"fundingUrl": "https://buymeacoffee.com/glowingjade",
-	"isDesktopOnly": false
+	"authorUrl": "https://github.com/infiolab",
+	"isDesktopOnly": true
 }

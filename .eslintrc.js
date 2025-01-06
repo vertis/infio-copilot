@@ -60,7 +60,13 @@ const config = {
       },
     ],
   },
-  ignorePatterns: ['.eslintrc.js'],
+  ignorePatterns: [
+    '.eslintrc.js',
+    'node_modules/**',
+    'dist/**',
+    'build/**',
+    'main.js',
+  ],
 }
 
 module.exports = config
