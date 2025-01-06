@@ -1,13 +1,5 @@
 <h1 align="center">Infio-Copilot</h1>
 
-<p align="center">
-  <a href="">Documentation</a>
-  ·
-  <a href="">Report Bug</a>
-  ·
-  <a href="">Discussions</a>
-</p>
-
 **Infio-Copilot is a Cursor-inspired AI assistant for Obsidian that offers smart autocomplete and interactive chat with your selected notes**
 
 ## Features
@@ -15,14 +7,26 @@
 ### Chat & Edit Flow
 
 Get instant AI assistance and apply suggested improvements with a single click, all within Obsidian
+![chat-with-select](asserts/chat-with-select.gif)
+
 
 ### Autocomplete
 
 Receive context-aware writing suggestions as you type
+![autocomplte](asserts/autocomplete.gif)
+
 
 ### Inline Editing
 
 Edit your notes directly within the current file
+![inline-edit](asserts/edit-inline.gif)
+
+
+### chat with vault 
+
+Leverage the power of AI to interact with your entire Obsidian vault, gaining insights and connections across your notes
+
+![rag](asserts/rag.gif)
 
 ## Getting Started
 
