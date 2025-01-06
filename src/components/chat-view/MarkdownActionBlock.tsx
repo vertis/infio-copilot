@@ -5,7 +5,7 @@ import { useDarkModeContext } from '../../contexts/DarkModeContext'
 
 import { MemoizedSyntaxHighlighterWrapper } from './SyntaxHighlighterWrapper'
 
-export default function MarkdownCodeComponent({
+export default function MarkdownActionBlock({
   onApply,
   isApplying,
   language,

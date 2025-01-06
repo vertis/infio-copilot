@@ -38,13 +38,9 @@ export class DBManager {
 		dbManager.templateManager = new TemplateManager(app, dbManager)
 		dbManager.conversationManager = new ConversationManager(app, dbManager)
 
-		console.log('Smart composer database initialized.')
+		console.log('infio database initialized.')
 		return dbManager
 	}
-
-	// getDb() {
-	// 	return this.db
-	// }
 
 	getPgClient() {
 		return this.db

@@ -42,7 +42,7 @@ export default class InfioPlugin extends Plugin {
 		await this.loadSettings()
 
 		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('wand-sparkles', 'Open smart composer', () =>
+		this.addRibbonIcon('wand-sparkles', 'Open infio copilot', () =>
 			this.openChatView(),
 		)
 

@@ -1,41 +1,51 @@
 import { TFile } from 'obsidian'
 
-// 替换指定行范围的内容
-const replaceLines = (content: string, startLine: number, endLine: number, newContent: string): string => {
-	const lines = content.split('\n')
-	const beforeLines = lines.slice(0, startLine - 1)
-	const afterLines = lines.slice(endLine) // 这里不需要 +1 因为 endLine 指向的是要替换的最后一行
-	return [...beforeLines, newContent, ...afterLines].join('\n')
-}
-
+/**
+ * Applies changes to a file by replacing content within specified line range
+ * @param content - The new content to insert
+ * @param currentFile - The file being modified
+ * @param currentFileContent - The current content of the file
+ * @param startLine - Starting line number (1-based indexing, optional)
+ * @param endLine - Ending line number (1-based indexing, optional)
+ * @returns Promise resolving to the modified content or null if operation fails
+ */
 export const manualApplyChangesToFile = async (
-	content: string,
-	currentFile: TFile,
-	currentFileContent: string,
-	startLine?: number,
-	endLine?: number,
+    content: string,
+    currentFile: TFile,
+    currentFileContent: string,
+    startLine?: number,
+    endLine?: number,
 ): Promise<string | null> => {
-	console.log('Manual apply changes to file:', currentFile.path)
-	console.log('Start line:', startLine)
-	console.log('End line:', endLine)
-	console.log('Content:', content)
-	try {
-		if (!startLine || !endLine) {
-			console.error('Missing line numbers for edit')
-			return null
-		}
+    try {
+        // Input validation
+        if (!content || !currentFileContent) {
+            throw new Error('Content cannot be empty')
+        }
 
-		// 直接替换指定行范围的内容
-		const newContent = replaceLines(
-			currentFileContent,
-			startLine,
-			endLine,
-			content
-		)
+        const lines = currentFileContent.split('\n')
+        const effectiveStartLine = Math.max(1, startLine ?? 1)
+        const effectiveEndLine = Math.min(endLine ?? lines.length, lines.length)
 
-		return newContent
-	} catch (error) {
-		console.error('Error applying changes:', error)
-		return null
-	}
+        // Validate line numbers
+        if (effectiveStartLine > effectiveEndLine) {
+            throw new Error('Start line cannot be greater than end line')
+        }
+
+        console.log('Applying changes to file:', {
+            path: currentFile.path,
+            startLine: effectiveStartLine,
+            endLine: effectiveEndLine,
+            contentLength: content.length
+        })
+
+        // Construct new content
+        return [
+            ...lines.slice(0, effectiveStartLine - 1),
+            content,
+            ...lines.slice(effectiveEndLine)
+        ].join('\n')
+    } catch (error) {
+        console.error('Error applying changes:', error instanceof Error ? error.message : 'Unknown error')
+        return null
+    }
 }
