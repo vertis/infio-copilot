@@ -54,7 +54,17 @@ Leverage the power of AI to interact with your entire Obsidian vault, gaining in
 We value your input and want to ensure you can easily share your thoughts and report any issues:
 
 - **Bug Reports**: If you encounter any bugs or unexpected behavior, please submit an issue on our [GitHub Issues](https://github.com/infiolab/infio-copilot/issues) page. Be sure to include as much detail as possible to help us reproduce and address the problem.
-- **Feature Requests**: For new feature ideas or enhancements, please use our [GitHub Discussions - Ideas &amp; Feature Requests](https://github.com/infiolab/infio-copilot/discussions/categories/ideas) page. Create a new discussion to share your suggestions.
-·## License
+- **Feature Requests**: For new feature ideas or enhancements, please use our [GitHub Discussions - Ideas & Feature Requests](https://github.com/infiolab/infio-copilot/discussions/categories/ideas) page. Create a new discussion to share your suggestions.
+
+## Acknowledgments
+
+This project stands on the shoulders of giants. We would like to express our gratitude to the following open-source projects:
+
+- [obsidian-copilot-auto-completion](https://github.com/j0rd1smit/obsidian-copilot-auto-completion) - For autocomplete implementation and TypeScript architecture inspiration
+- [obsidian-smart-composer](https://github.com/glowingjade/obsidian-smart-composer) - For chat/apply UI patterns and PgLite integration examples  
+- [continue](https://github.com/continuedev/continue) & [cline](https://github.com/cline/cline) - For prompt engineering and LLM interaction patterns
+- [pglite](https://github.com/electric-sql/pglite) - For conversation/vector data storage and sample code
+
+## License
 
 This project is licensed under the [MIT License](LICENSE).
