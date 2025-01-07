@@ -49,6 +49,13 @@ Leverage the power of AI to interact with your entire Obsidian vault, gaining in
    - Anthropic : [Claude API Keys](https://console.anthropic.com/settings/keys)
    - Gemini : [Gemini API Keys](https://aistudio.google.com/apikey)
    - Groq : [Groq API Keys](https://console.groq.com/keys)
+6. Set up hotkeys for quick access:
+   - Go to Settings > Hotkeys
+   - Search for "Infio Copilot"
+   - Recommended keybindings:
+     * Infio Copilot: Infio add selection to chat -> cmd + shift + L
+     * Infio Copilot: Infio Inline Edit -> cmd + shift + K
+![autocomplte](asserts/doc-set-hotkey.png)
 
 ## Feedback and Support
 We value your input and want to ensure you can easily share your thoughts and report any issues:
