@@ -12,6 +12,15 @@ describe('calculateFileDistance', () => {
 		}
 	}
 
+	// Mock TFolder class
+	class MockTFolder extends TFolder {
+		path: string
+		constructor(path: string) {
+			super()
+			this.path = path
+		}
+	}
+
 	it('should calculate the correct distance between files in the same folder', () => {
 		const file1 = new MockTFile('folder/file1.md')
 		const file2 = new MockTFile('folder/file2.md')
@@ -53,7 +62,7 @@ describe('calculateFileDistance', () => {
 
 	it('should calculate the correct distance between a folder and a file', () => {
 		const file = new MockTFile('folder1/folder2/file1.md')
-		const folder = new MockTFile('folder1/folder2')
+		const folder = new MockTFolder('folder1/folder2')
 		if (!(folder instanceof TFolder)) {
 			throw new Error('Expected folder to be a TFolder instance')
 		}

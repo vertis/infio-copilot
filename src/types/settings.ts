@@ -233,7 +233,7 @@ export function parseInfioSettings(data: unknown): InfioSettings {
 		const migratedData = migrateSettings(data as Record<string, unknown>)
 		return InfioSettingsSchema.parse(migratedData)
 	} catch (error) {
-		console.warn('Invalid settings provided, using defaults:', error)
+		// console.warn('Invalid settings provided, using defaults:', error)
 		return InfioSettingsSchema.parse({ ...DEFAULT_AUTOCOMPLETE_SETTINGS })
 	}
 }
