@@ -1,4 +1,12 @@
 releases:
+  - version: "0.0.3"
+    improvements:
+      - "Enhanced code style and formatting with ESLint auto-fix"
+      - "Improved TypeScript styling and CSS integration"
+    fixes:
+      - "Removed debug logs for cleaner output"
+      - "Updated main.js for better functionality"
+
   - version: "0.0.2"
     improvements:
       - "Converted webp to gif format for better compatibility"
