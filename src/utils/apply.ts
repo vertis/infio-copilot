@@ -31,13 +31,6 @@ export const manualApplyChangesToFile = async (
             throw new Error('Start line cannot be greater than end line')
         }
 
-        console.log('Applying changes to file:', {
-            path: currentFile.path,
-            startLine: effectiveStartLine,
-            endLine: effectiveEndLine,
-            contentLength: content.length
-        })
-
         // Construct new content
         return [
             ...lines.slice(0, effectiveStartLine - 1),

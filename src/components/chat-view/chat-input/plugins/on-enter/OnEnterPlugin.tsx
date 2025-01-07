@@ -16,7 +16,6 @@ export default function OnEnterPlugin({
     const removeListener = editor.registerCommand(
       KEY_ENTER_COMMAND,
       (evt: KeyboardEvent) => {
-        console.log('onEnter', evt)
         if (
           onVaultChat &&
           (Platform.isMacOS ? evt.metaKey : evt.ctrlKey)

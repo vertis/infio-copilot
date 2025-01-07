@@ -127,12 +127,12 @@ export default class InfioPlugin extends Plugin {
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				this.addSelectionToChat(editor, view)
 			},
-			hotkeys: [
-				{
-					modifiers: ['Mod', 'Shift'],
-					key: 'l',
-				},
-			],
+			// hotkeys: [
+			// 	{
+			// 		modifiers: ['Mod', 'Shift'],
+			// 		key: 'l',
+			// 	},
+			// ],
 		})
 
 		this.addCommand({
@@ -287,12 +287,12 @@ export default class InfioPlugin extends Plugin {
 		this.addCommand({
 			id: "infio-ai-inline-edit",
 			name: "infio Inline Edit",
-			hotkeys: [
-				{
-					modifiers: ['Mod', 'Shift'],
-					key: "k",
-				},
-			],
+			// hotkeys: [
+			// 	{
+			// 		modifiers: ['Mod', 'Shift'],
+			// 		key: "k",
+			// 	},
+			// ],
 			editorCallback: (editor: Editor) => {
 				const selection = editor.getSelection();
 				if (!selection) {

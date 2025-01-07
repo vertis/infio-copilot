@@ -38,7 +38,6 @@ export class DBManager {
 		dbManager.templateManager = new TemplateManager(app, dbManager)
 		dbManager.conversationManager = new ConversationManager(app, dbManager)
 
-		console.log('infio database initialized.')
 		return dbManager
 	}
 
@@ -110,7 +109,6 @@ export class DBManager {
 				// Split SQL into individual commands and execute them one by one
 				const commands = migration.sql.split('\n\n').filter(cmd => cmd.trim());
 				for (const command of commands) {
-					console.log('Executing SQL migration:', command);
 					await this.db.query(command);
 				}
 			}

@@ -309,12 +309,6 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						handleScrollToBottom()
 					}
 				}
-				// for debugging
-				setChatMessages((prevChatHistory) => {
-					const lastMessage = prevChatHistory[prevChatHistory.length - 1];
-					console.log("Last complete message:", lastMessage?.content);
-					return prevChatHistory;
-				});
 			} catch (error) {
 				if (error.name === 'AbortError') {
 					return

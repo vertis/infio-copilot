@@ -17,7 +17,6 @@ abstract class State implements EventHandler {
 
   handleSettingChanged(settings: InfioSettings): void {
 		const settingErrors = checkForErrors(settings);
-		console.log(settingErrors);
     if (!settings.autocompleteEnabled) {
       new Notice("Copilot is now disabled.");
       this.context.transitionToDisabledManualState()
