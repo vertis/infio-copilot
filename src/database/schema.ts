@@ -4,7 +4,7 @@ import { SUPPORT_EMBEDDING_SIMENTION } from '../constants'
 import { EmbeddingModelId } from '../types/embedding'
 
 // PostgreSQL column types
-interface ColumnDefinition {
+type ColumnDefinition = {
 	type: string
 	notNull?: boolean
 	primaryKey?: boolean
@@ -14,7 +14,7 @@ interface ColumnDefinition {
 	dimensions?: number
 }
 
-interface TableDefinition {
+type TableDefinition = {
 	name: string
 	columns: Record<string, ColumnDefinition>
 	indices?: Record<string, {
@@ -61,7 +61,7 @@ export const vectorTables = SUPPORT_EMBEDDING_SIMENTION.reduce<
 }, {})
 
 // Type definitions for vector table
-export interface VectorRecord {
+export type VectorRecord = {
 	id: number
 	path: string
 	mtime: number
@@ -91,7 +91,7 @@ export type TemplateContent = {
 	nodes: SerializedLexicalNode[]
 }
 
-export interface TemplateRecord {
+export type TemplateRecord = {
 	id: string
 	name: string
 	content: TemplateContent
@@ -113,14 +113,14 @@ export const templateTable: TableDefinition = {
 	}
 }
 
-export interface Conversation {
+export type Conversation = {
 	id: string // uuid
 	title: string
 	createdAt: Date
 	updatedAt: Date
 }
 
-export interface Message {
+export type Message = {
 	id: string // uuid
 	conversationId: string // uuid
 	role: 'user' | 'assistant'

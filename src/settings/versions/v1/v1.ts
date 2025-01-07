@@ -1,13 +1,12 @@
 import { z } from "zod";
 
 import { isRegexValid, isValidIgnorePattern } from "../../../utils/auto-complete";
-
 import {
-	azureOAIApiSettingsSchema, fewShotExampleSchema,
-	MAX_DELAY,
-	MAX_MAX_CHAR_LIMIT,
+	MAX_DELAY, MAX_MAX_CHAR_LIMIT,
 	MIN_DELAY,
 	MIN_MAX_CHAR_LIMIT,
+	azureOAIApiSettingsSchema,
+	fewShotExampleSchema,
 	modelOptionsSchema,
 	ollamaApiSettingsSchema,
 	openAIApiSettingsSchema,

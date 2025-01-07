@@ -11,7 +11,11 @@ const config = {
     tsconfigRootDir: __dirname,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
+  plugins: [
+    '@typescript-eslint/eslint-plugin',
+    'no-inline-styles',
+    'css-modules'
+  ],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -59,6 +63,16 @@ const config = {
         },
       },
     ],
+    'no-console': 'warn',
+    'no-inline-styles/no-inline-styles': 'error',
+    '@typescript-eslint/consistent-type-assertions': [
+      'error',
+      {
+        'assertionStyle': 'never'
+      }
+    ],
+    '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+    '@typescript-eslint/prefer-regexp-exec': 'error',
   },
   ignorePatterns: [
     '.eslintrc.js',

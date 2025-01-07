@@ -271,7 +271,7 @@ export class VectorManager {
         }
         return null
       }),
-    ).then((files) => files.filter(Boolean) as TFile[])
+    ).then((files) => files.filter(Boolean))
 
     return filesToIndex
   }

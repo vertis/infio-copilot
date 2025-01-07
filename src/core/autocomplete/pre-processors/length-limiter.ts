@@ -1,5 +1,5 @@
 import Context from "../context-detection";
-import { PrefixAndSuffix, PreProcessor } from "../types";
+import { PreProcessor, PrefixAndSuffix } from "../types";
 
 class LengthLimiter implements PreProcessor {
   private readonly maxPrefixChars: number;

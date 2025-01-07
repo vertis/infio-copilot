@@ -4,7 +4,7 @@ import * as React from "react";
 import Context from "../../core/autocomplete/context-detection";
 import { FewShotExample } from "../versions";
 
-interface IProps {
+type IProps = {
 	name: string;
 	description: string;
 

@@ -1,6 +1,6 @@
 import React from "react";
 
-export interface DropdownComponentProps {
+export type DropdownComponentProps = {
 	name: string;
 	description?: string;
 	options: string[];
@@ -32,7 +32,7 @@ export const DropdownComponent: React.FC<DropdownComponentProps> = ({
 	</div>
 );
 
-export interface TextComponentProps {
+export type TextComponentProps = {
 	name: string;
 	description?: string;
 	placeholder: string;
@@ -62,7 +62,7 @@ export const TextComponent: React.FC<TextComponentProps> = ({
 	</div>
 );
 
-export interface ToggleComponentProps {
+export type ToggleComponentProps = {
 	name?: string;
 	description?: string;
 	value: boolean;

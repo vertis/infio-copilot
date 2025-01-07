@@ -30,7 +30,7 @@ import {
 	MIN_TOP_P
 } from "./versions";
 
-interface IProps {
+type IProps = {
 	onSettingsChanged(settings: InfioSettings): void;
 
 	settings: InfioSettings;

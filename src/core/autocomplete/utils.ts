@@ -40,7 +40,7 @@ export function isMatchBetweenPathAndPatterns(
 }
 
 export function extractNextWordAndRemaining(suggestion: string): [string | undefined, string | undefined] {
-  const leadingWhitespacesMatch = suggestion.match(/^(\s*)/);
+  const leadingWhitespacesMatch = /^(\s*)/.exec(suggestion);
   const leadingWhitespaces = leadingWhitespacesMatch ? leadingWhitespacesMatch[0] : '';
   const trimmedSuggestion = suggestion.slice(leadingWhitespaces.length);
 
@@ -48,11 +48,11 @@ export function extractNextWordAndRemaining(suggestion: string): [string | undef
   let nextWord: string | undefined;
   let remaining: string | undefined = undefined;
 
-  const whitespaceAfterNextWordMatch = trimmedSuggestion.match(/\s+/);
+  const whitespaceAfterNextWordMatch = /\s+/.exec(trimmedSuggestion);
   if (!whitespaceAfterNextWordMatch) {
     nextWord = trimmedSuggestion || undefined;
   } else {
-    const whitespaceAfterNextWordStartingIndex = whitespaceAfterNextWordMatch.index!;
+    const whitespaceAfterNextWordStartingIndex = whitespaceAfterNextWordMatch.index;
     const whitespaceAfterNextWord = whitespaceAfterNextWordMatch[0];
     const whitespaceLength = whitespaceAfterNextWord.length;
     const startOfWhitespaceAfterNextWordIndex = whitespaceAfterNextWordStartingIndex + whitespaceLength;

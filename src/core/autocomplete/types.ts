@@ -2,14 +2,14 @@ import { Result } from "neverthrow";
 
 import Context from "./context-detection";
 
-export interface AutocompleteService {
+export type AutocompleteService = {
   fetchPredictions(
     prefix: string,
     suffix: string
   ): Promise<Result<string, Error>>;
 }
 
-export interface PostProcessor {
+export type PostProcessor = {
   process(
     prefix: string,
     suffix: string,
@@ -18,23 +18,23 @@ export interface PostProcessor {
   ): string;
 }
 
-export interface PreProcessor {
+export type PreProcessor = {
   process(prefix: string, suffix: string, context: Context): PrefixAndSuffix;
   removesCursor(prefix: string, suffix: string): boolean;
 }
 
-export interface PrefixAndSuffix {
+export type PrefixAndSuffix = {
   prefix: string;
   suffix: string;
 }
 
-export interface ChatMessage {
+export type ChatMessage = {
   content: string;
   role: "user" | "assistant" | "system";
 }
 
 
-export interface UserMessageFormattingInputs {
+export type UserMessageFormattingInputs = {
   prefix: string;
   suffix: string;
 }
@@ -43,12 +43,12 @@ export type UserMessageFormatter = (
   inputs: UserMessageFormattingInputs
 ) => string;
 
-export interface ApiClient {
+export type ApiClient = {
   queryChatModel(messages: ChatMessage[]): Promise<Result<string, Error>>;
   checkIfConfiguredCorrectly?(): Promise<string[]>;
 }
 
-export interface ModelOptions {
+export type ModelOptions = {
   temperature: number;
   top_p: number;
   frequency_penalty: number;

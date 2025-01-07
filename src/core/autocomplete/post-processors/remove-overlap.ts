@@ -90,7 +90,7 @@ function startLocationOfEachWord(text: string): number[] {
 }
 
 function isWhiteSpaceChar(char: string | undefined): boolean {
-  return char !== undefined && char.match(/\s/) !== null;
+  return char !== undefined && (/\s/.exec(char)) !== null;
 }
 
 export default RemoveOverlap;

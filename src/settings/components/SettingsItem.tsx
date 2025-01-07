@@ -1,6 +1,6 @@
 import * as React from "react";
 
-interface IProps {
+type IProps = {
 	name: string;
 	description: string | React.ReactNode;
 	errorMessage?: string;

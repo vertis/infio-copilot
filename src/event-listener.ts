@@ -258,7 +258,7 @@ class EventListener implements EventHandler {
       if (trigger.type === "string" && documentChanges.getPrefix().endsWith(trigger.value)) {
         return true;
       }
-      if (trigger.type === "regex" && documentChanges.getPrefix().match(trigger.value)) {
+      if (trigger.type === "regex" && (RegExp(trigger.value).exec(documentChanges.getPrefix()))) {
         return true;
       }
     }

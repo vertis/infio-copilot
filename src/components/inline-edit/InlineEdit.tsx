@@ -9,7 +9,7 @@ import { manualApplyChangesToFile } from '../../utils/apply';
 import { removeAITags } from '../../utils/content-filter';
 import { PromptGenerator } from '../../utils/prompt-generator';
 
-interface InlineEditProps {
+type InlineEditProps = {
 	source: string;
 	secStartLine: number;
 	secEndLine: number;
@@ -17,7 +17,7 @@ interface InlineEditProps {
 	settings: InfioSettings;
 }
 
-interface InputAreaProps {
+type InputAreaProps = {
 	value: string;
 	onChange: (value: string) => void;
 }
@@ -43,7 +43,7 @@ const InputArea: React.FC<InputAreaProps> = ({ value, onChange }) => {
 	);
 };
 
-interface ControlAreaProps {
+type ControlAreaProps = {
 	settings: InfioSettings;
 	onSubmit: () => void;
 	selectedModel: string;
@@ -144,15 +144,15 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
 	};
 
 	const parseSmartComposeBlock = (content: string) => {
-		const match = content.match(/<infio_block[^>]*>([\s\S]*?)<\/infio_block>/);
+		const match = /<infio_block[^>]*>([\s\S]*?)<\/infio_block>/.exec(content);
 		if (!match) {
 			return null;
 		}
 
 		const blockContent = match[1].trim();
-		const attributes = match[0].match(/startLine="(\d+)"/);
+		const attributes = /startLine="(\d+)"/.exec(match[0]);
 		const startLine = attributes ? parseInt(attributes[1]) : undefined;
-		const endLineMatch = match[0].match(/endLine="(\d+)"/);
+		const endLineMatch = /endLine="(\d+)"/.exec(match[0]);
 		const endLine = endLineMatch ? parseInt(endLineMatch[1]) : undefined;
 
 		return {

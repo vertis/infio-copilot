@@ -9,7 +9,7 @@ import {
   WidgetType,
 } from "@codemirror/view";
 
-import { cancelSuggestion, InlineSuggestionState } from "./states";
+import { InlineSuggestionState, cancelSuggestion } from "./states";
 import { OptionalSuggestion, Suggestion } from "./types";
 
 const RenderSuggestionPlugin = () =>

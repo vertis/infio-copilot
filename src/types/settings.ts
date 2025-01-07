@@ -3,11 +3,11 @@ import { z } from 'zod';
 
 import { DEFAULT_MODELS } from '../constants';
 import {
-	fewShotExampleSchema,
 	MAX_DELAY,
 	MAX_MAX_CHAR_LIMIT,
 	MIN_DELAY,
 	MIN_MAX_CHAR_LIMIT,
+	fewShotExampleSchema,
 	modelOptionsSchema
 } from '../settings/versions/shared';
 import { DEFAULT_AUTOCOMPLETE_SETTINGS } from "../settings/versions/v1/v1";

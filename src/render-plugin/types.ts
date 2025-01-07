@@ -1,13 +1,13 @@
 // @ts-nocheck
 import { Text } from "@codemirror/state";
 
-export interface Suggestion {
+export type Suggestion = {
   value: string;
   render: boolean;
 }
 export type OptionalSuggestion = Suggestion | null;
 
-export interface InlineSuggestion {
+export type InlineSuggestion = {
   suggestion: OptionalSuggestion;
   doc: Text | null;
 }

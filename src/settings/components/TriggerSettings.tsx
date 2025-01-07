@@ -3,7 +3,7 @@ import * as React from "react";
 import { Trigger } from "../versions";
 
 
-interface IProps {
+type IProps = {
 	name: string;
 	description: string;
 	triggers: Trigger[];

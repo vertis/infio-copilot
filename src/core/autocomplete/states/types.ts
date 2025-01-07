@@ -1,10 +1,10 @@
 
 import { TFile } from "obsidian";
 
-import { InfioSettings } from "../../../types/settings";
 import { DocumentChanges } from "../../../render-plugin/document-changes-listener";
+import { InfioSettings } from "../../../types/settings";
 
-export interface EventHandler {
+export type EventHandler = {
   handleSettingChanged(settings: InfioSettings): void;
 
   handleDocumentChange(documentChanges: DocumentChanges): Promise<void>;

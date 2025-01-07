@@ -1,5 +1,5 @@
 import { PGlite } from '@electric-sql/pglite'
-// @ts-ignore
+// @ts-expect-error
 import { type PGliteWithLive, live } from '@electric-sql/pglite/live'
 import { App, normalizePath } from 'obsidian'
 

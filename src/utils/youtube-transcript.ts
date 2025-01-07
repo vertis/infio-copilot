@@ -98,7 +98,7 @@ export class YoutubeTranscript {
 		const videoPageBody = videoPageResponse.text
 
 		// Extract title using regex from <title> tags
-		const titleMatch = videoPageBody.match(/<title>(.*?)<\/title>/)
+		const titleMatch = /<title>(.*?)<\/title>/.exec(videoPageBody)
 		const title = titleMatch
 			? titleMatch[1].replace(' - YouTube', '').trim()
 			: ''
@@ -189,7 +189,7 @@ export class YoutubeTranscript {
 		if (videoId.length === 11) {
 			return videoId
 		}
-		const matchId = videoId.match(RE_YOUTUBE)
+		const matchId = RE_YOUTUBE.exec(videoId)
 		if (matchId?.length) {
 			return matchId[1]
 		}

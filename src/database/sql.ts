@@ -1,4 +1,4 @@
-export interface SqlMigration {
+export type SqlMigration = {
 	description: string;
 	sql: string;
 }

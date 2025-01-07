@@ -1,6 +1,6 @@
-import { generateRandomString } from "../utils";
 import Context from "../context-detection";
-import { PrefixAndSuffix, PreProcessor } from "../types";
+import { PreProcessor, PrefixAndSuffix } from "../types";
+import { generateRandomString } from "../utils";
 
 const DATA_VIEW_REGEX = /```dataview(js){0,1}(.|\n)*?```/gm;
 const UNIQUE_CURSOR = `${generateRandomString(16)}`;

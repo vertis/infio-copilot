@@ -22,12 +22,12 @@ import {
 	LLMAPIKeyNotSetException,
 } from './exception'
 
-export interface RangeFilter {
+export type RangeFilter = {
 	gte?: number;
 	lte?: number;
 }
 
-export interface ChunkFilter {
+export type ChunkFilter = {
 	field: string;
 	match_all?: string[];
 	range?: RangeFilter;
@@ -36,7 +36,7 @@ export interface ChunkFilter {
 /**
  * Interface for making requests to the Infio API
  */
-export interface InfioRequest {
+export type InfioRequest = {
 	/** Required: The content of the user message to attach to the topic and then generate an assistant message in response to */
 	messages: RequestMessage[];
 	// /** Required: The ID of the topic to attach the message to */

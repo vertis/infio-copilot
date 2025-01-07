@@ -2,7 +2,7 @@ import * as React from "react";
 
 import SettingsItem from "./SettingsItem";
 
-interface IProps {
+type IProps = {
 	name: string;
 	description: string;
 	placeholder: string;

@@ -4,7 +4,7 @@ export function parseImageDataUrl(dataUrl: string): {
 	mimeType: string
 	base64Data: string
 } {
-	const matches = dataUrl.match(/^data:([^;]+);base64,(.+)/)
+	const matches = /^data:([^;]+);base64,(.+)/.exec(dataUrl)
 	if (!matches) {
 		throw new Error('Invalid image data URL format')
 	}

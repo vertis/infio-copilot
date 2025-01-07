@@ -5,7 +5,7 @@ import { InfioSettings } from "../types/settings";
 
 import ModelsSettings from "./ModelsSettings";
 
-interface CustomSettingsProps {
+type CustomSettingsProps = {
 	plugin: InfioPlugin;
 }
 

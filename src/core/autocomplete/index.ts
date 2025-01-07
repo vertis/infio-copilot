@@ -1,5 +1,5 @@
 import * as Handlebars from "handlebars";
-import { err, ok, Result } from "neverthrow";
+import { Result, err, ok } from "neverthrow";
 
 import { FewShotExample } from "../../settings/versions";
 import { CustomLLMModel } from "../../types/llm/model";

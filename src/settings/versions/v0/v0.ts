@@ -1,7 +1,7 @@
 
 import { z } from "zod";
 
-import { azureOAIApiSettingsSchema, fewShotExampleSchema, MAX_DELAY, MAX_MAX_CHAR_LIMIT, MIN_DELAY, MIN_MAX_CHAR_LIMIT, modelOptionsSchema, openAIApiSettingsSchema } from "../shared";
+import { MAX_DELAY, MAX_MAX_CHAR_LIMIT, MIN_DELAY, MIN_MAX_CHAR_LIMIT, azureOAIApiSettingsSchema, fewShotExampleSchema, modelOptionsSchema, openAIApiSettingsSchema } from "../shared";
 
 import block_qoute_example from "./few-shot-examples/block-qoute-example";
 import codeblock_function_completion from "./few-shot-examples/codeblock-function-completion";

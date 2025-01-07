@@ -1,6 +1,6 @@
-import Context from "../context-detection";
 import EventListener from "../../../event-listener";
 import { DocumentChanges } from "../../../render-plugin/document-changes-listener";
+import Context from "../context-detection";
 
 import State from "./state";
 

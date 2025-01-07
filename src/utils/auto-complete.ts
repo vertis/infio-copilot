@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { cloneDeep, each, get, has, isArray, isEqual, isNumber, isObject, isString, set, unset } from "lodash";
 import * as mm from "micromatch";
-import { err, ok, Result } from "neverthrow";
-import { z, ZodError, ZodIssueCode, ZodType } from 'zod';
+import { Result, err, ok } from "neverthrow";
+import { ZodError, ZodIssueCode, ZodType, z } from 'zod';
 
 import { DEFAULT_SETTINGS, PluginData, Settings } from "../settings/versions";
 import { isSettingsV0, isSettingsV1, migrateFromV0ToV1 } from "../settings/versions/migration";
@@ -77,7 +77,7 @@ function replaceValueWithDefaultValue<V, T>(
 	paths: string[],
 	defaultValue: T,
 ): V {
-	const result = cloneDeep(value) as any;
+	const result = cloneDeep(value);
 	paths.forEach(path => {
 		const originalValue = has(defaultValue, path) ? get(defaultValue, path) : undefined;
 		set(result, path, originalValue);
@@ -100,7 +100,7 @@ function removeUnrecognizedKeys(value: JSONObject | null | undefined, error: Zod
 		// Array path will be handled separately by the value replacement function
 		.filter(issue => !isAnArrayPath(issue.path))
 		.flatMap(issue => {
-			// @ts-ignore
+			// @ts-expect-error
 			const keys = issue.keys;
 			return keys.map(key => [...issue.path, key].join('.'));
 		});

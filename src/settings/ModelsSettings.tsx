@@ -6,7 +6,7 @@ import { InfioSettings } from "../types/settings";
 
 import { DropdownComponent, TextComponent, ToggleComponent } from "./FormComponents";
 
-interface ModelRowProps {
+type ModelRowProps = {
 	model: CustomLLMModel;
 	canDelete: boolean;
 	onToggle: (enabled: boolean) => void;
@@ -31,7 +31,7 @@ const ModelRow: React.FC<ModelRowProps> = ({ model, canDelete, onToggle, onDelet
 	</tr>
 );
 
-interface ModelFormProps {
+type ModelFormProps = {
 	providers: string[];
 	onSubmit: (model: CustomLLMModel) => void;
 	isEmbeddingModel: boolean;
@@ -96,7 +96,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ providers, onSubmit, isEmbeddingM
 	);
 };
 
-interface ModelListProps {
+type ModelListProps = {
 	models: CustomLLMModel[];
 	chatModelKey: string;
 	applyModelKey: string;
@@ -139,7 +139,7 @@ const ModelList: React.FC<ModelListProps> = ({
 	</div>
 );
 
-interface ModelsSettingsProps {
+type ModelsSettingsProps = {
 	settings: InfioSettings;
 	setSettings: (settings: InfioSettings) => void;
 }
