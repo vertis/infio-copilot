@@ -5,7 +5,7 @@ releases:
       - "Improved TypeScript styling and CSS integration"
     fixes:
       - "Removed debug logs for cleaner output"
-      - "Updated main.js for better functionality"
+      - "removed main.js"
 
   - version: "0.0.2"
     improvements:
