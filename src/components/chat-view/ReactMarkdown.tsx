@@ -2,7 +2,8 @@ import React, { useMemo } from 'react'
 import Markdown from 'react-markdown'
 
 import {
-	ParsedinfioBlock,
+	InfioBlockAction,
+	ParsedInfioBlock,
 	parseinfioBlocks,
 } from '../../utils/parse-infio-block'
 
@@ -23,7 +24,7 @@ function ReactMarkdown({
 	children: string
 	isApplying: boolean
 }) {
-	const blocks: ParsedinfioBlock[] = useMemo(
+	const blocks: ParsedInfioBlock[] = useMemo(
 		() => parseinfioBlocks(children),
 		[children],
 	)
@@ -35,7 +36,7 @@ function ReactMarkdown({
 					<Markdown key={index} className="infio-markdown">
 						{block.content}
 					</Markdown>
-				) : block.startLine && block.endLine && block.filename && block.action === 'reference' ? (
+				) : block.startLine && block.endLine && block.filename && block.action === InfioBlockAction.Reference ? (
 					<MarkdownReferenceBlock
 						key={index}
 						filename={block.filename}

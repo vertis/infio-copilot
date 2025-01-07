@@ -538,9 +538,8 @@ export function useMenuAnchorRef(
         containerDiv.setAttribute('aria-label', 'Typeahead menu')
         containerDiv.setAttribute('id', 'typeahead-menu')
         containerDiv.setAttribute('role', 'listbox')
-        containerDiv.style.display = 'block'
-        containerDiv.style.position = 'absolute'
-        parent.append(containerDiv)
+				containerDiv.classList.add('infio-utils-lexical-menu-container')
+      parent.append(containerDiv)
       }
       anchorElementRef.current = containerDiv
       rootElement.setAttribute('aria-controls', 'typeahead-menu')

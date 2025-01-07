@@ -1,6 +1,12 @@
 import { parseFragment } from 'parse5'
 
-export type ParsedinfioBlock =
+export enum InfioBlockAction {
+  Edit = 'edit',
+  New = 'new',
+  Reference = 'reference'
+}
+
+export type ParsedInfioBlock =
 	| { type: 'string'; content: string }
 	| {
 		type: 'infio_block'
@@ -9,11 +15,15 @@ export type ParsedinfioBlock =
 		filename?: string
 		startLine?: number
 		endLine?: number
-		action?: 'edit' | 'new' | 'reference'
+		action?: InfioBlockAction
 	}
 
-export function parseinfioBlocks(input: string): ParsedinfioBlock[] {
-	const parsedResult: ParsedinfioBlock[] = []
+function isInfioBlockAction(value: string): value is InfioBlockAction {
+  return Object.values<string>(InfioBlockAction).includes(value)
+}
+
+export function parseinfioBlocks(input: string): ParsedInfioBlock[] {
+	const parsedResult: ParsedInfioBlock[] = []
 	const fragment = parseFragment(input, {
 		sourceCodeLocationInfo: true,
 	})
@@ -36,7 +46,11 @@ export function parseinfioBlocks(input: string): ParsedinfioBlock[] {
 			const filename = node.attrs.find((attr) => attr.name === 'filename')?.value
 			const startLine = node.attrs.find((attr) => attr.name === 'startline')?.value
 			const endLine = node.attrs.find((attr) => attr.name === 'endline')?.value
-			const action = node.attrs.find((attr) => attr.name === 'type')?.value as 'edit' | 'new' | 'reference'
+			const actionValue = node.attrs.find((attr) => attr.name === 'type')?.value
+			const action = actionValue && isInfioBlockAction(actionValue)
+				? actionValue
+				: undefined
+
 
 			const children = node.childNodes
 			if (children.length === 0) {

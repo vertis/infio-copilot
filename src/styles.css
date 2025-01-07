@@ -1607,7 +1607,25 @@ button.infio-chat-input-model-select {
   opacity: 0.4;
 }
 
-.infio-utils-lexical-menu-container {
+.infio-utils-menu-container {
   position: absolute;
   display: block;
 }
+
+.infio-utils-lexical-menu-container {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  z-index: 100;
+}
+
+.infio-utils-lexical-menu-content {
+  position: relative;
+  pointer-events: auto;
+  user-select: text;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+

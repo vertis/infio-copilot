@@ -1,4 +1,4 @@
-import { ParsedinfioBlock, parseinfioBlocks } from './parse-infio-block'
+import { InfioBlockAction, ParsedInfioBlock, parseinfioBlocks } from './parse-infio-block'
 
 describe('parseinfioBlocks', () => {
 	it('should parse a string with infio_block elements', () => {
@@ -22,7 +22,7 @@ print("Hello, world!")
 </infio_block>
 Some text after`
 
-		const expected: ParsedinfioBlock[] = [
+		const expected: ParsedInfioBlock[] = [
 			{ type: 'string', content: 'Some text before\n' },
 			{
 				type: 'infio_block',
@@ -58,7 +58,7 @@ print("Hello, world!")
       <infio_block language="python"></infio_block>
     `
 
-		const expected: ParsedinfioBlock[] = [
+		const expected: ParsedInfioBlock[] = [
 			{ type: 'string', content: '\n      ' },
 			{
 				type: 'infio_block',
@@ -76,7 +76,7 @@ print("Hello, world!")
 	it('should handle input without infio_block elements', () => {
 		const input = 'Just a regular string without any infio_block elements.'
 
-		const expected: ParsedinfioBlock[] = [{ type: 'string', content: input }]
+		const expected: ParsedInfioBlock[] = [{ type: 'string', content: input }]
 
 		const result = parseinfioBlocks(input)
 		expect(result).toEqual(expected)
@@ -100,7 +100,7 @@ print("Hello, world!")
 </infio_block>
 End`
 
-		const expected: ParsedinfioBlock[] = [
+		const expected: ParsedInfioBlock[] = [
 			{ type: 'string', content: 'Start\n' },
 			{
 				type: 'infio_block',
@@ -139,7 +139,7 @@ print("Hello, world!")
 # Unfinished infio_block
 
 Some text after without closing tag`
-		const expected: ParsedinfioBlock[] = [
+		const expected: ParsedInfioBlock[] = [
 			{ type: 'string', content: 'Start\n' },
 			{
 				type: 'infio_block',
@@ -158,13 +158,41 @@ Some text after without closing tag`,
 
 	it('should handle infio_block with startline and endline attributes', () => {
 		const input = `<infio_block language="markdown" startline="2" endline="5"></infio_block>`
-		const expected: ParsedinfioBlock[] = [
+		const expected: ParsedInfioBlock[] = [
 			{
 				type: 'infio_block',
 				content: '',
 				language: 'markdown',
 				startLine: 2,
 				endLine: 5,
+			},
+		]
+
+		const result = parseinfioBlocks(input)
+		expect(result).toEqual(expected)
+	})
+
+	it('should parse infio_block with action attribute', () => {
+		const input = `<infio_block type="edit"></infio_block>`
+		const expected: ParsedInfioBlock[] = [
+			{
+				type: 'infio_block',
+				content: '',
+				action: InfioBlockAction.Edit,
+			},
+		]
+
+		const result = parseinfioBlocks(input)
+		expect(result).toEqual(expected)
+	})
+
+	it('should handle invalid action attribute', () => {
+		const input = `<infio_block type="invalid"></infio_block>`
+		const expected: ParsedInfioBlock[] = [
+			{
+				type: 'infio_block',
+				content: '',
+				action: undefined,
 			},
 		]
 

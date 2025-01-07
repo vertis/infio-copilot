@@ -449,17 +449,13 @@ When writing out new markdown blocks, remember not to include "line_number|" at 
 	 */
 	private async getWebsiteContent(url: string): Promise<string> {
 		if (isYoutubeUrl(url)) {
-			try {
-				// TODO: pass language based on user preferences
-				const { title, transcript } =
-					await YoutubeTranscript.fetchTranscriptAndMetadata(url)
+			// TODO: pass language based on user preferences
+			const { title, transcript } =
+				await YoutubeTranscript.fetchTranscriptAndMetadata(url)
 
-				return `Title: ${title}
+			return `Title: ${title}
 Video Transcript:
 ${transcript.map((t) => `${t.offset}: ${t.text}`).join('\n')}`
-			} catch (error) {
-				console.error('Error fetching YouTube transcript', error)
-			}
 		}
 
 		const response = await requestUrl({ url })

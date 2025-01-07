@@ -2,6 +2,7 @@ import { Check, CopyIcon, Loader2 } from 'lucide-react'
 import { PropsWithChildren, useMemo, useState } from 'react'
 
 import { useDarkModeContext } from '../../contexts/DarkModeContext'
+import { InfioBlockAction } from '../../utils/parse-infio-block'
 
 import { MemoizedSyntaxHighlighterWrapper } from './SyntaxHighlighterWrapper'
 
@@ -26,7 +27,7 @@ export default function MarkdownActionBlock({
   filename?: string
   startLine?: number
   endLine?: number
-  action?: 'edit' | 'new' | 'reference'
+  action?: InfioBlockAction
 }>) {
   const [copied, setCopied] = useState(false)
   const { isDarkMode } = useDarkModeContext()
@@ -67,7 +68,7 @@ export default function MarkdownActionBlock({
               </>
             )}
           </button>
-          {action === 'edit' && (
+          {action === InfioBlockAction.Edit && (
             <button
               onClick={() => {
                 onApply({
@@ -88,7 +89,7 @@ export default function MarkdownActionBlock({
               )}
             </button>
           )}
-          {action === 'new' && (
+          {action === InfioBlockAction.New && (
             <button
               onClick={() => {
                 onApply({

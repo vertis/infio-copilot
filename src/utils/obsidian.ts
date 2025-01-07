@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, TFile, TFolder, Vault } from 'obsidian'
+import { App, Editor, MarkdownView, TFile, TFolder, Vault, WorkspaceLeaf } from 'obsidian'
 
 import { MentionableBlockData } from '../types/mentionable'
 
@@ -60,7 +60,11 @@ export function getOpenFiles(app: App): TFile[] {
 	try {
 		const leaves = app.workspace.getLeavesOfType('markdown')
 
-		return leaves.map((v) => (v.view as MarkdownView).file).filter((v) => !!v)
+		return leaves
+			.filter((v): v is WorkspaceLeaf & { view: MarkdownView & { file: TFile } } => 
+				v.view instanceof MarkdownView && !!v.view.file
+			)
+			.map((v) => v.view.file)
 	} catch (e) {
 		return []
 	}
@@ -111,9 +115,8 @@ export function openMarkdownFile(
 	if (existingLeaf) {
 		app.workspace.setActiveLeaf(existingLeaf, { focus: true })
 
-		if (startLine) {
-			const view = existingLeaf.view as MarkdownView
-			view.setEphemeralState({ line: startLine - 1 }) // -1 because line is 0-indexed
+		if (startLine && existingLeaf.view instanceof MarkdownView) {
+			existingLeaf.view.setEphemeralState({ line: startLine - 1 }) // -1 because line is 0-indexed
 		}
 	} else {
 		const leaf = app.workspace.getLeaf('tab')
