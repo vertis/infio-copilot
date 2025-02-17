@@ -1,3 +1,4 @@
+import { OPENROUTER_BASE_URL } from '../constants'
 import { ApiProvider } from '../types/llm/model'
 
 export interface ModelInfo {
@@ -1143,13 +1144,50 @@ export const GetEmbeddingProviders = (): ApiProvider[] => {
 		ApiProvider.AlibabaQwen
 	]
 }
+
+let openRouterModelsCache: Record<string, ModelInfo> | null = null;
+
+async function fetchOpenRouterModels(): Promise<Record<string, ModelInfo>> {
+	if (openRouterModelsCache) {
+		return openRouterModelsCache;
+	}
+
+	try {
+		const response = await fetch(OPENROUTER_BASE_URL + "/models");
+		const data = await response.json();
+		const models: Record<string, ModelInfo> = {};
+
+		if (data?.data) {
+			for (const model of data.data) {
+				models[model.id] = {
+					maxTokens: model.top_provider?.max_completion_tokens ?? model.context_length,
+					contextWindow: model.context_length,
+					supportsImages: model.architecture?.modality?.includes("image") ?? false,
+					supportsPromptCache: false,
+					inputPrice: model.pricing?.prompt ?? 0,
+					outputPrice: model.pricing?.completion ?? 0,
+					description: model.description,
+				};
+			}
+		}
+
+		openRouterModelsCache = models;
+		return models;
+	} catch (error) {
+		console.error('Failed to fetch OpenRouter models:', error);
+		return {
+			[openRouterDefaultModelId]: openRouterDefaultModelInfo
+		};
+	}
+}
+
 // Get all models for a provider
-export const GetProviderModels = (provider: ApiProvider): Record<string, ModelInfo> => {
+export const GetProviderModels = async (provider: ApiProvider): Promise<Record<string, ModelInfo>> => {
 	switch (provider) {
 		case ApiProvider.Infio:
 			return infioModels
 		case ApiProvider.OpenRouter:
-			return {}
+			return await fetchOpenRouterModels()
 		case ApiProvider.OpenAI:
 			return openAiNativeModels
 		case ApiProvider.AlibabaQwen:
@@ -1172,7 +1210,16 @@ export const GetProviderModels = (provider: ApiProvider): Record<string, ModelIn
 			return {}
 	}
 }
-// Get all models for a provider
+
+// Get all model ids for a provider
+export const GetProviderModelIds = async (provider: ApiProvider): Promise<string[]> => {
+	const models = await GetProviderModels(provider)
+	return Object.keys(models)
+}
+
+/// Embedding models
+
+// Get all embedding models for a provider
 export const GetEmbeddingProviderModels = (provider: ApiProvider): Record<string, EmbeddingModelInfo> => {
 	switch (provider) {
 		case ApiProvider.Google:
@@ -1187,15 +1234,11 @@ export const GetEmbeddingProviderModels = (provider: ApiProvider): Record<string
 			return {}
 	}
 }
-// Get all model ids for a provider
-export const GetProviderModelIds = (provider: ApiProvider): string[] => {
-	return Object.keys(GetProviderModels(provider))
-}
-
+// Get all embedding model ids for a provider
 export const GetEmbeddingProviderModelIds = (provider: ApiProvider): string[] => {
 	return Object.keys(GetEmbeddingProviderModels(provider))
 }
-
+// Get embedding model info for a provider and model id
 export const GetEmbeddingModelInfo = (provider: ApiProvider, modelId: string): EmbeddingModelInfo => {
 	const models = GetEmbeddingProviderModels(provider)
 	return models[modelId]

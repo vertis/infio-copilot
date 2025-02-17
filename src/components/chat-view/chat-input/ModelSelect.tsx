@@ -1,17 +1,31 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useSettings } from '../../../contexts/SettingsContext'
 import { GetProviderModelIds } from "../../../utils/api"
+
 export function ModelSelect() {
 	const { settings, setSettings } = useSettings()
 	const [isOpen, setIsOpen] = useState(false)
+	const [chatModelId, setChatModelId] = useState(settings.chatModelId)
+	const [providerModels, setProviderModels] = useState<string[]>([])
+	const [isLoading, setIsLoading] = useState(true)
 
-	const[chatModelId, setChatModelId] = useState(settings.chatModelId)
-
-	const currProviderModels = useMemo(() => {
-		return GetProviderModelIds(settings.chatModelProvider)
+	useEffect(() => {
+		const fetchModels = async () => {
+			setIsLoading(true)
+			try {
+				const models = await GetProviderModelIds(settings.chatModelProvider)
+				setProviderModels(models)
+			} catch (error) {
+				console.error('Failed to fetch provider models:', error)
+			} finally {
+				setIsLoading(false)
+			}
+		}
+		
+		fetchModels()
 	}, [settings.chatModelProvider])
 
 	return (
@@ -29,21 +43,25 @@ export function ModelSelect() {
 				<DropdownMenu.Content
 					className="infio-popover">
 					<ul>
-						{currProviderModels.map((modelId) => (
-							<DropdownMenu.Item
-								key={modelId}
-								onSelect={() => {
-									setChatModelId(modelId)
-									setSettings({
-										...settings,
-										chatModelId: modelId,
-									})
-								}}
-								asChild
-							>
-								<li>{modelId}</li>
-							</DropdownMenu.Item>
-						))}
+						{isLoading ? (
+							<li>Loading...</li>
+						) : (
+							providerModels.map((modelId) => (
+								<DropdownMenu.Item
+									key={modelId}
+									onSelect={() => {
+										setChatModelId(modelId)
+										setSettings({
+											...settings,
+											chatModelId: modelId,
+										})
+									}}
+									asChild
+								>
+									<li>{modelId}</li>
+								</DropdownMenu.Item>
+							))
+						)}
 					</ul>
 				</DropdownMenu.Content>
 			</DropdownMenu.Portal>

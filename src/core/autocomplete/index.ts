@@ -34,7 +34,7 @@ class LLMClient {
 
 	async queryChatModel(messages: RequestMessage[]): Promise<Result<string, Error>> {
 		const data = await this.llm.generateResponse(this.model, {
-			model: this.model.name,
+			model: this.model.modelId,
 			messages: messages,
 			stream: false,
 		})

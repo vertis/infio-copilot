@@ -4,14 +4,14 @@ import { ResponseUsage } from '../types/llm/response'
 import { GetProviderModels } from './api'
 
 // Returns the cost in dollars. Returns null if the model is not supported.
-export const calculateLLMCost = ({
+export const calculateLLMCost = async ({
 	model,
 	usage,
 }: {
 	model: LLMModel
 	usage: ResponseUsage
-}): number | null => {
-	const providerModels = GetProviderModels(model.provider)
+}): Promise<number | null> => {
+	const providerModels = await GetProviderModels(model.provider)
 	if (!providerModels) {
 		return null
 	}

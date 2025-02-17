@@ -170,9 +170,19 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 
 	const providers = isEmbedding ? GetEmbeddingProviders() : GetAllProviders()
 
-	const modelIds = useMemo(() => {
-		return isEmbedding ? GetEmbeddingProviderModelIds(modelProvider) : GetProviderModelIds(modelProvider)
-	}, [modelProvider])
+	const [modelIds, setModelIds] = useState<string[]>([]);
+
+	// Replace useMemo with useEffect for async fetching
+	useEffect(() => {
+		const fetchModelIds = async () => {
+			const ids = isEmbedding 
+				? GetEmbeddingProviderModelIds(modelProvider) 
+				: await GetProviderModelIds(modelProvider);
+			setModelIds(ids);
+		};
+		
+		fetchModelIds();
+	}, [modelProvider, isEmbedding]);
 
 	const searchableItems = useMemo(() => {
 		return modelIds.map((id) => ({
@@ -182,8 +192,8 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 	}, [modelIds])
 
 	// 初始化 fuse，用于模糊搜索，简单配置 threshold 可按需调整
-	const fuse = useMemo(() => {
-		return new Fuse(searchableItems, {
+	const fuse: Fuse<SearchableItem> = useMemo(() => {
+		return new Fuse<SearchableItem>(searchableItems, {
 			keys: ["html"],
 			threshold: 0.6,
 			shouldSort: true,
@@ -200,7 +210,7 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 			? highlight(fuse.search(searchTerm))
 			: searchableItems.map(item => ({
 				...item,
-				html: [{ text: item.html, isHighlighted: false }]
+				html: typeof item.html === 'string' ? [{ text: item.html, isHighlighted: false }] : item.html
 			}))
 		return results
 	}, [searchableItems, searchTerm, fuse])

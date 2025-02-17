@@ -1,6 +1,6 @@
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { Check, CopyIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { ChatAssistantMessage } from '../../types/chat'
 import { calculateLLMCost } from '../../utils/price-calculator'
@@ -44,15 +44,23 @@ function CopyButton({ message }: { message: ChatAssistantMessage }) {
 }
 
 function LLMResponesInfoButton({ message }: { message: ChatAssistantMessage }) {
-  const cost = useMemo<number | null>(() => {
-    if (!message.metadata?.model || !message.metadata?.usage) {
-      return 0
+  const [cost, setCost] = useState<number | null>(0);
+
+  useEffect(() => {
+    async function calculateCost() {
+      if (!message.metadata?.model || !message.metadata?.usage) {
+        setCost(0);
+        return;
+      }
+      const calculatedCost = await calculateLLMCost({
+        model: message.metadata.model,
+        usage: message.metadata.usage,
+      });
+      setCost(calculatedCost);
     }
-    return calculateLLMCost({
-      model: message.metadata.model,
-      usage: message.metadata.usage,
-    })
-  }, [message])
+
+    calculateCost();
+  }, [message]);	
 
   return (
     <Tooltip.Provider delayDuration={0}>

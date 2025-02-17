@@ -58,14 +58,19 @@ const ControlArea: React.FC<ControlAreaProps> = ({
 	onModelChange,
 	isSubmitting,
 }) => {
-	const currProviderModels = useMemo(() => {
-		return GetProviderModelIds(settings.chatModelProvider)
-			.map((modelId) => (
-				<option key={modelId} value={modelId}>
-					{modelId}
-				</option>
-			))
-	}, [settings])
+	const [providerModels, setProviderModels] = useState<string[]>([]);
+
+	useEffect(() => {
+		const fetchModels = async () => {
+			try {
+				const models = await GetProviderModelIds(settings.chatModelProvider);
+				setProviderModels(models);
+			} catch (error) {
+				console.error("Failed to fetch provider models:", error);
+			}
+		};
+		fetchModels();
+	}, [settings]);
 
 	return (
 		<div className="infio-ai-block-controls">
@@ -75,7 +80,11 @@ const ControlArea: React.FC<ControlAreaProps> = ({
 				onChange={(e) => onModelChange(e.target.value)}
 				disabled={isSubmitting}
 			>
-				{currProviderModels}
+				{providerModels.map((modelId) => (
+					<option key={modelId} value={modelId}>
+						{modelId}
+					</option>
+				))}
 			</select>
 			<button
 				className="infio-ai-block-submit-button"
