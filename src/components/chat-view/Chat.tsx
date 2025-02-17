@@ -652,7 +652,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 				{submitMutation.isPending && (
 					<button onClick={abortActiveStreams} className="infio-stop-gen-btn">
 						<CircleStop size={16} />
-						<div>Stop Generation</div>
+						<div>Stop generation</div>
 					</button>
 				)}
 			</div>

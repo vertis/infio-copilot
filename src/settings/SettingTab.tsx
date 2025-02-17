@@ -1,26 +1,32 @@
 import {
 	App,
-	DropdownComponent,
 	Modal,
+	Notice,
 	PluginSettingTab,
 	Setting,
-	TFile,
+	TFile
 } from 'obsidian';
 import * as React from "react";
 import { createRoot } from "react-dom/client";
-// import {
-// 	EMBEDDING_MODEL_OPTIONS,
-// } from '../constants'
 
 import InfioPlugin from '../main';
+import { InfioSettings } from '../types/settings';
 import { findFilesMatchingPatterns } from '../utils/glob-utils';
-import { getOllamaModels } from '../utils/ollama';
 
-import AutoCompleteSettings from './AutoCompleteSettings';
-import CustomSettings from './CustomSettings';
+import AdvancedSettings from './components/AdvancedSettings';
+import BasicAutoCompleteSettings from './components/BasicAutoCompleteSettings';
+import DangerZoneSettings from './components/DangerZoneSettings';
+import ModelParametersSettings from './components/ModelParametersSettings';
+import CustomProviderSettings from './components/ModelProviderSettings';
+import PostprocessingSettings from './components/PostprocessingSettings';
+import PreprocessingSettings from './components/PreprocessingSettings';
+import PrivacySettings from './components/PrivacySettings';
+import TriggerSettingsSection from './components/TriggerSettingsSection';
 
 export class InfioSettingTab extends PluginSettingTab {
-	plugin: InfioPlugin
+	plugin: InfioPlugin;
+	private autoCompleteContainer: HTMLElement | null = null;
+	private modelsContainer: HTMLElement | null = null;
 
 	constructor(app: App, plugin: InfioPlugin) {
 		super(app, plugin)
@@ -35,522 +41,30 @@ export class InfioSettingTab extends PluginSettingTab {
 		this.renderAutoCompleteSection(containerEl)
 	}
 
-	renderModelsSection(containerEl: HTMLElement): void {
+	private renderModelsContent(containerEl: HTMLElement): void {
 		const div = containerEl.createDiv("div");
 		const sections = createRoot(div);
-		sections.render(<CustomSettings plugin={this.plugin} />);
+		sections.render(
+			<CustomProviderSettings
+				plugin={this.plugin}
+				onSettingsUpdate={() => {
+					if (this.modelsContainer) {
+						this.modelsContainer.empty();
+						this.renderModelsContent(this.modelsContainer);
+					}
+				}}
+			/>
+		);
 	}
 
-	renderAPIKeysSection(containerEl: HTMLElement): void {
-		new Setting(containerEl)
-			.setHeading()
-			.setName('API keys')
-		new Setting(containerEl)
-			.setName('Infio API key')
-			.setClass("infio-chat-setting-item-container")
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your API key')
-					.setValue(this.plugin.settings.infioApiKey)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							infioApiKey: value,
-						})
-					}),
-			)
-
-		new Setting(containerEl)
-			.setName('Anthropic API key')
-			.setClass("infio-chat-setting-item-container-append")
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your API key')
-					.setValue(this.plugin.settings.anthropicApiKey)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							anthropicApiKey: value,
-						})
-					}),
-			)
-
-		new Setting(containerEl)
-			.setName('Deepseek API key')
-			.setClass("infio-chat-setting-item-container-append")
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your API key')
-					.setValue(this.plugin.settings.deepseekApiKey)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							deepseekApiKey: value,
-						})
-					}),
-			)
-
-		new Setting(containerEl)
-			.setName('OpenAI API key')
-			.setClass("infio-chat-setting-item-container-append")
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your API key')
-					.setValue(this.plugin.settings.openAIApiKey)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							openAIApiKey: value,
-						})
-					}),
-			)
-
-		new Setting(containerEl)
-			.setName('Google API key')
-			.setClass("infio-chat-setting-item-container-append")
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your API key')
-					.setValue(this.plugin.settings.geminiApiKey)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							geminiApiKey: value,
-						})
-					}),
-			)
-
-		new Setting(containerEl)
-			.setName('Groq API key')
-			.setClass("infio-chat-setting-item-container-append")
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your API key')
-					.setValue(this.plugin.settings.groqApiKey)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							groqApiKey: value,
-						})
-					}),
-			)
-	}
-
-	renderDefaultModelSection(containerEl: HTMLElement): void {
-		new Setting(containerEl).setHeading().setName('Default Model')
-		new Setting(containerEl)
-			.setName('Default chat model')
-			.setClass("infio-chat-setting-item-container")
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions(
-						this.plugin.settings.activeModels
-							.reduce<Record<string, string>>((acc, option) => {
-								if (!option.isEmbeddingModel && option.enabled) {
-									acc[option.name] = option.name
-								}
-								return acc
-							}, {}),
-					)
-					.setValue(this.plugin.settings.chatModelId)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							chatModelId: value,
-						})
-						// Force refresh to show/hide Ollama and OpenAI-compatible settings
-						this.display()
-					}),
-			)
-		if (this.plugin.settings.chatModelId === 'ollama') {
-			this.renderOllamaChatModelSettings(containerEl)
-		}
-		if (this.plugin.settings.chatModelId === 'openai-compatible') {
-			this.renderOpenAICompatibleChatModelSettings(containerEl)
-		}
-
-		new Setting(containerEl)
-			.setName('Default apply model')
-			.setClass("infio-chat-setting-item-container-append")
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions(
-						this.plugin.settings.activeModels
-							.reduce<Record<string, string>>(
-								(acc, option) => {
-									if (!option.isEmbeddingModel && option.enabled) {
-										acc[option.name] = option.name
-									}
-									return acc
-								},
-								{},
-							),
-					)
-					.setValue(this.plugin.settings.applyModelId)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							applyModelId: value,
-						})
-						// Force refresh to show/hide Ollama and OpenAI-compatible settings
-						this.display()
-					}),
-			)
-		if (this.plugin.settings.applyModelId === 'ollama') {
-			this.renderOllamaApplyModelSettings(containerEl)
-		}
-		if (this.plugin.settings.applyModelId === 'openai-compatible') {
-			this.renderOpenAICompatibleApplyModelSettings(containerEl)
-		}
-
-		new Setting(containerEl)
-			.setName('Default embedding model')
-			.setClass("infio-chat-setting-item-container-append")
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions(
-						this.plugin.settings.activeModels
-							.reduce<Record<string, string>>(
-								(acc, option) => {
-									if (option.isEmbeddingModel && option.enabled) {
-										acc[option.name] = option.name
-									}
-									return acc
-								},
-								{},
-							),
-					)
-					.setValue(this.plugin.settings.embeddingModelId)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							embeddingModelId: value,
-						})
-						// Force refresh to show/hide Ollama settings
-						this.display()
-					}),
-			)
-		if (this.plugin.settings.embeddingModelId.startsWith('ollama/')) {
-			this.renderOllamaEmbeddingModelSettings(containerEl)
-		}
-
-		new Setting(containerEl)
-			.setHeading()
-			.setName('System prompt')
-			.setDesc('This prompt will be added to the beginning of every chat.')
-
-		new Setting(containerEl)
-			.setClass('infio-chat-settings-textarea')
-			.addTextArea((text) =>
-				text
-					.setValue(this.plugin.settings.systemPrompt)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							systemPrompt: value,
-						})
-					}),
-			)
-	}
-
-	renderOllamaChatModelSettings(containerEl: HTMLElement): void {
-		const ollamaContainer = containerEl.createDiv(
-			'infio-chat-settings-model-container',
-		)
-		let modelDropdown: DropdownComponent | null = null // Store reference to the dropdown
-
-		// Base URL Setting
-		new Setting(ollamaContainer)
-			.setName('Base URL')
-			.setClass("infio-chat-setting-item-container-append")
-			.setDesc(
-				'The API endpoint for your Ollama service (e.g., http://127.0.0.1:11434)',
-			)
-			.addText((text) => {
-				text
-					.setPlaceholder('http://127.0.0.1:11434')
-					.setValue(this.plugin.settings.ollamaChatModel.baseUrl || '')
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							ollamaChatModel: {
-								...this.plugin.settings.ollamaChatModel,
-								baseUrl: value,
-							},
-						})
-						if (modelDropdown) {
-							await this.updateOllamaModelOptions({
-								baseUrl: value,
-								dropdown: modelDropdown,
-								onModelChange: async (model: string) => {
-									await this.plugin.setSettings({
-										...this.plugin.settings,
-										ollamaChatModel: {
-											...this.plugin.settings.ollamaChatModel,
-											model,
-										},
-									})
-								},
-							})
-						}
-					})
-			})
-
-		// Model Setting
-		new Setting(ollamaContainer)
-			.setName('Model Name')
-			.setDesc('Select a model from your Ollama instance')
-			.addDropdown(async (dropdown) => {
-				const currentModel = this.plugin.settings.ollamaChatModel.model
-				modelDropdown = dropdown
-					.addOption(currentModel, currentModel)
-					.setValue(currentModel)
-				await this.updateOllamaModelOptions({
-					baseUrl: this.plugin.settings.ollamaChatModel.baseUrl,
-					dropdown,
-					onModelChange: async (model: string) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							ollamaChatModel: {
-								...this.plugin.settings.ollamaChatModel,
-								model,
-							},
-						})
-					},
-				})
-			})
-	}
-
-	renderOpenAICompatibleChatModelSettings(containerEl: HTMLElement): void {
-		const openAICompatContainer = containerEl.createDiv(
-			'infio-chat-settings-model-container',
-		)
-
-		new Setting(openAICompatContainer)
-			.setName('Base URL')
-			.setDesc(
-				'The API endpoint for your OpenAI-compatible service (e.g., https://api.example.com/v1)',
-			)
-			.addText((text) =>
-				text
-					.setPlaceholder('https://api.example.com/v1')
-					.setValue(
-						this.plugin.settings.openAICompatibleChatModel.baseUrl || '',
-					)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							openAICompatibleChatModel: {
-								...this.plugin.settings.openAICompatibleChatModel,
-								baseUrl: value,
-							},
-						})
-					}),
-			)
-
-		new Setting(openAICompatContainer)
-			.setName('API Key')
-			.setDesc('Your authentication key for the OpenAI-compatible service')
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your API key')
-					.setValue(this.plugin.settings.openAICompatibleChatModel.apiKey || '')
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							openAICompatibleChatModel: {
-								...this.plugin.settings.openAICompatibleChatModel,
-								apiKey: value,
-							},
-						})
-					}),
-			)
-
-		new Setting(openAICompatContainer)
-			.setName('Model Name')
-			.setDesc(
-				'The specific model to use with your service (e.g., llama-3.1-70b, mixtral-8x7b)',
-			)
-			.addText((text) =>
-				text
-					.setPlaceholder('llama-3.1-70b')
-					.setValue(this.plugin.settings.openAICompatibleChatModel.model || '')
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							openAICompatibleChatModel: {
-								...this.plugin.settings.openAICompatibleChatModel,
-								model: value,
-							},
-						})
-					}),
-			)
-	}
-
-	renderOllamaApplyModelSettings(containerEl: HTMLElement): void {
-		const ollamaContainer = containerEl.createDiv(
-			'infio-chat-settings-model-container',
-		)
-		let modelDropdown: DropdownComponent | null = null // Store reference to the dropdown
-
-		// Base URL Setting
-		new Setting(ollamaContainer)
-			.setName('Base URL')
-			.setDesc(
-				'The API endpoint for your Ollama service (e.g., http://127.0.0.1:11434)',
-			)
-			.addText((text) => {
-				text
-					.setPlaceholder('http://127.0.0.1:11434')
-					.setValue(this.plugin.settings.ollamaApplyModel.baseUrl || '')
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							ollamaApplyModel: {
-								...this.plugin.settings.ollamaApplyModel,
-								baseUrl: value,
-							},
-						})
-						if (modelDropdown) {
-							await this.updateOllamaModelOptions({
-								baseUrl: value,
-								dropdown: modelDropdown,
-								onModelChange: async (model: string) => {
-									await this.plugin.setSettings({
-										...this.plugin.settings,
-										ollamaApplyModel: {
-											...this.plugin.settings.ollamaApplyModel,
-											model,
-										},
-									})
-								},
-							})
-						}
-					})
-			})
-
-		// Model Setting
-		new Setting(ollamaContainer)
-			.setName('Model Name')
-			.setDesc('Select a model from your Ollama instance')
-			.addDropdown(async (dropdown) => {
-				const currentModel = this.plugin.settings.ollamaApplyModel.model
-				modelDropdown = dropdown
-					.addOption(currentModel, currentModel)
-					.setValue(currentModel)
-				await this.updateOllamaModelOptions({
-					baseUrl: this.plugin.settings.ollamaApplyModel.baseUrl,
-					dropdown,
-					onModelChange: async (model: string) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							ollamaApplyModel: {
-								...this.plugin.settings.ollamaApplyModel,
-								model,
-							},
-						})
-					},
-				})
-			})
-	}
-
-	renderOpenAICompatibleApplyModelSettings(containerEl: HTMLElement): void {
-		const openAICompatContainer = containerEl.createDiv(
-			'infio-chat-settings-model-container',
-		)
-
-		new Setting(openAICompatContainer)
-			.setName('Base URL')
-			.setDesc(
-				'The API endpoint for your OpenAI-compatible service (e.g., https://api.example.com/v1)',
-			)
-			.addText((text) =>
-				text
-					.setPlaceholder('https://api.example.com/v1')
-					.setValue(
-						this.plugin.settings.openAICompatibleApplyModel.baseUrl || '',
-					)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							openAICompatibleApplyModel: {
-								...this.plugin.settings.openAICompatibleApplyModel,
-								baseUrl: value,
-							},
-						})
-					}),
-			)
-
-		new Setting(openAICompatContainer)
-			.setName('API Key')
-			.setDesc('Your authentication key for the OpenAI-compatible service')
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your API key')
-					.setValue(
-						this.plugin.settings.openAICompatibleApplyModel.apiKey || '',
-					)
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							openAICompatibleApplyModel: {
-								...this.plugin.settings.openAICompatibleApplyModel,
-								apiKey: value,
-							},
-						})
-					}),
-			)
-
-		new Setting(openAICompatContainer)
-			.setName('Model Name')
-			.setDesc(
-				'The specific model to use with your service (e.g., llama-3.1-70b, mixtral-8x7b)',
-			)
-			.addText((text) =>
-				text
-					.setPlaceholder('llama-3.1-70b')
-					.setValue(this.plugin.settings.openAICompatibleApplyModel.model || '')
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							openAICompatibleApplyModel: {
-								...this.plugin.settings.openAICompatibleApplyModel,
-								model: value,
-							},
-						})
-					}),
-			)
-	}
-
-	renderOllamaEmbeddingModelSettings(containerEl: HTMLElement): void {
-		const ollamaContainer = containerEl.createDiv(
-			'infio-chat-settings-model-container',
-		)
-
-		new Setting(ollamaContainer)
-			.setName('Base URL')
-			.setDesc(
-				'The API endpoint for your Ollama service (e.g., http://127.0.0.1:11434)',
-			)
-			.addText((text) =>
-				text
-					.setPlaceholder('http://127.0.0.1:11434')
-					.setValue(this.plugin.settings.ollamaEmbeddingModel.baseUrl || '')
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							ollamaEmbeddingModel: {
-								...this.plugin.settings.ollamaEmbeddingModel,
-								baseUrl: value,
-							},
-						})
-					}),
-			)
+	renderModelsSection(containerEl: HTMLElement): void {
+		const modelsDiv = containerEl.createDiv("models-section");
+		this.modelsContainer = modelsDiv;
+		this.renderModelsContent(modelsDiv);
 	}
 
 	renderRAGSection(containerEl: HTMLElement): void {
 		new Setting(containerEl).setHeading().setName('RAG')
-
 		new Setting(containerEl)
 			.setName('Include patterns')
 			.setDesc(
@@ -715,69 +229,115 @@ export class InfioSettingTab extends PluginSettingTab {
 	}
 
 	renderAutoCompleteSection(containerEl: HTMLElement): void {
-		const div = containerEl.createDiv("div");
-
-		const sections = createRoot(div);
-		sections.render(
-			<React.StrictMode>
-				<AutoCompleteSettings
-					onSettingsChanged={async (settings) => {
-						this.plugin.setSettings(settings);
-						// Force refresh the settings page to update dropdowns
-						this.plugin.settingTab.display();
-					}}
-					settings={this.plugin.settings}
-				/>
-			</React.StrictMode>
-		);
+		// 创建一个专门的容器来存放 AutoComplete 相关的组件
+		const autoCompleteDiv = containerEl.createDiv("auto-complete-section");
+		this.autoCompleteContainer = autoCompleteDiv;
+		this.renderAutoCompleteContent(autoCompleteDiv);
 	}
 
-	private async updateOllamaModelOptions({
-		baseUrl,
-		dropdown,
-		onModelChange,
-	}: {
-		baseUrl: string
-		dropdown: DropdownComponent
-		onModelChange: (model: string) => Promise<void>
-	}): Promise<void> {
-		const currentValue = dropdown.getValue()
-		dropdown.selectEl.empty()
+	private renderAutoCompleteContent(containerEl: HTMLElement): void {
+		const updateSettings = async (update: Partial<InfioSettings>) => {
+		    await this.plugin.setSettings({
+		        ...this.plugin.settings,
+		        ...update
+		    });
+		    
+		    // 只重新渲染 AutoComplete 部分
+		    if (this.autoCompleteContainer) {
+		        this.autoCompleteContainer.empty();
+		        this.renderAutoCompleteContent(this.autoCompleteContainer);
+		    }
+		};
 
-		try {
-			const models = await getOllamaModels(baseUrl)
-			if (models.length > 0) {
-				const modelOptions = models.reduce<Record<string, string>>(
-					(acc, model) => {
-						acc[model] = model
-						return acc
-					},
-					{},
-				)
+		const errors = new Map();
 
-				dropdown.addOptions(modelOptions)
+		// AutoComplete base
+		new Setting(containerEl).setName('AutoComplete').setHeading();
+		this.renderComponent(containerEl,
+			<BasicAutoCompleteSettings
+				settings={this.plugin.settings}
+				updateSettings={updateSettings}
+			/>
+		);
 
-				if (models.includes(currentValue)) {
-					dropdown.setValue(currentValue)
-				} else {
-					dropdown.setValue(models[0])
-					await onModelChange(models[0])
-				}
-			} else {
-				dropdown.addOption('', 'No models found - check base URL')
-				dropdown.setValue('')
-				await onModelChange('')
-			}
-		} catch (error) {
-			console.error('Failed to fetch Ollama models:', error)
-			dropdown.addOption('', 'No models found - check base URL')
-			dropdown.setValue('')
-			await onModelChange('')
+		// Model parameters
+		new Setting(containerEl).setName('Model parameters').setHeading();
+		this.renderComponent(containerEl,
+			<ModelParametersSettings
+				settings={this.plugin.settings}
+				updateSettings={updateSettings}
+				errors={errors}
+			/>
+		);
+
+		// Preprocessing
+		new Setting(containerEl).setName('Preprocessing').setHeading();
+		this.renderComponent(containerEl,
+			<PreprocessingSettings
+				settings={this.plugin.settings}
+				updateSettings={updateSettings}
+				errors={errors}
+			/>
+		);
+
+		// Postprocessing
+		new Setting(containerEl).setName('Postprocessing').setHeading();
+		this.renderComponent(containerEl,
+			<PostprocessingSettings
+				settings={this.plugin.settings}
+				updateSettings={updateSettings}
+			/>
+		);
+
+		// Trigger
+		new Setting(containerEl).setName('Trigger').setHeading();
+		this.renderComponent(containerEl,
+			<TriggerSettingsSection
+				settings={this.plugin.settings}
+				updateSettings={updateSettings}
+				errors={errors}
+			/>
+		);
+
+		// Privacy
+		new Setting(containerEl).setName('Privacy').setHeading();
+		this.renderComponent(containerEl,
+			<PrivacySettings
+				settings={this.plugin.settings}
+				updateSettings={updateSettings}
+				errors={errors}
+			/>
+		);
+
+		// Danger zone
+		new Setting(containerEl).setName('Danger zone').setHeading();
+		this.renderComponent(containerEl,
+			<DangerZoneSettings
+				settings={this.plugin.settings}
+				updateSettings={updateSettings}
+				onReset={() => {
+					new Notice("Factory reset complete.");
+				}}
+			/>
+		);
+
+		// Advanced
+		if (this.plugin.settings.advancedMode) {
+			new Setting(containerEl).setName('Advanced').setHeading();
+			this.renderComponent(containerEl,
+				<AdvancedSettings
+					settings={this.plugin.settings}
+					updateSettings={updateSettings}
+					errors={errors}
+				/>
+			);
 		}
+	}
 
-		dropdown.onChange(async (value) => {
-			await onModelChange(value)
-		})
+	private renderComponent(containerEl: HTMLElement, component: React.ReactNode) {
+		const div = containerEl.createDiv("div");
+		const root = createRoot(div);
+		root.render(component);
 	}
 }
 

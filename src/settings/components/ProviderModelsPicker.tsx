@@ -2,9 +2,9 @@ import * as Popover from "@radix-ui/react-popover";
 import Fuse, { FuseResult } from "fuse.js";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-import { ApiProvider } from "../types/llm/model";
+import { ApiProvider } from "../../types/llm/model";
 // import { PROVIDERS } from '../constants';
-import { GetAllProviders, GetEmbeddingProviderModelIds, GetEmbeddingProviders, GetProviderModelIds } from "../utils/api";
+import { GetAllProviders, GetEmbeddingProviderModelIds, GetEmbeddingProviders, GetProviderModelIds } from "../../utils/api";
 
 type TextSegment = {
 	text: string;

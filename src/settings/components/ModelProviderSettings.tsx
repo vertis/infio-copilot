@@ -1,13 +1,17 @@
 import React, { useMemo, useState } from 'react';
 
-// import { PROVIDERS } from '../constants';
-import { ApiProvider } from '../types/llm/model';
-import { InfioSettings } from '../types/settings';
-import { GetAllProviders } from '../utils/api';
-// import { siliconFlowDefaultModelId } from '../utils/api';
+import InfioPlugin from "../../main";
+import { ApiProvider } from '../../types/llm/model';
+import { InfioSettings } from '../../types/settings';
+import { GetAllProviders } from '../../utils/api';
 
 import { DropdownComponent, TextComponent, ToggleComponent } from './FormComponents';
 import { ComboBoxComponent } from './ProviderModelsPicker';
+
+type CustomProviderSettingsProps = {
+	plugin: InfioPlugin;
+	onSettingsUpdate?: () => void;
+}
 
 type ProviderSettingKey =
 	| 'infioProvider'
@@ -21,11 +25,6 @@ type ProviderSettingKey =
 	| 'groqProvider'
 	| 'ollamaProvider'
 	| 'openaicompatibleProvider';
-
-interface ProviderSettingsProps {
-	settings: InfioSettings;
-	setSettings: (settings: InfioSettings) => Promise<void>;
-}
 
 const keyMap: Record<ApiProvider, ProviderSettingKey> = {
 	'Infio': 'infioProvider',
@@ -45,19 +44,26 @@ const getProviderSettingKey = (provider: ApiProvider): ProviderSettingKey => {
 	return keyMap[provider];
 };
 
-const PROVIDERS = GetAllProviders();
-
-const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettings }) => {
+const CustomProviderSettings: React.FC<CustomProviderSettingsProps> = ({ plugin, onSettingsUpdate }) => {
+	const settings = plugin.settings;
 	const [currProvider, setCurrProvider] = useState(settings.defaultProvider);
+
+	const handleSettingsUpdate = async (newSettings: InfioSettings) => {
+		await plugin.setSettings(newSettings);
+		// 使用父组件传入的回调函数来刷新整个容器
+		onSettingsUpdate?.();
+	};
 
 	const providerSetting = useMemo(() => {
 		const providerKey = getProviderSettingKey(currProvider);
 		return settings[providerKey] || {};
 	}, [currProvider, settings]);
 
+	const providers = GetAllProviders();
+
 	const updateProvider = (provider: ApiProvider) => {
 		setCurrProvider(provider);
-		setSettings({
+		handleSettingsUpdate({
 			...settings,
 			defaultProvider: provider
 		});
@@ -67,7 +73,7 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 		const providerKey = getProviderSettingKey(currProvider);
 		const providerSettings = settings[providerKey];
 
-		setSettings({
+		handleSettingsUpdate({
 			...settings,
 			[providerKey]: {
 				...providerSettings,
@@ -80,7 +86,7 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 		const providerKey = getProviderSettingKey(currProvider);
 		const providerSettings = settings[providerKey];
 
-		setSettings({
+		handleSettingsUpdate({
 			...settings,
 			[providerKey]: {
 				...providerSettings,
@@ -93,7 +99,7 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 		const providerKey = getProviderSettingKey(currProvider);
 		const providerSettings = settings[providerKey];
 
-		setSettings({
+		handleSettingsUpdate({
 			...settings,
 			[providerKey]: {
 				...providerSettings,
@@ -103,7 +109,7 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 	};
 
 	const updateChatModelId = (provider: ApiProvider, modelId: string) => {
-		setSettings({
+		handleSettingsUpdate({
 			...settings,
 			chatModelProvider: provider,
 			chatModelId: modelId
@@ -111,7 +117,7 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 	};
 
 	const updateApplyModelId = (provider: ApiProvider, modelId: string) => {
-		setSettings({
+		handleSettingsUpdate({
 			...settings,
 			applyModelProvider: provider,
 			applyModelId: modelId
@@ -119,7 +125,7 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 	};
 
 	const updateEmbeddingModelId = (provider: ApiProvider, modelId: string) => {
-		setSettings({
+		handleSettingsUpdate({
 			...settings,
 			embeddingModelProvider: provider,
 			embeddingModelId: modelId
@@ -129,28 +135,28 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 	return (
 		<div className="infio-llm-setting-provider">
 			<DropdownComponent
-				name="API Provider:"
+				name="Api provider:"
 				value={currProvider}
-				options={PROVIDERS}
+				options={providers}
 				onChange={updateProvider}
 			/>
 			<div className="infio-llm-setting-divider"></div>
 			<TextComponent
-				name={currProvider + " API Key:"}
-				placeholder="Enter your API key"
+				name={currProvider + " api key:"}
+				placeholder="Enter your api key"
 				value={providerSetting.apiKey || ''}
 				onChange={updateProviderApiKey}
 				type="password"
 			/>
 			<div className="infio-llm-setting-divider"></div>
 			<ToggleComponent
-				name="Use custom base URL"
+				name="Use custom base url"
 				value={providerSetting.useCustomUrl || false}
 				onChange={updateProviderUseCustomUrl}
 			/>
 			{providerSetting.useCustomUrl && (
 				<TextComponent
-					placeholder="Enter your custom API endpoint URL"
+					placeholder="Enter your custom api endpoint url"
 					value={providerSetting.baseUrl || ''}
 					onChange={updateProviderBaseUrl}
 				/>
@@ -159,21 +165,21 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 			<div className="infio-llm-setting-divider"></div>
 			<div className="infio-llm-setting-divider"></div>
 			<ComboBoxComponent
-				name="Chat Model:"
+				name="Chat model:"
 				provider={settings.chatModelProvider || currProvider}
 				modelId={settings.chatModelId}
 				updateModel={updateChatModelId}
 			/>
 			<div className="infio-llm-setting-divider"></div>
 			<ComboBoxComponent
-				name="Autocomplete Model:"
+				name="Autocomplete model:"
 				provider={settings.applyModelProvider || currProvider}
 				modelId={settings.applyModelId}
 				updateModel={updateApplyModelId}
 			/>
 			<div className="infio-llm-setting-divider"></div>
 			<ComboBoxComponent
-				name="Embedding Model:"
+				name="Embedding model:"
 				provider={settings.embeddingModelProvider || ApiProvider.Google}
 				modelId={settings.embeddingModelId}
 				isEmbedding={true}
@@ -185,4 +191,4 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 	);
 };
 
-export default ProviderSettings;
+export default CustomProviderSettings;

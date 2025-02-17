@@ -187,7 +187,7 @@ export default function FewShotExampleSettings(
 								className="setting-item-name"
 								style={{ width: "100%", textAlign: "left" }}
 							>
-								Human Message
+								Human message
 							</div>
 							{props.errorMessages.get(`fewShotExamples.${index}.input`) !== undefined && (
 								<div className="setting-item-description" style={{ width: "100%", textAlign: "left" }}>
@@ -207,7 +207,7 @@ export default function FewShotExampleSettings(
 								className="setting-item-name"
 								style={{ width: "100%", textAlign: "left" }}
 							>
-								Assistant Message
+								Assistant message
 							</div>
 							{props.errorMessages.get(`fewShotExamples.${index}.answer`) !== undefined && (
 								<div className="setting-item-description" style={{ width: "100%", textAlign: "left" }}>

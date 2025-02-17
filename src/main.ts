@@ -208,7 +208,7 @@ export default class InfioPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'autocomplete-accept',
-			name: 'Autocomplete Accept',
+			name: 'Autocomplete accept',
 			editorCheckCallback: (
 				checking: boolean,
 				editor: Editor,
@@ -228,7 +228,7 @@ export default class InfioPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'autocomplete-predict',
-			name: 'Autocomplete Predict',
+			name: 'Autocomplete predict',
 			editorCheckCallback: (
 				checking: boolean,
 				editor: Editor,
@@ -251,7 +251,7 @@ export default class InfioPlugin extends Plugin {
 
 		this.addCommand({
 			id: "autocomplete-toggle",
-			name: "Autocomplete Toggle",
+			name: "Autocomplete toggle",
 			callback: () => {
 				const newValue = !this.settings.autocompleteEnabled;
 				this.setSettings({
@@ -262,8 +262,8 @@ export default class InfioPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "infio-autocomplete-enable",
-			name: "Infio Autocomplete Enable",
+			id: "autocomplete-enable",
+			name: "Autocomplete enable",
 			checkCallback: (checking) => {
 				if (checking) {
 					return !this.settings.autocompleteEnabled;
@@ -279,7 +279,7 @@ export default class InfioPlugin extends Plugin {
 
 		this.addCommand({
 			id: "autocomplete-disable",
-			name: "Autocomplete Disable",
+			name: "Autocomplete disable",
 			checkCallback: (checking) => {
 				if (checking) {
 					return this.settings.autocompleteEnabled;
@@ -295,7 +295,7 @@ export default class InfioPlugin extends Plugin {
 
 		this.addCommand({
 			id: "ai-inline-edit",
-			name: "Inline Edit",
+			name: "Inline edit",
 			// hotkeys: [
 			// 	{
 			// 		modifiers: ['Mod', 'Shift'],

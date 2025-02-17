@@ -30,9 +30,9 @@ export default function LLMResponseInfoPopover({
 			</Popover.Trigger>
 			{usage ? (
 				<Popover.Content className="infio-chat-popover-content infio-llm-info-content">
-					<div className="infio-llm-info-header">LLM Response Information</div>
+					<div className="infio-llm-info-header">LLM response information</div>
 					<div className="infio-llm-info-tokens">
-						<div className="infio-llm-info-tokens-header">Token Count</div>
+						<div className="infio-llm-info-tokens-header">Token count</div>
 						<div className="infio-llm-info-tokens-grid">
 							<div className="infio-llm-info-token-row">
 								<ArrowUp className="infio-llm-info-icon--input" />
@@ -59,7 +59,7 @@ export default function LLMResponseInfoPopover({
 					</div>
 					<div className="infio-llm-info-footer-row">
 						<Coins className="infio-llm-info-icon--footer" />
-						<span>Estimated Price:</span>
+						<span>Estimated price:</span>
 						<span className="infio-llm-info-footer-value">
 							{estimatedPrice === null
 								? 'Not available'

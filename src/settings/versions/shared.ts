@@ -50,8 +50,8 @@ export const modelOptionsSchema = z.object({
 export const fewShotExampleSchema = z.object({
 	// TODO: figure out how to make this compatible with the context enum and its namespace.
 	context: z.enum(["Text", "Heading", "BlockQuotes", "UnorderedList", "NumberedList", "CodeBlock", "MathBlock", "TaskList"]),
-	input: z.string().min(3, { message: "The Input must be at least 3 characters long" }),
-	answer: z.string().min(3, { message: "The Answer must be at least 3 characters long" }),
+	input: z.string().min(3, { message: "The input must be at least 3 characters long" }),
+	answer: z.string().min(3, { message: "The answer must be at least 3 characters long" }),
 }).strict();
 
 export type FewShotExample = z.infer<typeof fewShotExampleSchema>;

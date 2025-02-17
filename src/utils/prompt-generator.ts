@@ -209,7 +209,7 @@ export class PromptGenerator {
 					},
 					onQueryProgressChange: onQueryProgressChange,
 				})
-			filePrompt = `## Potentially Relevant Snippets from the current vault
+			filePrompt = `## Potentially relevant snippets from the current vault
 ${similaritySearchResults
 					.map(({ path, content, metadata }) => {
 						const contentWithLineNumbers = this.addLineNumbersToContent({
@@ -242,7 +242,7 @@ ${similaritySearchResults
 
 		const urlPrompt =
 			urls.length > 0
-				? `## Potentially Relevant Websearch Results
+				? `## Potentially relevant web search results
 ${(
 					await Promise.all(
 						urls.map(
@@ -387,7 +387,7 @@ ${customInstruction}
 		return {
 			role: 'user',
 			content: `# Inputs
-## Current File
+## Current file
 Here is the file I'm looking at.
 \`\`\`${currentFile.path}
 ${fileContent}

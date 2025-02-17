@@ -150,7 +150,7 @@ function CurrentFileBadge({
 				<span>{mentionable.file.name}</span>
 			</div>
 			<div className="infio-chat-user-input-file-badge-name-block-suffix">
-				{' (Current File)'}
+				{' (Current file)'}
 			</div>
 		</BadgeBase>
 	) : null
