@@ -125,13 +125,13 @@ export default class InfioPlugin extends Plugin {
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
-			id: 'infio-open-new-chat',
+			id: 'open-new-chat',
 			name: 'Infio open new chat',
 			callback: () => this.openChatView(true),
 		})
 
 		this.addCommand({
-			id: 'infio-add-selection-to-chat',
+			id: 'add-selection-to-chat',
 			name: 'Infio add selection to chat',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				this.addSelectionToChat(editor, view)
@@ -145,7 +145,7 @@ export default class InfioPlugin extends Plugin {
 		})
 
 		this.addCommand({
-			id: 'infio-rebuild-vault-index',
+			id: 'rebuild-vault-index',
 			name: 'Infio rebuild entire vault index',
 			callback: async () => {
 				const notice = new Notice('Rebuilding vault index...', 0)
@@ -176,7 +176,7 @@ export default class InfioPlugin extends Plugin {
 		})
 
 		this.addCommand({
-			id: 'infio-update-vault-index',
+			id: 'update-vault-index',
 			name: 'Infio update index for modified files',
 			callback: async () => {
 				const notice = new Notice('Updating vault index...', 0)
@@ -207,7 +207,7 @@ export default class InfioPlugin extends Plugin {
 		})
 
 		this.addCommand({
-			id: 'infio-autocomplete-accept',
+			id: 'autocomplete-accept',
 			name: 'Infio Autocomplete Accept',
 			editorCheckCallback: (
 				checking: boolean,
@@ -227,7 +227,7 @@ export default class InfioPlugin extends Plugin {
 		})
 
 		this.addCommand({
-			id: 'infio-autocomplete-predict',
+			id: 'autocomplete-predict',
 			name: 'Infio Autocomplete Predict',
 			editorCheckCallback: (
 				checking: boolean,
@@ -250,7 +250,7 @@ export default class InfioPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "infio-autocomplete-toggle",
+			id: "autocomplete-toggle",
 			name: "Infio Autocomplete Toggle",
 			callback: () => {
 				const newValue = !this.settings.autocompleteEnabled;
@@ -278,7 +278,7 @@ export default class InfioPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "infio-autocomplete-disable",
+			id: "autocomplete-disable",
 			name: "Infio Autocomplete Disable",
 			checkCallback: (checking) => {
 				if (checking) {
@@ -294,7 +294,7 @@ export default class InfioPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "infio-ai-inline-edit",
+			id: "ai-inline-edit",
 			name: "infio Inline Edit",
 			// hotkeys: [
 			// 	{
