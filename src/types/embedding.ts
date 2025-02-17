@@ -1,4 +1,6 @@
-import { CustomLLMModel } from './llm/model'
+import { LLMModel } from './llm/model'
+
+import { EmbeddingModelInfo } from '../utils/api'
 
 export type EmbeddingModelId =
   | 'text-embedding-3-small'
@@ -10,12 +12,12 @@ export type EmbeddingModelId =
 export type EmbeddingModelOption = {
   id: EmbeddingModelId
   name: string
-  model: CustomLLMModel
+  model: LLMModel
   dimension: number
 }
 
 export type EmbeddingModel = {
-  id: EmbeddingModelId
+  id: string
   dimension: number
   getEmbedding: (text: string) => Promise<number[]>
 }

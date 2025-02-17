@@ -1,120 +1,22 @@
-import { CustomLLMModel } from './types/llm/model'
-
+import { LLMModel } from './types/llm/model'
+// import { ApiProvider } from './utils/api'
 export const CHAT_VIEW_TYPE = 'infio-chat-view'
 export const APPLY_VIEW_TYPE = 'infio-apply-view'
 
-export const DEFAULT_MODELS: CustomLLMModel[] = [
-	{
-		name: 'claude-3.5-sonnet',
-		provider: 'anthropic',
-		enabled: true,
-		isEmbeddingModel: false,
-		isBuiltIn: true,
-	},
-	{
-		name: 'o1-mini',
-		provider: 'openai',
-		enabled: true,
-		isEmbeddingModel: false,
-		isBuiltIn: true,
-	},
-	{
-		name: 'o1-preview',
-		provider: 'openai',
-		enabled: false,
-		isEmbeddingModel: false,
-		isBuiltIn: true,
-	},
-	{
-		name: 'gpt-4o',
-		provider: 'openai',
-		enabled: true,
-		isEmbeddingModel: false,
-		isBuiltIn: true,
-	},
-	{
-		name: 'gpt-4o-mini',
-		provider: 'openai',
-		enabled: false,
-		isEmbeddingModel: false,
-		isBuiltIn: true,
-	},
-	{
-		name: 'deepseek-chat',
-		provider: 'deepseek',
-		enabled: true,
-		isEmbeddingModel: false,
-		isBuiltIn: true,
-	},
-	{
-		name: 'gemini-1.5-pro',
-		provider: 'google',
-		enabled: true,
-		isEmbeddingModel: false,
-		isBuiltIn: true,
-	},
-	{
-		name: 'gemini-2.0-flash-exp',
-		provider: 'google',
-		enabled: true,
-		isEmbeddingModel: false,
-		isBuiltIn: true,
-	},
-	{
-		name: 'gemini-2.0-flash-thinking-exp-1219',
-		provider: 'google',
-		enabled: false,
-		isEmbeddingModel: false,
-		isBuiltIn: true,
-	},
-	{
-		name: 'llama-3.1-70b-versatile',
-		provider: 'groq',
-		enabled: true,
-		isEmbeddingModel: false,
-		isBuiltIn: true,
-	},
-	{
-		name: 'text-embedding-3-small',
-		provider: 'openai',
-		dimension: 1536,
-		enabled: true,
-		isEmbeddingModel: true,
-		isBuiltIn: true,
-	},
-	{
-		name: 'text-embedding-004',
-		provider: 'google',
-		dimension: 768,
-		enabled: true,
-		isEmbeddingModel: true,
-		isBuiltIn: true,
-	},
-	{
-		name: 'nomic-embed-text',
-		provider: 'ollama',
-		dimension: 768,
-		enabled: true,
-		isEmbeddingModel: true,
-		isBuiltIn: true,
-	},
-	{
-		name: 'mxbai-embed-large',
-		provider: 'ollama',
-		dimension: 1024,
-		enabled: true,
-		isEmbeddingModel: true,
-		isBuiltIn: true,
-	},
-	{
-		name: 'bge-m3',
-		provider: 'ollama',
-		dimension: 1024,
-		enabled: true,
-		isEmbeddingModel: true,
-		isBuiltIn: true,
-	}
-]
+export const DEFAULT_MODELS: LLMModel[] = []
+
+// export const PROVIDERS: ApiProvider[] = [
+// 	'Infio',
+// 	'OpenRouter',
+// 	'SiliconFlow',
+// 	'Anthropic',
+// 	'Deepseek',
+// 	'OpenAI',
+// 	'Google',
+// 	'Groq',
+// 	'Ollama',
+// 	'OpenAICompatible',
+// ]
 
 export const SUPPORT_EMBEDDING_SIMENTION: number[] = [
 	384,
@@ -124,7 +26,12 @@ export const SUPPORT_EMBEDDING_SIMENTION: number[] = [
 	1536
 ]
 
+export const OPENAI_BASE_URL = 'https://api.openai.com/v1'
 export const DEEPSEEK_BASE_URL = 'https://api.deepseek.com'
+export const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
+export const SILICONFLOW_BASE_URL = 'https://api.siliconflow.cn/v1'
+export const ALIBABA_QWEN_BASE_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+export const INFIO_BASE_URL = 'https://api.infio.com/api/raw_message'
 
 // Pricing in dollars per million tokens
 type ModelPricing = {

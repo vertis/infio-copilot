@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-
 import { DEFAULT_MODELS } from '../constants';
 import {
 	MAX_DELAY,
@@ -11,9 +10,142 @@ import {
 	modelOptionsSchema
 } from '../settings/versions/shared';
 import { DEFAULT_AUTOCOMPLETE_SETTINGS } from "../settings/versions/v1/v1";
+import { ApiProvider } from '../types/llm/model';
 import { isRegexValid, isValidIgnorePattern } from '../utils/auto-complete';
 
 export const SETTINGS_SCHEMA_VERSION = 0.1
+
+const InfioProviderSchema = z.object({
+	name: z.literal('Infio'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().catch(''),
+	useCustomUrl: z.boolean().catch(false)
+}).catch({
+	name: 'Infio',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: false
+})
+
+const OpenRouterProviderSchema = z.object({
+	name: z.literal('OpenRouter'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().catch(''),
+	useCustomUrl: z.boolean().catch(false)
+}).catch({
+	name: 'OpenRouter',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: false
+})
+
+const SiliconFlowProviderSchema = z.object({
+	name: z.literal('SiliconFlow'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().catch(''),
+	useCustomUrl: z.boolean().catch(false)
+}).catch({
+	name: 'SiliconFlow',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: false
+})
+
+const AlibabaQwenProviderSchema = z.object({
+	name: z.literal('AlibabaQwen'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().catch(''),
+	useCustomUrl: z.boolean().catch(false)
+}).catch({
+	name: 'AlibabaQwen',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: false
+})
+
+const AnthropicProviderSchema = z.object({
+	name: z.literal('Anthropic'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().optional(),
+	useCustomUrl: z.boolean().catch(false)
+}).catch({
+	name: 'Anthropic',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: false
+})
+
+const DeepSeekProviderSchema = z.object({
+	name: z.literal('DeepSeek'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().catch(''),
+	useCustomUrl: z.boolean().catch(false)
+}).catch({
+	name: 'DeepSeek',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: false
+})
+
+const GoogleProviderSchema = z.object({
+	name: z.literal('Google'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().catch(''),
+	useCustomUrl: z.boolean().catch(false)
+}).catch({
+	name: 'Google',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: false
+})
+
+const OpenAIProviderSchema = z.object({
+	name: z.literal('OpenAI'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().optional(),
+	useCustomUrl: z.boolean().catch(false)
+}).catch({
+	name: 'OpenAI',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: false
+})
+
+const OpenAICompatibleProviderSchema = z.object({
+	name: z.literal('OpenAICompatible'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().optional(),
+	useCustomUrl: z.boolean().catch(true)
+}).catch({
+	name: 'OpenAICompatible',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: true
+})
+
+const OllamaProviderSchema = z.object({
+	name: z.literal('Ollama'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().catch(''),
+	useCustomUrl: z.boolean().catch(false)
+}).catch({
+	name: 'Ollama',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: false
+})
+
+const GroqProviderSchema = z.object({
+	name: z.literal('Groq'),
+	apiKey: z.string().catch(''),
+	baseUrl: z.string().catch(''),
+	useCustomUrl: z.boolean().catch(false)
+}).catch({
+	name: 'Groq',
+	apiKey: '',
+	baseUrl: '',
+	useCustomUrl: false
+})
 
 const ollamaModelSchema = z.object({
 	baseUrl: z.string().catch(''),
@@ -61,7 +193,34 @@ export const InfioSettingsSchema = z.object({
 	// Version
 	version: z.literal(SETTINGS_SCHEMA_VERSION).catch(SETTINGS_SCHEMA_VERSION),
 
-	// activeModels
+	// Provider
+	defaultProvider: z.nativeEnum(ApiProvider).catch(ApiProvider.OpenRouter),
+	infioProvider: InfioProviderSchema,
+	openrouterProvider: OpenRouterProviderSchema,
+	siliconflowProvider: SiliconFlowProviderSchema,
+	alibabaQwenProvider: AlibabaQwenProviderSchema,
+	anthropicProvider: AnthropicProviderSchema,
+	deepseekProvider: DeepSeekProviderSchema,
+	openaiProvider: OpenAIProviderSchema,
+	googleProvider: GoogleProviderSchema,
+	ollamaProvider: OllamaProviderSchema,
+	groqProvider: GroqProviderSchema,
+	openaicompatibleProvider: OpenAICompatibleProviderSchema,
+
+	// Chat Model 
+	chatModelProvider: z.nativeEnum(ApiProvider).catch(ApiProvider.OpenRouter),
+	chatModelId: z.string().catch(''),
+
+	// Apply Model
+	applyModelProvider: z.nativeEnum(ApiProvider).catch(ApiProvider.OpenRouter),
+	applyModelId: z.string().catch(''),
+
+	// Embedding Model
+	embeddingModelProvider: z.nativeEnum(ApiProvider).catch(ApiProvider.Google),
+	embeddingModelId: z.string().catch(''),
+
+	/// [compatible]
+	// activeModels [compatible]
 	activeModels: z.array(
 		z.object({
 			name: z.string(),
@@ -74,17 +233,17 @@ export const InfioSettingsSchema = z.object({
 			dimension: z.number().optional(),
 		})
 	).catch(DEFAULT_MODELS),
-
-	// API Keys
+	// API Keys [compatible]
 	infioApiKey: z.string().catch(''),
 	openAIApiKey: z.string().catch(''),
 	anthropicApiKey: z.string().catch(''),
 	geminiApiKey: z.string().catch(''),
 	groqApiKey: z.string().catch(''),
 	deepseekApiKey: z.string().catch(''),
-
-	// DEFAULT Chat Model
-	chatModelId: z.string().catch('deepseek-chat'),
+	ollamaEmbeddingModel: ollamaModelSchema.catch({
+		baseUrl: '',
+		model: '',
+	}),
 	ollamaChatModel: ollamaModelSchema.catch({
 		baseUrl: '',
 		model: '',
@@ -94,9 +253,6 @@ export const InfioSettingsSchema = z.object({
 		apiKey: '',
 		model: '',
 	}),
-
-	// DEFAULT Apply Model
-	applyModelId: z.string().catch('deepseek-chat'),
 	ollamaApplyModel: ollamaModelSchema.catch({
 		baseUrl: '',
 		model: '',
@@ -104,15 +260,6 @@ export const InfioSettingsSchema = z.object({
 	openAICompatibleApplyModel: openAICompatibleModelSchema.catch({
 		baseUrl: '',
 		apiKey: '',
-		model: '',
-	}),
-
-	// DEFAULT Embedding Model
-	embeddingModelId: z.string().catch(
-		'text-embedding-004',
-	),
-	ollamaEmbeddingModel: ollamaModelSchema.catch({
-		baseUrl: '',
 		model: '',
 	}),
 
@@ -132,10 +279,13 @@ export const InfioSettingsSchema = z.object({
 	// autocomplete options
 	autocompleteEnabled: z.boolean(),
 	advancedMode: z.boolean(),
+
+	// [compatible]
 	apiProvider: z.enum(['azure', 'openai', "ollama"]),
 	azureOAIApiSettings: z.string().catch(''),
 	openAIApiSettings: z.string().catch(''),
 	ollamaApiSettings: z.string().catch(''),
+
 	triggers: z.array(triggerSchema),
 	delay: z.number().int().min(MIN_DELAY, { message: "Delay must be between 0ms and 2000ms" }).max(MAX_DELAY, { message: "Delay must be between 0ms and 2000ms" }),
 	modelOptions: modelOptionsSchema,

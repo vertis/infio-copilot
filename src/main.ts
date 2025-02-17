@@ -30,6 +30,7 @@ import { getMentionableBlockData } from './utils/obsidian'
 // Remember to rename these classes and interfaces!
 export default class InfioPlugin extends Plugin {
 	settings: InfioSettings
+	settingTab: InfioSettingTab
 	settingsListeners: ((newSettings: InfioSettings) => void)[] = []
 	initChatProps?: ChatProps
 	dbManager: DBManager | null = null
@@ -41,6 +42,10 @@ export default class InfioPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings()
 
+		// Add settings tab
+		this.settingTab = new InfioSettingTab(this.app, this)
+		this.addSettingTab(this.settingTab)
+
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon('wand-sparkles', 'Open infio copilot', () =>
 			this.openChatView(),
@@ -49,14 +54,12 @@ export default class InfioPlugin extends Plugin {
 		this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf, this))
 		this.registerView(APPLY_VIEW_TYPE, (leaf) => new ApplyView(leaf))
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new InfioSettingTab(this.app, this))
-
 		// Register markdown processor for ai blocks
 		this.inlineEdit = new InlineEdit(this, this.settings);
 		this.registerMarkdownCodeBlockProcessor("infioedit", (source, el, ctx) => {
 			this.inlineEdit?.Processor(source, el, ctx);
 		});
+
 		// Update inlineEdit when settings change
 		this.addSettingsListener((newSettings) => {
 			this.inlineEdit = new InlineEdit(this, newSettings);

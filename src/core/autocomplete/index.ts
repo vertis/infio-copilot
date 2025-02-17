@@ -2,7 +2,7 @@ import * as Handlebars from "handlebars";
 import { Result, err, ok } from "neverthrow";
 
 import { FewShotExample } from "../../settings/versions";
-import { CustomLLMModel } from "../../types/llm/model";
+import { LLMModel } from "../../types/llm/model";
 import { RequestMessage } from '../../types/llm/request';
 import { InfioSettings } from "../../types/settings";
 import LLMManager from '../llm/manager';
@@ -25,9 +25,9 @@ import {
 
 class LLMClient {
 	private llm: LLMManager;
-	private model: CustomLLMModel;
+	private model: LLMModel;
 
-	constructor(llm: LLMManager, model: CustomLLMModel) {
+	constructor(llm: LLMManager, model: LLMModel) {
 		this.llm = llm;
 		this.model = model;
 	}
@@ -100,17 +100,11 @@ class AutoComplete implements AutocompleteService {
 		postProcessors.push(new RemoveOverlap());
 		postProcessors.push(new RemoveWhitespace());
 
-		const llm_manager = new LLMManager({
-			deepseek: settings.deepseekApiKey,
-			openai: settings.openAIApiKey,
-			anthropic: settings.anthropicApiKey,
-			gemini: settings.geminiApiKey,
-			groq: settings.groqApiKey,
-			infio: settings.infioApiKey,
-		})
-		const model = settings.activeModels.find(
-			(option) => option.name === settings.chatModelId,
-		) as CustomLLMModel;
+		const llm_manager = new LLMManager(settings)
+		const model = {
+			provider: settings.applyModelProvider,
+			modelId: settings.applyModelId,
+		}
 		const llm = new LLMClient(llm_manager, model);
 
 		return new AutoComplete(

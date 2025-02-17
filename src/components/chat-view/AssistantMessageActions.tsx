@@ -62,7 +62,7 @@ function LLMResponesInfoButton({ message }: { message: ChatAssistantMessage }) {
             <LLMResponseInfoPopover
               usage={message.metadata?.usage}
               estimatedPrice={cost}
-              model={message.metadata?.model?.name}
+              model={message.metadata?.model?.modelId}
             />
           </div>
         </Tooltip.Trigger>

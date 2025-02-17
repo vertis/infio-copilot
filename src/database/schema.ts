@@ -1,7 +1,7 @@
 import { SerializedLexicalNode } from 'lexical'
 
 import { SUPPORT_EMBEDDING_SIMENTION } from '../constants'
-import { EmbeddingModelId } from '../types/embedding'
+// import { EmbeddingModelId } from '../types/embedding'
 
 // PostgreSQL column types
 type ColumnDefinition = {

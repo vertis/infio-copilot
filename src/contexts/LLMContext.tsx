@@ -9,7 +9,7 @@ import {
 } from 'react'
 
 import LLMManager from '../core/llm/manager'
-import { CustomLLMModel } from '../types/llm/model'
+import { LLMModel } from '../types/llm/model'
 import {
 	LLMOptions,
 	LLMRequestNonStreaming,
@@ -24,17 +24,17 @@ import { useSettings } from './SettingsContext'
 
 export type LLMContextType = {
 	generateResponse: (
-		model: CustomLLMModel,
+		model: LLMModel,
 		request: LLMRequestNonStreaming,
 		options?: LLMOptions,
 	) => Promise<LLMResponseNonStreaming>
 	streamResponse: (
-		model: CustomLLMModel,
+		model: LLMModel,
 		request: LLMRequestStreaming,
 		options?: LLMOptions,
 	) => Promise<AsyncIterable<LLMResponseStreaming>>
-	chatModel: CustomLLMModel
-	applyModel: CustomLLMModel
+	chatModel: LLMModel
+	applyModel: LLMModel
 }
 
 const LLMContext = createContext<LLMContextType | null>(null)
@@ -43,55 +43,28 @@ export function LLMProvider({ children }: PropsWithChildren) {
 	const [llmManager, setLLMManager] = useState<LLMManager | null>(null)
 	const { settings } = useSettings()
 
-	const chatModel = useMemo((): CustomLLMModel => {
-		const model = settings.activeModels.find(
-			(option) => option.name === settings.chatModelId,
-		)
-		if (!model) {
-			throw new Error('Invalid chat model ID')
+	const chatModel = useMemo((): LLMModel => {
+		return {
+			provider: settings.chatModelProvider,
+			modelId: settings.chatModelId,
 		}
-		return model as CustomLLMModel
 	}, [settings])
 
-	const applyModel = useMemo((): CustomLLMModel => {
-		const model = settings.activeModels.find(
-			(option) => option.name === settings.applyModelId,
-		)
-		if (!model) {
-			throw new Error('Invalid apply model ID')
+	const applyModel = useMemo((): LLMModel => {
+		return {
+			provider: settings.applyModelProvider,
+			modelId: settings.applyModelId,
 		}
-		if (model.provider === 'ollama') {
-			return {
-				...model,
-				baseUrl: settings.ollamaApplyModel.baseUrl,
-				name: settings.ollamaApplyModel.model,
-			} as CustomLLMModel
-		}
-		return model as CustomLLMModel
 	}, [settings])
 
 	useEffect(() => {
-		const manager = new LLMManager({
-			deepseek: settings.deepseekApiKey,
-			openai: settings.openAIApiKey,
-			anthropic: settings.anthropicApiKey,
-			gemini: settings.geminiApiKey,
-			groq: settings.groqApiKey,
-			infio: settings.infioApiKey,
-		})
+		const manager = new LLMManager(settings)
 		setLLMManager(manager)
-	}, [
-		settings.deepseekApiKey,
-		settings.openAIApiKey,
-		settings.anthropicApiKey,
-		settings.geminiApiKey,
-		settings.groqApiKey,
-		settings.infioApiKey,
-	])
+	}, [settings])
 
 	const generateResponse = useCallback(
 		async (
-			model: CustomLLMModel,
+			model: LLMModel,
 			request: LLMRequestNonStreaming,
 			options?: LLMOptions,
 		) => {
@@ -105,7 +78,7 @@ export function LLMProvider({ children }: PropsWithChildren) {
 
 	const streamResponse = useCallback(
 		async (
-			model: CustomLLMModel,
+			model: LLMModel,
 			request: LLMRequestStreaming,
 			options?: LLMOptions,
 		) => {

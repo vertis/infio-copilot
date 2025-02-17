@@ -279,7 +279,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 				const stream = await streamResponse(
 					chatModel,
 					{
-						model: chatModel.name,
+						model: chatModel.modelId,
 						messages: requestMessages,
 						stream: true,
 					},

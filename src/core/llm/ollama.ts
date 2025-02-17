@@ -7,7 +7,7 @@
 import OpenAI from 'openai'
 import { FinalRequestOptions } from 'openai/core'
 
-import { CustomLLMModel } from '../../types/llm/model'
+import { LLMModel } from '../../types/llm/model'
 import {
 	LLMOptions,
 	LLMRequestNonStreaming,
@@ -19,7 +19,7 @@ import {
 } from '../../types/llm/response'
 
 import { BaseLLMProvider } from './base'
-import { LLMBaseUrlNotSetException, LLMModelNotSetException } from './exception'
+import { LLMBaseUrlNotSetException } from './exception'
 import { OpenAIMessageAdapter } from './openai-message-adapter'
 
 export class NoStainlessOpenAI extends OpenAI {
@@ -35,7 +35,7 @@ export class NoStainlessOpenAI extends OpenAI {
 		{ retryCount = 0 }: { retryCount?: number } = {},
 	): { req: RequestInit; url: string; timeout: number } {
 		const req = super.buildRequest(options, { retryCount })
-		const headers = req.req.headers as Record<string, string>
+		const headers: Record<string, string> = req.req.headers
 		Object.keys(headers).forEach((k) => {
 			if (k.startsWith('x-stainless')) {
 				// eslint-disable-next-line @typescript-eslint/no-dynamic-delete
@@ -48,30 +48,26 @@ export class NoStainlessOpenAI extends OpenAI {
 
 export class OllamaProvider implements BaseLLMProvider {
 	private adapter: OpenAIMessageAdapter
+	private baseUrl: string
 
-	constructor() {
+	constructor(baseUrl: string) {
 		this.adapter = new OpenAIMessageAdapter()
+		this.baseUrl = baseUrl
 	}
 
 	async generateResponse(
-		model: CustomLLMModel,
+		model: LLMModel,
 		request: LLMRequestNonStreaming,
 		options?: LLMOptions,
 	): Promise<LLMResponseNonStreaming> {
-		if (!model.baseUrl) {
+		if (!this.baseUrl) {
 			throw new LLMBaseUrlNotSetException(
 				'Ollama base URL is missing. Please set it in settings menu.',
 			)
 		}
 
-		if (!model.name) {
-			throw new LLMModelNotSetException(
-				'Ollama model is missing. Please set it in settings menu.',
-			)
-		}
-
 		const client = new NoStainlessOpenAI({
-			baseURL: `${model.baseUrl}/v1`,
+			baseURL: `${this.baseUrl}/v1`,
 			apiKey: '',
 			dangerouslyAllowBrowser: true,
 		})
@@ -79,24 +75,18 @@ export class OllamaProvider implements BaseLLMProvider {
 	}
 
 	async streamResponse(
-		model: CustomLLMModel,
+		model: LLMModel,
 		request: LLMRequestStreaming,
 		options?: LLMOptions,
 	): Promise<AsyncIterable<LLMResponseStreaming>> {
-		if (!model.baseUrl) {
+		if (!this.baseUrl) {
 			throw new LLMBaseUrlNotSetException(
 				'Ollama base URL is missing. Please set it in settings menu.',
 			)
 		}
 
-		if (!model.name) {
-			throw new LLMModelNotSetException(
-				'Ollama model is missing. Please set it in settings menu.',
-			)
-		}
-
 		const client = new NoStainlessOpenAI({
-			baseURL: `${model.baseUrl}/v1`,
+			baseURL: `${this.baseUrl}/v1`,
 			apiKey: '',
 			dangerouslyAllowBrowser: true,
 		})

@@ -31,8 +31,6 @@ export class InfioSettingTab extends PluginSettingTab {
 		const { containerEl } = this
 		containerEl.empty()
 		this.renderModelsSection(containerEl)
-		this.renderAPIKeysSection(containerEl)
-		this.renderDefaultModelSection(containerEl)
 		this.renderRAGSection(containerEl)
 		this.renderAutoCompleteSection(containerEl)
 	}
@@ -108,7 +106,7 @@ export class InfioSettingTab extends PluginSettingTab {
 			)
 
 		new Setting(containerEl)
-			.setName('Gemini API key')
+			.setName('Google API key')
 			.setClass("infio-chat-setting-item-container-append")
 			.addText((text) =>
 				text
@@ -725,6 +723,8 @@ export class InfioSettingTab extends PluginSettingTab {
 				<AutoCompleteSettings
 					onSettingsChanged={async (settings) => {
 						this.plugin.setSettings(settings);
+						// Force refresh the settings page to update dropdowns
+						this.plugin.settingTab.display();
 					}}
 					settings={this.plugin.settings}
 				/>

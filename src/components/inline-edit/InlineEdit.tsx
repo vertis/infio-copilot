@@ -1,10 +1,10 @@
 import { MarkdownView, Plugin } from 'obsidian';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { APPLY_VIEW_TYPE } from '../../constants';
 import LLMManager from '../../core/llm/manager';
-import { CustomLLMModel } from '../../types/llm/model';
 import { InfioSettings } from '../../types/settings';
+import { GetProviderModelIds } from '../../utils/api';
 import { manualApplyChangesToFile } from '../../utils/apply';
 import { removeAITags } from '../../utils/content-filter';
 import { PromptGenerator } from '../../utils/prompt-generator';
@@ -57,31 +57,35 @@ const ControlArea: React.FC<ControlAreaProps> = ({
 	selectedModel,
 	onModelChange,
 	isSubmitting,
-}) => (
-	<div className="infio-ai-block-controls">
-		<select
-			className="infio-ai-block-model-select"
-			value={selectedModel}
-			onChange={(e) => onModelChange(e.target.value)}
-			disabled={isSubmitting}
-		>
-			{settings.activeModels
-				.filter((model) => !model.isEmbeddingModel && model.enabled)
-				.map((model) => (
-					<option key={model.name} value={model.name}>
-						{model.name}
-					</option>
-				))}
-		</select>
-		<button
-			className="infio-ai-block-submit-button"
-			onClick={onSubmit}
-			disabled={isSubmitting}
-		>
-			{isSubmitting ? "Submitting..." : "Submit"}
-		</button>
-	</div>
-);
+}) => {
+	const currProviderModels = useMemo(() => {
+		return GetProviderModelIds(settings.chatModelProvider)
+			.map((modelId) => (
+				<option key={modelId} value={modelId}>
+					{modelId}
+				</option>
+			))
+	}, [settings])
+
+	return (
+		<div className="infio-ai-block-controls">
+			<select
+				className="infio-ai-block-model-select"
+				value={selectedModel}
+				onChange={(e) => onModelChange(e.target.value)}
+				disabled={isSubmitting}
+			>
+				{currProviderModels}
+			</select>
+			<button
+				className="infio-ai-block-submit-button"
+				onClick={onSubmit}
+				disabled={isSubmitting}
+			>
+				{isSubmitting ? "Submitting..." : "Submit"}
+			</button>
+		</div>);
+};
 
 export const InlineEdit: React.FC<InlineEditProps> = ({
 	source,
@@ -94,14 +98,7 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
 	const [selectedModel, setSelectedModel] = useState(settings.chatModelId);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const llmManager = new LLMManager({
-		deepseek: settings.deepseekApiKey,
-		openai: settings.openAIApiKey,
-		anthropic: settings.anthropicApiKey,
-		gemini: settings.geminiApiKey,
-		groq: settings.groqApiKey,
-		infio: settings.infioApiKey,
-	});
+	const llmManager = new LLMManager(settings);
 
 	const promptGenerator = new PromptGenerator(
 		async () => {
@@ -171,9 +168,10 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
 				return;
 			}
 
-			const chatModel = settings.activeModels.find(
-				(model) => model.name === selectedModel
-			) as CustomLLMModel;
+			const chatModel = {
+				provider: settings.chatModelProvider,
+				modelId: settings.chatModelId,
+			};
 			if (!chatModel) {
 				setIsSubmitting(false);
 				throw new Error("Invalid chat model");
@@ -193,7 +191,7 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
 			});
 
 			const response = await llmManager.generateResponse(chatModel, {
-				model: chatModel.name,
+				model: chatModel.modelId,
 				messages: requestMessages,
 				stream: false,
 			});

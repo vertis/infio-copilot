@@ -6,7 +6,7 @@ import {
   ChatCompletionMessageParam,
 } from 'groq-sdk/resources/chat/completions'
 
-import { CustomLLMModel } from '../../types/llm/model'
+import { LLMModel } from '../../types/llm/model'
 import {
   LLMOptions,
   LLMRequestNonStreaming,
@@ -35,20 +35,14 @@ export class GroqProvider implements BaseLLMProvider {
   }
 
   async generateResponse(
-    model: CustomLLMModel,
+    model: LLMModel,
     request: LLMRequestNonStreaming,
     options?: LLMOptions,
   ): Promise<LLMResponseNonStreaming> {
     if (!this.client.apiKey) {
-      if (!model.apiKey) {
-        throw new LLMAPIKeyNotSetException(
-          'Groq API key is missing. Please set it in settings menu.',
-        )
-      }
-      this.client = new Groq({
-        apiKey: model.apiKey,
-        dangerouslyAllowBrowser: true,
-      })
+			throw new LLMAPIKeyNotSetException(
+				'Groq API key is missing. Please set it in settings menu.',
+			)
     }
 
     try {
@@ -78,20 +72,14 @@ export class GroqProvider implements BaseLLMProvider {
   }
 
   async streamResponse(
-    model: CustomLLMModel,
+    model: LLMModel,
     request: LLMRequestStreaming,
     options?: LLMOptions,
   ): Promise<AsyncIterable<LLMResponseStreaming>> {
     if (!this.client.apiKey) {
-      if (!model.apiKey) {
-        throw new LLMAPIKeyNotSetException(
-          'Groq API key is missing. Please set it in settings menu.',
-        )
-      }
-      this.client = new Groq({
-        apiKey: model.apiKey,
-        dangerouslyAllowBrowser: true,
-      })
+			throw new LLMAPIKeyNotSetException(
+				'Groq API key is missing. Please set it in settings menu.',
+			)
     }
 
     try {

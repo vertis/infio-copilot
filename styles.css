@@ -1092,7 +1092,7 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
   justify-content: center;
   align-items: center;
   height: 100%;
-  margin: 0;
+	margin-top: 5px !important; /* 使用 !important 强制生效 */
 }
 
 .infio-llm-model-settings-table .switch {
@@ -1104,6 +1104,10 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
 }
 
 .infio-llm-add-custom-model {
+  margin-top: 20px;
+}
+
+.infio-provider {
   margin-top: 20px;
 }
 
@@ -1119,9 +1123,171 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
   margin-bottom: 3px;
 }
 
+.infio-llm-setting-checkbox-name {
+	font-weight: bold;
+  color: var(--inline-title-color);
+}
+
+.infio-llm-setting-select-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--size-2-1) var(--size-4-1);
+  font-size: var(--font-ui-smaller);
+  color: var(--text-normal);
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: var(--size-4-1);
+}
+
+.infio-llm-setting-select-content {
+  overflow: hidden;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow-s);
+}
+
+.infio-llm-setting-select-item {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-normal);
+  padding: var(--size-2-1) var(--size-4-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  outline: none;
+}
+
+.infio-llm-setting-select-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.infio-llm-setting-select-item[data-highlighted] {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.infio-llm-setting-select-indicator {
+  color: var(--text-accent);
+  padding-left: var(--size-4-1);
+}
+
+.iinfio-llm-setting-divider {
+  margin-top: 14px;
+}
+
+.infio-llm-setting-slider-round {
+	font-weight: bold;
+  color: var(--inline-title-color);
+}
+
 .infio-llm-setting-item-control {
   width: 50%; /* Adjust the width as needed */
   max-width: 100%; /* Ensures it doesn't exceed the parent width */
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  padding: var(--size-2-1);
+}
+
+.infio-llm-setting-model-id {
+	 color: var(--text-accent);
+}
+
+/* Add hover and focus states for better interactivity */
+.infio-llm-setting-item-control:hover {
+  border-color: var(--background-modifier-border-hover);
+}
+
+.infio-llm-setting-item-control:focus {
+  border-color: var(--background-modifier-border-focus);
+  outline: none;
+}
+
+.infio-llm-setting-combobox-dropdown {
+	margin-top: 4px;
+	max-height: 200px;
+	overflow-y: auto;
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 0;
+	z-index: 1000;
+	padding: 2px 0;
+	box-shadow: var(--shadow-s);
+	width: var(--radix-popover-trigger-width);
+	min-width: var(--radix-popover-trigger-width);
+}
+
+
+/* 添加容器样式使 select 和 input 在同一行 */
+.infio-llm-setting-search-container {
+	display: flex;
+	gap: 2px;
+	align-items: center;
+}
+
+.infio-llm-setting-provider-switch {
+	width: 26%;
+	border-radius: 0;
+	margin: 0;
+	margin-left: 1px;
+	padding: 0;
+	background-color: var(--background-secondary);
+	/* outline: none; */
+	text-align: center;
+	text-align-last: center;
+	color: var(--text-accent);
+}
+
+.infio-llm-setting-provider-switch:focus {
+	/* border: none; */
+	outline: none;
+	box-shadow: none;
+}
+
+.infio-llm-setting-item-search {
+	width: 74%;
+	border: none;
+	margin: 0;
+	padding: 0;
+	/* background-color: var(--background-secondary); */
+	outline: none;
+	border-radius: 0 !important;
+	-webkit-border-radius: 0 !important;
+	-moz-border-radius: 0 !important;
+	-ms-border-radius: 0 !important;
+}
+
+.infio-llm-setting-item-search:focus {
+	border: none;
+	outline: none;
+	box-shadow: none;
+}
+
+.infio-llm-setting-combobox-option {
+	padding: 8px 12px;
+	cursor: pointer;
+	background-color: transparent;
+}
+
+.infio-llm-setting-combobox-option:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+/*
+ * Highlight styles
+ */
+.infio-llm-setting-model-item-highlight {
+  background-color: var(--text-highlight-bg);
+  color: var(--text-normal);
+  border-radius: var(--radius-s);
+  padding: 0 2px;
 }
 
 .infio-llm-setting-item-control::placeholder {

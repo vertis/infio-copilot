@@ -23,26 +23,12 @@ export class RAGEngine {
     this.app = app
     this.settings = settings
     this.vectorManager = dbManager.getVectorManager()
-    this.embeddingModel = getEmbeddingModel(
-      settings.embeddingModelId,
-      {
-        openAIApiKey: settings.openAIApiKey,
-        geminiApiKey: settings.geminiApiKey,
-      },
-      settings.ollamaEmbeddingModel.baseUrl,
-    )
+    this.embeddingModel = getEmbeddingModel(settings)
   }
 
   setSettings(settings: InfioSettings) {
     this.settings = settings
-    this.embeddingModel = getEmbeddingModel(
-      settings.embeddingModelId,
-      {
-        openAIApiKey: settings.openAIApiKey,
-        geminiApiKey: settings.geminiApiKey,
-      },
-      settings.ollamaEmbeddingModel.baseUrl,
-    )
+    this.embeddingModel = getEmbeddingModel(settings)
   }
 
   // TODO: Implement automatic vault re-indexing when settings are changed.

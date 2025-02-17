@@ -1,6 +1,6 @@
 import OpenAI from 'openai'
 
-import { CustomLLMModel } from '../../types/llm/model'
+import { LLMModel } from '../../types/llm/model'
 import {
   LLMOptions,
   LLMRequestNonStreaming,
@@ -33,7 +33,7 @@ export class OpenAICompatibleProvider implements BaseLLMProvider {
   }
 
   async generateResponse(
-    model: CustomLLMModel,
+    model: LLMModel,
     request: LLMRequestNonStreaming,
     options?: LLMOptions,
   ): Promise<LLMResponseNonStreaming> {
@@ -47,7 +47,7 @@ export class OpenAICompatibleProvider implements BaseLLMProvider {
   }
 
   async streamResponse(
-    model: CustomLLMModel,
+    model: LLMModel,
     request: LLMRequestStreaming,
     options?: LLMOptions,
   ): Promise<AsyncIterable<LLMResponseStreaming>> {

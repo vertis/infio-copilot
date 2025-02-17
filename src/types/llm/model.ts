@@ -1,3 +1,22 @@
+export enum ApiProvider {
+	Infio = "Infio",
+	OpenRouter = "OpenRouter",
+	SiliconFlow = "SiliconFlow",
+	AlibabaQwen = "AlibabaQwen",
+	Anthropic = "Anthropic",
+	Deepseek = "Deepseek",
+	OpenAI = "OpenAI",
+	Google = "Google",
+	Groq = "Groq",
+	Ollama = "Ollama",
+	OpenAICompatible = "OpenAICompatible",
+}
+
+export type LLMModel = {
+	provider: ApiProvider;
+	modelId: string;
+}
+
 // Model Providers
 export enum ModelProviders {
   OPENAI = "openai",

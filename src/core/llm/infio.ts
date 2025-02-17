@@ -4,12 +4,12 @@ import {
 	ChatCompletionChunk,
 } from 'openai/resources/chat/completions'
 
-import { CustomLLMModel } from '../../types/llm/model'
+import { INFIO_BASE_URL } from '../../constants'
+import { LLMModel } from '../../types/llm/model'
 import {
-	LLMOptions,
 	LLMRequestNonStreaming,
 	LLMRequestStreaming,
-	RequestMessage,
+	RequestMessage
 } from '../../types/llm/request'
 import {
 	LLMResponseNonStreaming,
@@ -85,13 +85,13 @@ export class InfioProvider implements BaseLLMProvider {
 		// this.client = new OpenAI({ apiKey, dangerouslyAllowBrowser: true })
 		// this.adapter = new OpenAIMessageAdapter()
 		this.apiKey = apiKey
-		this.baseUrl = 'https://api.infio.com/api/raw_message'
+		this.baseUrl = INFIO_BASE_URL
 	}
 
 	async generateResponse(
-		model: CustomLLMModel,
+		model: LLMModel,
 		request: LLMRequestNonStreaming,
-		options?: LLMOptions,
+		// options?: LLMOptions,
 	): Promise<LLMResponseNonStreaming> {
 		if (!this.apiKey) {
 			throw new LLMAPIKeyNotSetException(
@@ -107,7 +107,7 @@ export class InfioProvider implements BaseLLMProvider {
 				presence_penalty: request.presence_penalty,
 				max_tokens: request.max_tokens,
 			}
-			const options = {
+			const req_options = {
 				method: 'POST',
 				headers: {
 					Authorization: this.apiKey,
@@ -117,7 +117,7 @@ export class InfioProvider implements BaseLLMProvider {
 				body: JSON.stringify(req)
 			};
 
-			const response = await fetch(this.baseUrl, options);
+			const response = await fetch(this.baseUrl, req_options);
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
@@ -134,9 +134,8 @@ export class InfioProvider implements BaseLLMProvider {
 	}
 
 	async streamResponse(
-		model: CustomLLMModel,
+		model: LLMModel,
 		request: LLMRequestStreaming,
-		options?: LLMOptions,
 	): Promise<AsyncIterable<LLMResponseStreaming>> {
 		if (!this.apiKey) {
 			throw new LLMAPIKeyNotSetException(
@@ -154,7 +153,7 @@ export class InfioProvider implements BaseLLMProvider {
 				presence_penalty: request.presence_penalty,
 				max_tokens: request.max_tokens,
 			}
-			const options = {
+			const req_options = {
 				method: 'POST',
 				headers: {
 					Authorization: this.apiKey,
@@ -164,7 +163,7 @@ export class InfioProvider implements BaseLLMProvider {
 				body: JSON.stringify(req)
 			};
 
-			const response = await fetch(this.baseUrl, options);
+			const response = await fetch(this.baseUrl, req_options);
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}

@@ -1,14 +1,18 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useSettings } from '../../../contexts/SettingsContext'
-
+import { GetProviderModelIds } from "../../../utils/api"
 export function ModelSelect() {
 	const { settings, setSettings } = useSettings()
 	const [isOpen, setIsOpen] = useState(false)
 
-	const activeModels = settings.activeModels.filter((model) => model.enabled)
+	const[chatModelId, setChatModelId] = useState(settings.chatModelId)
+
+	const currProviderModels = useMemo(() => {
+		return GetProviderModelIds(settings.chatModelProvider)
+	}, [settings.chatModelProvider])
 
 	return (
 		<DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
@@ -17,11 +21,7 @@ export function ModelSelect() {
 					{isOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
 				</div>
 				<div className="infio-chat-input-model-select__model-name">
-					{
-						activeModels.find(
-							(option) => option.name === settings.chatModelId,
-						)?.name
-					}
+					{chatModelId}
 				</div>
 			</DropdownMenu.Trigger>
 
@@ -29,18 +29,19 @@ export function ModelSelect() {
 				<DropdownMenu.Content
 					className="infio-popover">
 					<ul>
-						{activeModels.map((model) => (
+						{currProviderModels.map((modelId) => (
 							<DropdownMenu.Item
-								key={model.name}
+								key={modelId}
 								onSelect={() => {
+									setChatModelId(modelId)
 									setSettings({
 										...settings,
-										chatModelId: model.name,
+										chatModelId: modelId,
 									})
 								}}
 								asChild
 							>
-								<li>{model.name}</li>
+								<li>{modelId}</li>
 							</DropdownMenu.Item>
 						))}
 					</ul>

@@ -7,7 +7,7 @@ import {
 	Part,
 } from '@google/generative-ai'
 
-import { CustomLLMModel } from '../../types/llm/model'
+import { LLMModel } from '../../types/llm/model'
 import {
 	LLMOptions,
 	LLMRequestNonStreaming,
@@ -43,18 +43,14 @@ export class GeminiProvider implements BaseLLMProvider {
 	}
 
 	async generateResponse(
-		model: CustomLLMModel,
+		model: LLMModel,
 		request: LLMRequestNonStreaming,
 		options?: LLMOptions,
 	): Promise<LLMResponseNonStreaming> {
 		if (!this.apiKey) {
-			if (!model.apiKey) {
-				throw new LLMAPIKeyNotSetException(
-					`Gemini API key is missing. Please set it in settings menu.`,
-				)
-			}
-			this.apiKey = model.apiKey
-			this.client = new GoogleGenerativeAI(model.apiKey)
+			throw new LLMAPIKeyNotSetException(
+				`Gemini API key is missing. Please set it in settings menu.`,
+			)
 		}
 
 		const systemMessages = request.messages.filter((m) => m.role === 'system')
@@ -110,18 +106,14 @@ export class GeminiProvider implements BaseLLMProvider {
 	}
 
 	async streamResponse(
-		model: CustomLLMModel,
+		model: LLMModel,
 		request: LLMRequestStreaming,
 		options?: LLMOptions,
 	): Promise<AsyncIterable<LLMResponseStreaming>> {
 		if (!this.apiKey) {
-			if (!model.apiKey) {
-				throw new LLMAPIKeyNotSetException(
-					`Gemini API key is missing. Please set it in settings menu.`,
-				)
-			}
-			this.apiKey = model.apiKey
-			this.client = new GoogleGenerativeAI(model.apiKey)
+			throw new LLMAPIKeyNotSetException(
+				`Gemini API key is missing. Please set it in settings menu.`,
+			)
 		}
 
 		const systemMessages = request.messages.filter((m) => m.role === 'system')

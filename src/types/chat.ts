@@ -2,7 +2,7 @@ import { SerializedEditorState } from 'lexical'
 
 import { SelectVector } from '../database/schema'
 
-import { CustomLLMModel } from './llm/model'
+import { LLMModel } from './llm/model'
 import { ContentPart } from './llm/request'
 import { ResponseUsage } from './llm/response'
 import { Mentionable, SerializedMentionable } from './mentionable'
@@ -17,15 +17,17 @@ export type ChatUserMessage = {
 		similarity: number
 	})[]
 }
+
 export type ChatAssistantMessage = {
 	role: 'assistant'
 	content: string
 	id: string
 	metadata?: {
 		usage?: ResponseUsage
-		model?: CustomLLMModel
+		model?: LLMModel
 	}
 }
+
 export type ChatMessage = ChatUserMessage | ChatAssistantMessage
 
 export type SerializedChatUserMessage = {
@@ -38,15 +40,17 @@ export type SerializedChatUserMessage = {
 		similarity: number
 	})[]
 }
+
 export type SerializedChatAssistantMessage = {
 	role: 'assistant'
 	content: string
 	id: string
 	metadata?: {
 		usage?: ResponseUsage
-		model?: CustomLLMModel
+		model?: LLMModel
 	}
 }
+
 export type SerializedChatMessage =
 	| SerializedChatUserMessage
 	| SerializedChatAssistantMessage
