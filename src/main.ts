@@ -32,6 +32,8 @@ export default class InfioPlugin extends Plugin {
 	settings: InfioSettings
 	settingTab: InfioSettingTab
 	settingsListeners: ((newSettings: InfioSettings) => void)[] = []
+	private activeLeafChangeUnloadFn: (() => void) | null = null
+	private metadataCacheUnloadFn: (() => void) | null = null
 	initChatProps?: ChatProps
 	dbManager: DBManager | null = null
 	ragEngine: RAGEngine | null = null
@@ -100,22 +102,26 @@ export default class InfioPlugin extends Plugin {
 			}
 		});
 
-		this.app.workspace.on("active-leaf-change", (leaf) => {
-			if (leaf?.view instanceof MarkdownView) {
-				// @ts-expect-error, not typed
-				const editorView = leaf.view.editor.cm as EditorView;
-				eventListener.onViewUpdate(editorView);
-				if (leaf.view.file) {
-					eventListener.handleFileChange(leaf.view.file);
+		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", (leaf) => {
+				if (leaf?.view instanceof MarkdownView) {
+					// @ts-expect-error, not typed
+					const editorView = leaf.view.editor.cm as EditorView;
+					eventListener.onViewUpdate(editorView);
+					if (leaf.view.file) {
+						eventListener.handleFileChange(leaf.view.file);
+					}
 				}
-			}
-		});
+			})
+		);
 
-		this.app.metadataCache.on("changed", (file: TFile) => {
-			if (file) {
-				eventListener.handleFileChange(file);
-			}
-		});
+		this.registerEvent(
+			this.app.metadataCache.on("changed", (file: TFile) => {
+				if (file) {
+					eventListener.handleFileChange(file);
+				}
+			})
+		);
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({

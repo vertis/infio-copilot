@@ -1107,7 +1107,7 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
   margin-top: 20px;
 }
 
-.infio-provider {
+.infio-llm-setting-provider {
   margin-top: 20px;
 }
 
@@ -1176,7 +1176,7 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
   padding-left: var(--size-4-1);
 }
 
-.iinfio-llm-setting-divider {
+.infio-llm-setting-divider {
   margin-top: 14px;
 }
 

@@ -127,14 +127,14 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 	};
 
 	return (
-		<div className="infio-provider">
+		<div className="infio-llm-setting-provider">
 			<DropdownComponent
 				name="API Provider:"
 				value={currProvider}
 				options={PROVIDERS}
 				onChange={updateProvider}
 			/>
-			<div className="iinfio-llm-setting-divider"></div>
+			<div className="infio-llm-setting-divider"></div>
 			<TextComponent
 				name={currProvider + " API Key:"}
 				placeholder="Enter your API key"
@@ -142,7 +142,7 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 				onChange={updateProviderApiKey}
 				type="password"
 			/>
-			<div className="iinfio-llm-setting-divider"></div>
+			<div className="infio-llm-setting-divider"></div>
 			<ToggleComponent
 				name="Use custom base URL"
 				value={providerSetting.useCustomUrl || false}
@@ -156,22 +156,22 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 				/>
 			)}
 
-			<div className="iinfio-llm-setting-divider"></div>
-			<div className="iinfio-llm-setting-divider"></div>
+			<div className="infio-llm-setting-divider"></div>
+			<div className="infio-llm-setting-divider"></div>
 			<ComboBoxComponent
 				name="Chat Model:"
 				provider={settings.chatModelProvider || currProvider}
 				modelId={settings.chatModelId}
 				updateModel={updateChatModelId}
 			/>
-			<div className="iinfio-llm-setting-divider"></div>
+			<div className="infio-llm-setting-divider"></div>
 			<ComboBoxComponent
-				name="Apply Model:"
+				name="Autocomplete Model:"
 				provider={settings.applyModelProvider || currProvider}
 				modelId={settings.applyModelId}
 				updateModel={updateApplyModelId}
 			/>
-			<div className="iinfio-llm-setting-divider"></div>
+			<div className="infio-llm-setting-divider"></div>
 			<ComboBoxComponent
 				name="Embedding Model:"
 				provider={settings.embeddingModelProvider || ApiProvider.Google}
@@ -179,6 +179,8 @@ const ProviderSettings: React.FC<ProviderSettingsProps> = ({ settings, setSettin
 				isEmbedding={true}
 				updateModel={updateEmbeddingModelId}
 			/>
+			<div className="infio-llm-setting-divider"></div>
+			<div className="infio-llm-setting-divider"></div>
 		</div>
 	);
 };
