@@ -2,6 +2,8 @@
 
 **Infio-Copilot is a Cursor-inspired AI assistant for Obsidian that offers smart autocomplete and interactive chat with your selected notes**
 
+[中文文档](README_zh-CN.md)
+
 ## Features
 
 ### Chat & Edit Flow
