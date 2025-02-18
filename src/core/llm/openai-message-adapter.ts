@@ -121,7 +121,8 @@ export class OpenAIMessageAdapter {
       choices: response.choices.map((choice) => ({
         finish_reason: choice.finish_reason,
         message: {
-          content: choice.message.content,
+					content: choice.message.content,
+					reasoning_content: choice.message.reasoning_content,
           role: choice.message.role,
         },
       })),
@@ -135,13 +136,14 @@ export class OpenAIMessageAdapter {
 
   static parseStreamingResponseChunk(
     chunk: ChatCompletionChunk,
-  ): LLMResponseStreaming {
+	): LLMResponseStreaming {
     return {
       id: chunk.id,
       choices: chunk.choices.map((choice) => ({
         finish_reason: choice.finish_reason ?? null,
         delta: {
           content: choice.delta.content ?? null,
+          reasoning_content: choice.delta.reasoning_content ?? null,
           role: choice.delta.role,
         },
       })),

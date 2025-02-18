@@ -622,6 +622,19 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
   border-radius: var(--radius-s);
 }
 
+.infio-chat-code-block.infio-reasoning-block {
+  max-height: 222px;
+  overflow: hidden;
+	margin-top: 22px;
+	margin-bottom: 22px;
+}
+
+.infio-reasoning-content-wrapper {
+  height: calc(100% - 28px);
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
 .infio-chat-code-block code {
   padding: 0;
 }
@@ -1776,4 +1789,12 @@ button.infio-chat-input-model-select {
 .infio-utils-lexical-menu-container {
   position: absolute;
   display: block;
+}
+
+.infio-chat-empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }

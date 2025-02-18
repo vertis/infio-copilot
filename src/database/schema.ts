@@ -125,6 +125,7 @@ export type Message = {
 	conversationId: string // uuid
 	role: 'user' | 'assistant'
 	content: string | null
+	reasoningContent?: string | null
 	promptContent?: string | null
 	metadata?: string | null
 	mentionables?: string | null
@@ -139,13 +140,19 @@ export type InsertConversation = {
 	updatedAt?: Date
 }
 
-export type SelectConversation = Conversation
+export type SelectConversation = {
+	id: string // uuid
+	title: string
+	created_at: Date
+	updated_at: Date
+}
 
 export type InsertMessage = {
 	id: string
 	conversationId: string
 	role: 'user' | 'assistant'
 	content: string | null
+	reasoningContent?: string | null
 	promptContent?: string | null
 	metadata?: string | null
 	mentionables?: string | null
@@ -153,4 +160,15 @@ export type InsertMessage = {
 	createdAt?: Date
 }
 
-export type SelectMessage = Message
+export type SelectMessage = {
+	id: string // uuid
+	conversation_id: string // uuid
+	role: 'user' | 'assistant'
+	content: string | null
+	reasoning_content?: string | null
+	prompt_content?: string | null
+	metadata?: string | null
+	mentionables?: string | null
+	similarity_search_results?: string | null
+	created_at: Date
+}

@@ -8,10 +8,6 @@ import {
   SelectMessage,
 } from '../../schema'
 
-type QueryResult<T> = {
-  rows: T[]
-}
-
 export class ConversationRepository {
   private app: App
   private db: PGliteInterface
@@ -32,31 +28,32 @@ export class ConversationRepository {
         conversation.createdAt || new Date(),
         conversation.updatedAt || new Date()
       ]
-    ) as QueryResult<SelectConversation>
+    )
     return result.rows[0]
   }
 
   async createMessage(message: InsertMessage): Promise<SelectMessage> {
-    const result = await this.db.query<SelectMessage>(
+		const result = await this.db.query<SelectMessage>(
       `INSERT INTO messages (
-        id, conversation_id, role, content, 
+        id, conversation_id, role, content, reasoning_content,
         prompt_content, metadata, mentionables, 
         similarity_search_results, created_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *`,
       [
         message.id,
         message.conversationId,
         message.role,
         message.content,
+        message.reasoningContent,
         message.promptContent,
         message.metadata,
         message.mentionables,
         message.similaritySearchResults,
         message.createdAt || new Date()
       ]
-    ) as QueryResult<SelectMessage>
+    )
     return result.rows[0]
   }
 
@@ -64,30 +61,30 @@ export class ConversationRepository {
     const result = await this.db.query<SelectConversation>(
       `SELECT * FROM conversations WHERE id = $1 LIMIT 1`,
       [id]
-    ) as QueryResult<SelectConversation>
+    )
     return result.rows[0]
   }
 
-  async findMessagesByConversationId(conversationId: string): Promise<SelectMessage[]> {
+	async findMessagesByConversationId(conversationId: string): Promise<SelectMessage[]> {
     const result = await this.db.query<SelectMessage>(
       `SELECT * FROM messages 
        WHERE conversation_id = $1 
        ORDER BY created_at`,
       [conversationId]
-    ) as QueryResult<SelectMessage>
+		)
     return result.rows
   }
 
   async findAll(): Promise<SelectConversation[]> {
     const result = await this.db.query<SelectConversation>(
-      `SELECT * FROM conversations ORDER BY updated_at DESC`
-    ) as QueryResult<SelectConversation>
+      `SELECT * FROM conversations ORDER BY created_at DESC`
+    )
     return result.rows
   }
 
   async update(id: string, data: Partial<InsertConversation>): Promise<SelectConversation> {
     const setClauses: string[] = []
-    const values: any[] = []
+    const values: (string | Date)[] = []
     let paramIndex = 1
 
     if (data.title !== undefined) {
@@ -110,7 +107,7 @@ export class ConversationRepository {
        WHERE id = $${paramIndex}
        RETURNING *`,
       values
-    ) as QueryResult<SelectConversation>
+    )
     return result.rows[0]
   }
 
@@ -118,7 +115,7 @@ export class ConversationRepository {
     const result = await this.db.query<SelectConversation>(
       `DELETE FROM conversations WHERE id = $1 RETURNING *`,
       [id]
-    ) as QueryResult<SelectConversation>
+    )
     return result.rows.length > 0
   }
 

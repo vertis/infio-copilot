@@ -11,13 +11,17 @@ function SyntaxHighlighterWrapper({
 	hasFilename,
 	wrapLines,
 	children,
+	isOpen = true,
 }: {
 	isDarkMode: boolean
 	language: string | undefined
 	hasFilename: boolean
 	wrapLines: boolean
 	children: string
+	isOpen?: boolean
 }) {
+	if (!isOpen) return null;
+	
 	return (
 		<SyntaxHighlighter
 			language={language}

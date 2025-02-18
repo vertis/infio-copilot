@@ -39,7 +39,8 @@ type NonStreamingChoice = {
 type StreamingChoice = {
   finish_reason: string | null
   delta: {
-    content: string | null
+		content: string | null
+		reasoning_content: string | null
     role?: string
   }
   error?: Error

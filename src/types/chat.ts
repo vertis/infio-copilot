@@ -21,6 +21,7 @@ export type ChatUserMessage = {
 export type ChatAssistantMessage = {
 	role: 'assistant'
 	content: string
+	reasoningContent: string
 	id: string
 	metadata?: {
 		usage?: ResponseUsage
@@ -44,6 +45,7 @@ export type SerializedChatUserMessage = {
 export type SerializedChatAssistantMessage = {
 	role: 'assistant'
 	content: string
+	reasoningContent: string
 	id: string
 	metadata?: {
 		usage?: ResponseUsage

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useApp } from '../contexts/AppContext'
 import { useDatabase } from '../contexts/DatabaseContext'
 import { DBManager } from '../database/database-manager'
 import { ChatConversationMeta, ChatMessage } from '../types/chat'
@@ -17,7 +16,6 @@ type UseChatHistory = {
 }
 
 export function useChatHistory(): UseChatHistory {
-  const app = useApp()
   const { getDatabaseManager } = useDatabase()
 
   // 这里更新有点繁琐, 但是能保持 chatList 实时更新
@@ -29,7 +27,9 @@ export function useChatHistory(): UseChatHistory {
 
   const fetchChatList = useCallback(async () => {
     const dbManager = await getManager()
-    dbManager.getConversationManager().getAllConversations(setChatList)
+    dbManager.getConversationManager().getAllConversations((conversations) => {
+      setChatList(conversations)
+    })
   }, [getManager])
 
   useEffect(() => {

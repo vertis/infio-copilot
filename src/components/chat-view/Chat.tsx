@@ -44,10 +44,12 @@ import AssistantMessageActions from './AssistantMessageActions'
 import PromptInputWithActions, { ChatUserInputRef } from './chat-input/PromptInputWithActions'
 import { editorStateToPlainText } from './chat-input/utils/editor-state-to-plain-text'
 import { ChatHistory } from './ChatHistory'
+import MarkdownReasoningBlock from './MarkdownReasoningBlock'
 import QueryProgress, { QueryProgressState } from './QueryProgress'
 import ReactMarkdown from './ReactMarkdown'
 import ShortcutInfo from './ShortcutInfo'
 import SimilaritySearchResults from './SimilaritySearchResults'
+
 // Add an empty line here
 const getNewInputMessage = (app: App): ChatUserMessage => {
 	return {
@@ -242,6 +244,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 				{
 					role: 'assistant',
 					content: '',
+					reasoningContent: '',
 					id: responseMessageId,
 					metadata: {
 						usage: undefined,
@@ -269,6 +272,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 					{
 						role: 'assistant',
 						content: '',
+						reasoningContent: '',
 						id: responseMessageId,
 						metadata: {
 							usage: undefined,
@@ -290,12 +294,14 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 
 				for await (const chunk of stream) {
 					const content = chunk.choices[0]?.delta?.content ?? ''
+					const reasoning_content = chunk.choices[0]?.delta?.reasoning_content ?? ''
 					setChatMessages((prevChatHistory) =>
 						prevChatHistory.map((message) =>
 							message.role === 'assistant' && message.id === responseMessageId
 								? {
 									...message,
 									content: message.content + content,
+									reasoningContent: message.reasoningContent + reasoning_content,
 									metadata: {
 										...message.metadata,
 										usage: chunk.usage ?? message.metadata?.usage, // Keep existing usage if chunk has no usage data
@@ -584,13 +590,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 				{
 					// If the chat is empty, show a message to start a new chat
 					chatMessages.length === 0 && (
-						<div style={{
-							display: 'flex',
-							justifyContent: 'center',
-							alignItems: 'center',
-							height: '100%',
-							width: '100%'
-						}}>
+						<div className="infio-chat-empty-state">
 							<ShortcutInfo />
 						</div>
 					)
@@ -638,6 +638,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						</div>
 					) : (
 						<div key={message.id} className="infio-chat-messages-assistant">
+							<MarkdownReasoningBlock reasoningContent={message.reasoningContent} />
 							<ReactMarkdownItem
 								handleApply={handleApply}
 								isApplying={applyMutation.isPending}
