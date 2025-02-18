@@ -1,5 +1,5 @@
 export type { FewShotExample } from "./shared";
-export { DEFAULT_AUTOCOMPLETE_SETTINGS as DEFAULT_SETTINGS, settingsSchema, pluginDataSchema } from "./v1/v1";
+export { DEFAULT_SETTINGS as DEFAULT_SETTINGS, settingsSchema, pluginDataSchema } from "./v1/v1";
 export type { Settings, Trigger, PluginData } from "./v1/v1";
 export {
 	MAX_DELAY, MAX_FREQUENCY_PENALTY,

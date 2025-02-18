@@ -9,7 +9,7 @@ import {
 	settingsSchema as settingsSchemaV0
 } from "./v0/v0";
 import {
-	DEFAULT_AUTOCOMPLETE_SETTINGS as DEFAULT_SETTINGS_V1,
+	DEFAULT_SETTINGS as DEFAULT_SETTINGS_V1,
 	Settings as SettingsV1,
 	settingsSchema as settingsSchemaV1
 } from "./v1/v1";

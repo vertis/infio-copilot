@@ -1,7 +1,7 @@
 import { DEFAULT_MODELS } from '../constants'
-import { DEFAULT_AUTOCOMPLETE_SETTINGS } from '../settings/versions/v1/v1'
+import { DEFAULT_SETTINGS } from '../settings/versions/v1/v1'
 
-import { SETTINGS_SCHEMA_VERSION, parseInfioSettings } from './settings'
+import { parseInfioSettings } from './settings'
 
 describe('parseSmartCopilotSettings', () => {
 	it('should return default values for empty input', () => {
@@ -15,7 +15,25 @@ describe('parseSmartCopilotSettings', () => {
 			geminiApiKey: '',
 			groqApiKey: '',
 			deepseekApiKey: '',
-			chatModelId: 'deepseek-chat',
+			chatModelId: '',
+			chatModelProvider: 'OpenRouter',
+			applyModelId: '',
+			applyModelProvider: 'OpenRouter',
+			embeddingModelId: '',
+			embeddingModelProvider: 'Google',
+			defaultProvider: 'OpenRouter',
+			alibabaQwenProvider: {
+				name: 'AlibabaQwen',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			anthropicProvider: {
+				name: 'Anthropic',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
 			ollamaChatModel: {
 				baseUrl: '',
 				model: '',
@@ -25,7 +43,6 @@ describe('parseSmartCopilotSettings', () => {
 				apiKey: '',
 				model: '',
 			},
-			applyModelId: 'deepseek-chat',
 			ollamaApplyModel: {
 				baseUrl: '',
 				model: '',
@@ -35,7 +52,6 @@ describe('parseSmartCopilotSettings', () => {
 				apiKey: '',
 				model: '',
 			},
-			embeddingModelId: 'text-embedding-004',
 			ollamaEmbeddingModel: {
 				baseUrl: '',
 				model: '',
@@ -55,7 +71,7 @@ describe('parseSmartCopilotSettings', () => {
 			azureOAIApiSettings: '',
 			openAIApiSettings: '',
 			ollamaApiSettings: '',
-			triggers: DEFAULT_AUTOCOMPLETE_SETTINGS.triggers,
+			triggers: DEFAULT_SETTINGS.triggers,
 			delay: 500,
 			modelOptions: {
 				temperature: 1,
@@ -64,8 +80,8 @@ describe('parseSmartCopilotSettings', () => {
 				presence_penalty: 0,
 				max_tokens: 800,
 			},
-			systemMessage: DEFAULT_AUTOCOMPLETE_SETTINGS.systemMessage,
-			fewShotExamples: DEFAULT_AUTOCOMPLETE_SETTINGS.fewShotExamples,
+			systemMessage: DEFAULT_SETTINGS.systemMessage,
+			fewShotExamples: DEFAULT_SETTINGS.fewShotExamples,
 			userMessageTemplate: '{{prefix}}<mask/>{{suffix}}',
 			chainOfThoughRemovalRegex: '(.|\\n)*ANSWER:',
 			dontIncludeDataviews: true,
@@ -77,6 +93,60 @@ describe('parseSmartCopilotSettings', () => {
 			ignoredTags: '',
 			cacheSuggestions: true,
 			debugMode: false,
+			deepseekProvider: {
+				name: 'DeepSeek',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			googleProvider: {
+				name: 'Google',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			groqProvider: {
+				name: 'Groq',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			infioProvider: {
+				name: 'Infio',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			ollamaProvider: {
+				name: 'Ollama',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			openaiProvider: {
+				name: 'OpenAI',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			openaicompatibleProvider: {
+				name: 'OpenAICompatible',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: true,
+			},
+			openrouterProvider: {
+				name: 'OpenRouter',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			siliconflowProvider: {
+				name: 'SiliconFlow',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
 		})
 	})
 })
@@ -110,7 +180,25 @@ describe('settings migration', () => {
 			geminiApiKey: '',
 			groqApiKey: '',
 			deepseekApiKey: '',
-			chatModelId: 'deepseek-chat',
+			chatModelId: '',
+			chatModelProvider: 'OpenRouter',
+			applyModelId: '',
+			applyModelProvider: 'OpenRouter',
+			embeddingModelId: '',
+			embeddingModelProvider: 'Google',
+			defaultProvider: 'OpenRouter',
+			alibabaQwenProvider: {
+				name: 'AlibabaQwen',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			anthropicProvider: {
+				name: 'Anthropic',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
 			ollamaChatModel: {
 				baseUrl: '',
 				model: '',
@@ -120,7 +208,6 @@ describe('settings migration', () => {
 				apiKey: '',
 				model: '',
 			},
-			applyModelId: 'deepseek-chat',
 			ollamaApplyModel: {
 				baseUrl: '',
 				model: '',
@@ -130,7 +217,6 @@ describe('settings migration', () => {
 				apiKey: '',
 				model: '',
 			},
-			embeddingModelId: 'text-embedding-004',
 			ollamaEmbeddingModel: {
 				baseUrl: '',
 				model: '',
@@ -150,7 +236,7 @@ describe('settings migration', () => {
 			azureOAIApiSettings: '',
 			openAIApiSettings: '',
 			ollamaApiSettings: '',
-			triggers: DEFAULT_AUTOCOMPLETE_SETTINGS.triggers,
+			triggers: DEFAULT_SETTINGS.triggers,
 			delay: 500,
 			modelOptions: {
 				temperature: 1,
@@ -159,8 +245,8 @@ describe('settings migration', () => {
 				presence_penalty: 0,
 				max_tokens: 800,
 			},
-			systemMessage: DEFAULT_AUTOCOMPLETE_SETTINGS.systemMessage,
-			fewShotExamples: DEFAULT_AUTOCOMPLETE_SETTINGS.fewShotExamples,
+			systemMessage: DEFAULT_SETTINGS.systemMessage,
+			fewShotExamples: DEFAULT_SETTINGS.fewShotExamples,
 			userMessageTemplate: '{{prefix}}<mask/>{{suffix}}',
 			chainOfThoughRemovalRegex: '(.|\\n)*ANSWER:',
 			dontIncludeDataviews: true,
@@ -172,6 +258,60 @@ describe('settings migration', () => {
 			ignoredTags: '',
 			cacheSuggestions: true,
 			debugMode: false,
+			deepseekProvider: {
+				name: 'DeepSeek',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			googleProvider: {
+				name: 'Google',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			groqProvider: {
+				name: 'Groq',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			infioProvider: {
+				name: 'Infio',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			ollamaProvider: {
+				name: 'Ollama',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			openaiProvider: {
+				name: 'OpenAI',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			openaicompatibleProvider: {
+				name: 'OpenAICompatible',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: true,
+			},
+			openrouterProvider: {
+				name: 'OpenRouter',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
+			siliconflowProvider: {
+				name: 'SiliconFlow',
+				apiKey: '',
+				baseUrl: '',
+				useCustomUrl: false,
+			},
 		})
 	})
 })

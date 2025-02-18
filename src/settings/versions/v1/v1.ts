@@ -95,7 +95,7 @@ export const pluginDataSchema = z.object({
 }).strict();
 
 
-export const DEFAULT_AUTOCOMPLETE_SETTINGS = {
+export const DEFAULT_SETTINGS = {
 	// version: "1",
 
 	// General settings

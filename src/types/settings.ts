@@ -9,11 +9,11 @@ import {
 	fewShotExampleSchema,
 	modelOptionsSchema
 } from '../settings/versions/shared';
-import { DEFAULT_AUTOCOMPLETE_SETTINGS } from "../settings/versions/v1/v1";
+import { DEFAULT_SETTINGS } from "../settings/versions/v1/v1";
 import { ApiProvider } from '../types/llm/model';
 import { isRegexValid, isValidIgnorePattern } from '../utils/auto-complete';
 
-export const SETTINGS_SCHEMA_VERSION = 0.1
+export const SETTINGS_SCHEMA_VERSION = 0.4
 
 const InfioProviderSchema = z.object({
 	name: z.literal('Infio'),
@@ -328,29 +328,11 @@ type Migration = {
 
 const MIGRATIONS: Migration[] = [
 	{
-		fromVersion: 0,
-		toVersion: 1,
+		fromVersion: 0.1,
+		toVersion: 0.4,
 		migrate: (data) => {
 			const newData = { ...data }
-			if (
-				'ollamaBaseUrl' in newData &&
-				typeof newData.ollamaBaseUrl === 'string'
-			) {
-				newData.ollamaChatModel = {
-					baseUrl: newData.ollamaBaseUrl,
-					model: '',
-				}
-				newData.ollamaApplyModel = {
-					baseUrl: newData.ollamaBaseUrl,
-					model: '',
-				}
-				newData.ollamaEmbeddingModel = {
-					baseUrl: newData.ollamaBaseUrl,
-					model: '',
-				}
-				delete newData.ollamaBaseUrl
-			}
-
+			newData.version = SETTINGS_SCHEMA_VERSION
 			return newData
 		},
 	},
@@ -383,7 +365,6 @@ export function parseInfioSettings(data: unknown): InfioSettings {
 		const migratedData = migrateSettings(data as Record<string, unknown>)
 		return InfioSettingsSchema.parse(migratedData)
 	} catch (error) {
-		// console.warn('Invalid settings provided, using defaults:', error)
-		return InfioSettingsSchema.parse({ ...DEFAULT_AUTOCOMPLETE_SETTINGS })
+		return InfioSettingsSchema.parse({ ...DEFAULT_SETTINGS })
 	}
 }
