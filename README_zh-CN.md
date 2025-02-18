@@ -4,6 +4,11 @@
 
 [English Version](README.md)
 
+[Chat with me on Twitter](https://x.com/buyiyouxi)
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/felixduan)
+
+
 ## 功能特点
 
 ### 对话与编辑流程

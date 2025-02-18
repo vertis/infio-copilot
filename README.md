@@ -4,6 +4,10 @@
 
 [中文文档](README_zh-CN.md)
 
+[Chat with me on Twitter](https://x.com/buyiyouxi)
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/felixduan)
+
 ## Features
 
 ### Chat & Edit Flow
