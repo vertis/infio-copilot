@@ -9,18 +9,21 @@
 ### Chat & Edit Flow
 
 Get instant AI assistance and apply suggested improvements with a single click, all within Obsidian
+
 ![chat-with-select](asserts/chat-with-select.gif)
 
 
 ### Autocomplete
 
 Receive context-aware writing suggestions as you type
+
 ![autocomplte](asserts/autocomplete.gif)
 
 
 ### Inline Editing
 
 Edit your notes directly within the current file
+
 ![inline-edit](asserts/edit-inline.gif)
 
 

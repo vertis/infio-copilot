@@ -9,18 +9,21 @@
 ### 对话与编辑流程
 
 在 Obsidian 中获取即时 AI 辅助，并一键应用建议的改进
+
 ![chat-with-select](asserts/chat-with-select.gif)
 
 
 ### 自动补全
 
 在您输入时获取上下文感知的写作建议
+
 ![autocomplte](asserts/autocomplete.gif)
 
 
 ### 内联编辑
 
 直接在当前文件中编辑您的笔记
+
 ![inline-edit](asserts/edit-inline.gif)
 
 
