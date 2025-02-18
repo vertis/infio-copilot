@@ -1,4 +1,18 @@
 releases:
+  - version: "0.0.4"
+    features:
+      - "Added new settings components for better organization"
+      - "Implemented new API utilities for improved service integration"
+      - "Added MarkdownReasoningBlock component for chat view"
+    improvements:
+      - "Restructured settings page for better user experience"
+      - "Enhanced LLM integration with multiple providers"
+      - "Updated chat view components and styling"
+      - "Improved conversation management system"
+      - "Upgraded package dependencies"
+    other:
+      - "Refactored settings structure for better maintainability"
+
   - version: "0.0.3"
     improvements:
       - "Enhanced code style and formatting with ESLint auto-fix"
