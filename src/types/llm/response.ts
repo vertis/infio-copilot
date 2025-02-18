@@ -30,7 +30,8 @@ export type ResponseUsage = {
 type NonStreamingChoice = {
   finish_reason: string | null // Depends on the model. Ex: 'stop' | 'length' | 'content_filter' | 'tool_calls' | 'function_call'
   message: {
-    content: string | null
+		content: string | null
+		reasoning_content?: string | null
     role: string
   }
   error?: Error
@@ -40,7 +41,7 @@ type StreamingChoice = {
   finish_reason: string | null
   delta: {
 		content: string | null
-		reasoning_content: string | null
+		reasoning_content?: string | null
     role?: string
   }
   error?: Error

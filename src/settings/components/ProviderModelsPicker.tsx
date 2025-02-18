@@ -248,7 +248,7 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 							<select
 								className="infio-llm-setting-provider-switch"
 								value={modelProvider}
-								onChange={(e) => setModelProvider(e.target.value)}
+								onChange={(e) => setModelProvider(e.target.value as ApiProvider)}
 							>
 								{providers.map((provider) => (
 									<option
