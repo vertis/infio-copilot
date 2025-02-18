@@ -7,7 +7,7 @@ describe('parseSmartCopilotSettings', () => {
 	it('should return default values for empty input', () => {
 		const result = parseInfioSettings({})
 		expect(result).toEqual({
-			version: 0.1,
+			version: 0.4,
 			activeModels: DEFAULT_MODELS,
 			infioApiKey: '',
 			openAIApiKey: '',
@@ -172,7 +172,7 @@ describe('settings migration', () => {
 
 		const result = parseInfioSettings(oldSettings)
 		expect(result).toEqual({
-			version: 0.1,
+			version: 0.4,
 			activeModels: DEFAULT_MODELS,
 			infioApiKey: '',
 			openAIApiKey: '',
