@@ -1,7 +1,7 @@
 import { Change, diffLines } from 'diff'
 import { CheckIcon, X } from 'lucide-react'
-import { getIcon } from 'obsidian'
-import { useState } from 'react'
+import { Platform, getIcon } from 'obsidian'
+import { useEffect, useState } from 'react'
 
 import { ApplyViewState } from '../../ApplyView'
 import { useApp } from '../../contexts/AppContext'
@@ -16,6 +16,14 @@ export default function ApplyViewRoot({
   const acceptIcon = getIcon('check')
   const rejectIcon = getIcon('x')
   const excludeIcon = getIcon('x')
+
+  const getShortcutText = (shortcut: 'accept' | 'reject') => {
+    const isMac = Platform.isMacOS
+    if (shortcut === 'accept') {
+      return isMac ? '(⌘⏎)' : '(Ctrl+⏎)'
+    }
+    return isMac ? '(⌘⌫)' : '(Ctrl+⌫)'
+  }
 
   const app = useApp()
 
@@ -64,6 +72,30 @@ export default function ApplyViewRoot({
     })
   }
 
+  const handleKeyDown = (event: KeyboardEvent) => {
+    const modifierKey = Platform.isMacOS ? event.metaKey : event.ctrlKey;
+    if (modifierKey) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        event.stopPropagation();
+        handleAccept();
+      } else if (event.key === 'Backspace') {
+        event.preventDefault();
+        event.stopPropagation();
+        handleReject();
+      }
+    }
+  }
+
+  // 在组件挂载时添加事件监听器，在卸载时移除
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => handleKeyDown(e);
+    window.addEventListener('keydown', handler, true);
+    return () => {
+      window.removeEventListener('keydown', handler, true);
+    }
+  }, [handleAccept, handleReject]) // 添加handleAccept和handleReject作为依赖项
+
   return (
     <div id="infio-apply-view">
       <div className="view-header">
@@ -81,7 +113,7 @@ export default function ApplyViewRoot({
               onClick={handleAccept}
             >
               {acceptIcon && <CheckIcon size={14} />}
-              Accept
+              Accept {getShortcutText('accept')}
             </button>
             <button
               className="clickable-icon view-action infio-reject-button"
@@ -89,7 +121,7 @@ export default function ApplyViewRoot({
               onClick={handleReject}
             >
               {rejectIcon && <X size={14} />}
-              Reject
+              Reject {getShortcutText('reject')}
             </button>
           </div>
         </div>

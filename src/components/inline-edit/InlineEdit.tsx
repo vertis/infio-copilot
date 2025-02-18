@@ -1,6 +1,6 @@
-import { MarkdownView, Plugin } from 'obsidian';
+import { MarkdownView, Plugin, Platform } from 'obsidian';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-
+import { CornerDownLeft } from 'lucide-react';
 import { APPLY_VIEW_TYPE } from '../../constants';
 import LLMManager from '../../core/llm/manager';
 import { InfioSettings } from '../../types/settings';
@@ -20,24 +20,41 @@ type InlineEditProps = {
 type InputAreaProps = {
 	value: string;
 	onChange: (value: string) => void;
+	handleSubmit: () => void;
+	handleClose: () => void;
 }
 
-const InputArea: React.FC<InputAreaProps> = ({ value, onChange }) => {
+const InputArea: React.FC<InputAreaProps> = ({ value, onChange, handleSubmit, handleClose }) => {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	useEffect(() => {
-		// 组件挂载后自动聚焦到 textarea
 		textareaRef.current?.focus();
 	}, []);
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+		if (e.key === 'Enter') {
+			if (e.shiftKey) {
+				// Shift + Enter: 允许换行，使用默认行为
+				return;
+			}
+			// 普通 Enter: 阻止默认行为并触发提交
+			e.preventDefault();
+			handleSubmit();
+		} else if (e.key === 'Escape') {
+			// 当按下 Esc 键时关闭编辑器
+			handleClose();
+		}
+	};
 
 	return (
 		<div className="infio-ai-block-input-wrapper">
 			<textarea
 				ref={textareaRef}
 				className="infio-ai-block-content"
-				placeholder="Enter instruction"
+				placeholder="Input instruction, Enter to submit, Esc to close"
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
+				onKeyDown={handleKeyDown}
 			/>
 		</div>
 	);
@@ -91,7 +108,12 @@ const ControlArea: React.FC<ControlAreaProps> = ({
 				onClick={onSubmit}
 				disabled={isSubmitting}
 			>
-				{isSubmitting ? "Submitting..." : "Submit"}
+				{isSubmitting ? "submitting..." : (
+					<>
+						submit 
+						<CornerDownLeft size={11} className="infio-ai-block-submit-icon" />
+					</>
+				)}
 			</button>
 		</div>);
 };
@@ -251,9 +273,8 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
 	return (
 		<div className="infio-ai-block-container"
 			id="infio-ai-block-container"
-			style={{ backgroundColor: 'var(--background-secondary)' }}
 		>
-			<InputArea value={instruction} onChange={setInstruction} />
+			<InputArea value={instruction} onChange={setInstruction} handleSubmit={handleSubmit} handleClose={handleClose} />
 			<button className="infio-ai-block-close-button" onClick={handleClose}>
 				<svg
 					width="14"
