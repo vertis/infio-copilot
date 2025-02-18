@@ -49,6 +49,9 @@ Leverage the power of AI to interact with your entire Obsidian vault, gaining in
 3. Search for "Infio Copilot" and click Install
 4. Enable the plugin in Community plugins
 5. Set up your API key in plugin settings
+   - SiliconFlow : [SiliconFlow API Keys](https://cloud.siliconflow.cn/account/ak)
+   - OpenRouter : [OpenRouter API Keys](https://openrouter.ai/settings/keys)
+	 - Alibaba Bailian : [Bailian API Keys](https://help.aliyun.com/zh/dashscope/developer-reference/activate-dashscope-and-create-an-api-key)
    - DeepSeek : [DeepSeek API Keys](https://platform.deepseek.com/api_keys/)
    - OpenAI : [ChatGPT API Keys](https://platform.openai.com/api-keys)
    - Anthropic : [Claude API Keys](https://console.anthropic.com/settings/keys)
@@ -61,6 +64,8 @@ Leverage the power of AI to interact with your entire Obsidian vault, gaining in
      * Infio Copilot: Infio add selection to chat -> cmd + shift + L
      * Infio Copilot: Infio Inline Edit -> cmd + shift + K
 ![autocomplte](asserts/doc-set-hotkey.png)
+7. If you need to chat with documents, you must configure an embedding model.
+   - Currently, only SiliconFlow, Alibaba, Google, and OpenAI platforms support embedding models.
 
 ## Feedback and Support
 We value your input and want to ensure you can easily share your thoughts and report any issues:

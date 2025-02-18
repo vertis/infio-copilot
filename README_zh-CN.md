@@ -50,6 +50,9 @@
 3. 搜索 "Infio Copilot" 并点击安装
 4. 在社区插件中启用该插件
 5. 在插件设置中配置您的 API 密钥
+   - SiliconFlow : [SiliconFlow API Keys](https://cloud.siliconflow.cn/account/ak)
+   - OpenRouter : [OpenRouter API Keys](https://openrouter.ai/settings/keys)
+	 - Alibaba Bailian : [Bailian API Keys](https://help.aliyun.com/zh/dashscope/developer-reference/activate-dashscope-and-create-an-api-key)
    - DeepSeek：[DeepSeek API Keys](https://platform.deepseek.com/api_keys/)
    - OpenAI：[ChatGPT API Keys](https://platform.openai.com/api-keys)
    - Anthropic：[Claude API Keys](https://console.anthropic.com/settings/keys)
@@ -62,6 +65,8 @@
      * Infio Copilot: Infio add selection to chat -> cmd + shift + L
      * Infio Copilot: Infio Inline Edit -> cmd + shift + K
 ![autocomplte](asserts/doc-set-hotkey.png)
+7. 如果需要 跟文档聊天 , 需要配置 embedding 模型
+	 - 目前之后 SiliconFlow Alibaba Google OpenAI 平台支持嵌入模型
 
 ## 反馈与支持
 我们重视您的意见，并希望确保您能轻松分享想法和报告问题：
