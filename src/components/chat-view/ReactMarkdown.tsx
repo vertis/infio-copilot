@@ -9,6 +9,7 @@ import {
 
 import MarkdownActionBlock from './MarkdownActionBlock'
 import MarkdownReferenceBlock from './MarkdownReferenceBlock'
+import MarkdownReasoningBlock from './MarkdownReasoningBlock'
 
 function ReactMarkdown({
 	onApply,
@@ -36,6 +37,11 @@ function ReactMarkdown({
 					<Markdown key={index} className="infio-markdown">
 						{block.content}
 					</Markdown>
+				) : block.type === 'think' ? (
+					<MarkdownReasoningBlock 
+						key={index}
+						reasoningContent={block.content} 
+					/>
 				) : block.startLine && block.endLine && block.filename && block.action === InfioBlockAction.Reference ? (
 					<MarkdownReferenceBlock
 						key={index}

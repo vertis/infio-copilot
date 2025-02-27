@@ -199,4 +199,104 @@ Some text after without closing tag`,
 		const result = parseinfioBlocks(input)
 		expect(result).toEqual(expected)
 	})
+
+	it('should parse a string with think elements', () => {
+		const input = `Some text before
+<think>
+This is a thought that should be parsed separately.
+It might contain multiple lines of text.
+</think>
+Some text after`
+
+		const expected: ParsedInfioBlock[] = [
+			{ type: 'string', content: 'Some text before\n' },
+			{
+				type: 'think',
+				content: `
+This is a thought that should be parsed separately.
+It might contain multiple lines of text.
+`
+			},
+			{ type: 'string', content: '\nSome text after' },
+		]
+
+		const result = parseinfioBlocks(input)
+		expect(result).toEqual(expected)
+	})
+
+	it('should handle empty think elements', () => {
+		const input = `
+      <think></think>
+    `
+
+		const expected: ParsedInfioBlock[] = [
+			{ type: 'string', content: '\n      ' },
+			{
+				type: 'think',
+				content: '',
+			},
+			{ type: 'string', content: '\n    ' },
+		]
+
+		const result = parseinfioBlocks(input)
+		expect(result).toEqual(expected)
+	})
+
+	it('should handle mixed infio_block and think elements', () => {
+		const input = `Start
+<infio_block language="python" filename="script.py">
+def greet(name):
+    print(f"Hello, {name}!")
+</infio_block>
+Middle
+<think>
+Let me think about this problem...
+I need to consider several approaches.
+</think>
+End`
+
+		const expected: ParsedInfioBlock[] = [
+			{ type: 'string', content: 'Start\n' },
+			{
+				type: 'infio_block',
+				content: `
+def greet(name):
+    print(f"Hello, {name}!")
+`,
+				language: 'python',
+				filename: 'script.py',
+			},
+			{ type: 'string', content: '\nMiddle\n' },
+			{
+				type: 'think',
+				content: `
+Let me think about this problem...
+I need to consider several approaches.
+`
+			},
+			{ type: 'string', content: '\nEnd' },
+		]
+
+		const result = parseinfioBlocks(input)
+		expect(result).toEqual(expected)
+	})
+
+	it('should handle unfinished think with only opening tag', () => {
+		const input = `Start
+<think>
+Some unfinished thought
+without closing tag`
+		const expected: ParsedInfioBlock[] = [
+			{ type: 'string', content: 'Start\n' },
+			{
+				type: 'think',
+				content: `
+Some unfinished thought
+without closing tag`,
+			},
+		]
+
+		const result = parseinfioBlocks(input)
+		expect(result).toEqual(expected)
+	})
 })
