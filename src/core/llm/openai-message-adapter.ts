@@ -122,7 +122,9 @@ export class OpenAIMessageAdapter {
         finish_reason: choice.finish_reason,
         message: {
           content: choice.message.content,
-          reasoning_content: 'reasoning_content' in choice.message ? (choice.message.reasoning_content as string) : null,
+          reasoning_content: 'reasoning_content' in choice.message 
+            ? (choice.message.reasoning_content as string) 
+            : ('reasoning' in choice.message ? (choice.message.reasoning as string) : null),
           role: choice.message.role,
         },
       })),
@@ -143,7 +145,9 @@ export class OpenAIMessageAdapter {
         finish_reason: choice.finish_reason ?? null,
         delta: {
           content: choice.delta.content ?? null,
-          reasoning_content: 'reasoning_content' in choice.delta ? (choice.delta.reasoning_content as string) : null,
+          reasoning_content: 'reasoning_content' in choice.delta 
+            ? (choice.delta.reasoning_content as string) 
+            : ('reasoning' in choice.delta ? (choice.delta.reasoning as string) : null),
           role: choice.delta.role,
         },
       })),
