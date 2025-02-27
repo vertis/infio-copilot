@@ -28,6 +28,11 @@ export class PromptGenerator {
 	private app: App
 	private settings: InfioSettings
 
+	private static readonly EMPTY_ASSISTANT_MESSAGE: RequestMessage = {
+		role: 'assistant',
+		content: '',
+	}
+
 	constructor(
 		getRagEngine: () => Promise<RAGEngine>,
 		app: App,
@@ -106,9 +111,9 @@ export class PromptGenerator {
 
 		const requestMessages: RequestMessage[] = [
 			systemMessage,
-			...(customInstructionMessage ? [customInstructionMessage] : []),
-			...(currentFileMessage ? [currentFileMessage] : []),
-			...compiledMessages.slice(-20).map((message): RequestMessage => {
+			...(customInstructionMessage ? [customInstructionMessage, PromptGenerator.EMPTY_ASSISTANT_MESSAGE] : []),
+			...(currentFileMessage ? [currentFileMessage, PromptGenerator.EMPTY_ASSISTANT_MESSAGE] : []),
+			...compiledMessages.slice(-19).map((message): RequestMessage => {
 				if (message.role === 'user') {
 					return {
 						role: 'user',
