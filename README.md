@@ -38,10 +38,6 @@ Leverage the power of AI to interact with your entire Obsidian vault, gaining in
 ![rag](asserts/rag.gif)
 
 ## Getting Started
-
-Currently, it can only be accessed through BRAT.
- https://infio.app/docs/guide/get-start
-
 > **⚠️ Important: Installer Version Requirement**Infio-Copilot requires a recent version of the Obsidian installer. If you experience issues with the plugin not loading properly:
 >
 > 1. First, try updating Obsidian normally at `Settings > General > Check for updates`.
