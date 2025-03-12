@@ -26,8 +26,8 @@ import OnEnterPlugin from './plugins/on-enter/OnEnterPlugin'
 import OnMutationPlugin, {
 	NodeMutations,
 } from './plugins/on-mutation/OnMutationPlugin'
-import CreateTemplatePopoverPlugin from './plugins/template/CreateTemplatePopoverPlugin'
-import TemplatePlugin from './plugins/template/TemplatePlugin'
+// import CreateTemplatePopoverPlugin from './plugins/template/CreateTemplatePopoverPlugin'
+// import TemplatePlugin from './plugins/template/TemplatePlugin'
 
 export type LexicalContentEditableProps = {
 	editorRef: RefObject<LexicalEditor>
@@ -141,13 +141,13 @@ export default function LexicalContentEditable({
 			<AutoLinkMentionPlugin />
 			<ImagePastePlugin onCreateImageMentionables={onCreateImageMentionables} />
 			<DragDropPaste onCreateImageMentionables={onCreateImageMentionables} />
-			<TemplatePlugin />
-			{plugins?.templatePopover && (
+			{/* <TemplatePlugin /> */}
+			{/* {plugins?.templatePopover && (
 				<CreateTemplatePopoverPlugin
 					anchorElement={plugins.templatePopover.anchorElement}
 					contentEditableElement={contentEditableRef.current}
 				/>
-			)}
+			)} */}
 		</LexicalComposer>
 	)
 }

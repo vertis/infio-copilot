@@ -1,3 +1,5 @@
+import * as path from 'path'
+
 import { useMutation } from '@tanstack/react-query'
 import { CircleStop, History, Plus } from 'lucide-react'
 import { App, Notice } from 'obsidian'
@@ -24,23 +26,31 @@ import {
 	LLMBaseUrlNotSetException,
 	LLMModelNotSetException,
 } from '../../core/llm/exception'
+import { regexSearchFiles } from '../../core/services/ripgrep'
 import { useChatHistory } from '../../hooks/use-chat-history'
+import { ApplyStatus, ToolArgs } from '../../types/apply'
 import { ChatMessage, ChatUserMessage } from '../../types/chat'
 import {
 	MentionableBlock,
 	MentionableBlockData,
 	MentionableCurrentFile,
 } from '../../types/mentionable'
-import { manualApplyChangesToFile } from '../../utils/apply'
+import { ApplyEditToFile, SearchAndReplace } from '../../utils/apply'
+import { listFilesAndFolders } from '../../utils/glob-utils'
 import {
 	getMentionableKey,
 	serializeMentionable,
 } from '../../utils/mentionable'
 import { readTFileContent } from '../../utils/obsidian'
 import { openSettingsModalWithError } from '../../utils/open-settings-modal'
-import { PromptGenerator } from '../../utils/prompt-generator'
+import { PromptGenerator, addLineNumbers } from '../../utils/prompt-generator'
 
-import AssistantMessageActions from './AssistantMessageActions'
+// Simple file reading function that returns a placeholder content for testing
+const readFileContent = (filePath: string): string => {
+	// In a real implementation, this would use filePath to read the actual file
+	return `Content of file: ${filePath}`;
+}
+
 import PromptInputWithActions, { ChatUserInputRef } from './chat-input/PromptInputWithActions'
 import { editorStateToPlainText } from './chat-input/utils/editor-state-to-plain-text'
 import { ChatHistory } from './ChatHistory'
@@ -54,6 +64,7 @@ import SimilaritySearchResults from './SimilaritySearchResults'
 const getNewInputMessage = (app: App): ChatUserMessage => {
 	return {
 		role: 'user',
+		applyStatus: ApplyStatus.Idle,
 		content: null,
 		promptContent: null,
 		id: uuidv4(),
@@ -239,19 +250,6 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 			})
 
 			const responseMessageId = uuidv4()
-			setChatMessages([
-				...newChatHistory,
-				{
-					role: 'assistant',
-					content: '',
-					reasoningContent: '',
-					id: responseMessageId,
-					metadata: {
-						usage: undefined,
-						model: undefined,
-					},
-				},
-			])
 
 			try {
 				const abortController = new AbortController()
@@ -271,6 +269,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 					...compiledMessages,
 					{
 						role: 'assistant',
+						applyStatus: ApplyStatus.Idle,
 						content: '',
 						reasoningContent: '',
 						id: responseMessageId,
@@ -284,6 +283,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 					chatModel,
 					{
 						model: chatModel.modelId,
+						temperature: 0.5,
 						messages: requestMessages,
 						stream: true,
 					},
@@ -348,45 +348,214 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 		submitMutation.mutate({ newChatHistory, useVaultSearch })
 	}
 
-	const applyMutation = useMutation({
-		mutationFn: async ({
-			blockInfo,
-		}: {
-			blockInfo: {
-				content: string
-				filename?: string
-				startLine?: number
-				endLine?: number
-			}
-		}) => {
-			const activeFile = app.workspace.getActiveFile()
-			if (!activeFile) {
-				throw new Error(
-					'No file is currently open to apply changes. Please open a file and try again.',
-				)
-			}
-			const activeFileContent = await readTFileContent(activeFile, app.vault)
+	const applyMutation = useMutation<
+		{
+			type: string;
+			applyMsgId: string;
+			applyStatus: ApplyStatus;
+			returnMsg?: ChatUserMessage
+		},
+		Error,
+		{ applyMsgId: string, toolArgs: ToolArgs }
+	>({
+		mutationFn: async ({ applyMsgId, toolArgs }) => {
+			try {
+				const activeFile = app.workspace.getActiveFile()
+				if (!activeFile) {
+					throw new Error(
+						'No file is currently open to apply changes. Please open a file and try again.',
+					)
+				}
 
-			const updatedFileContent = await manualApplyChangesToFile(
-				blockInfo.content,
-				activeFile,
-				activeFileContent,
-				blockInfo.startLine,
-				blockInfo.endLine
-			)
-			if (!updatedFileContent) {
-				throw new Error('Failed to apply changes')
-			}
+				const activeFileContent = await readTFileContent(activeFile, app.vault)
 
-			await app.workspace.getLeaf(true).setViewState({
-				type: APPLY_VIEW_TYPE,
-				active: true,
-				state: {
-					file: activeFile,
-					originalContent: activeFileContent,
-					newContent: updatedFileContent,
-				} satisfies ApplyViewState,
-			})
+				if (toolArgs.type === 'write_to_file' || toolArgs.type === 'insert_content') {
+					const applyRes = await ApplyEditToFile(
+						activeFile,
+						activeFileContent,
+						toolArgs.content,
+						toolArgs.startLine,
+						toolArgs.endLine
+					)
+					if (!applyRes) {
+						throw new Error('Failed to apply edit changes')
+					}
+					// 返回一个Promise，该Promise会在用户做出选择后解析
+					return new Promise<{ type: string; applyMsgId: string; applyStatus: ApplyStatus; returnMsg?: ChatUserMessage }>((resolve) => {
+						app.workspace.getLeaf(true).setViewState({
+							type: APPLY_VIEW_TYPE,
+							active: true,
+							state: {
+								file: activeFile,
+								originalContent: activeFileContent,
+								newContent: applyRes,
+								onClose: (applied: boolean) => {
+									const applyStatus = applied ? ApplyStatus.Applied : ApplyStatus.Rejected
+									const applyEditContent = applied ? 'Changes successfully applied'
+										: 'User rejected changes'
+									resolve({
+										type: 'write_to_file',
+										applyMsgId,
+										applyStatus,
+										returnMsg: {
+											role: 'user',
+											applyStatus: ApplyStatus.Idle,
+											content: null,
+											promptContent: `[write_to_file for '${toolArgs.filepath}'] Result:\n${applyEditContent}\n`,
+											id: uuidv4(),
+											mentionables: [],
+										}
+									});
+								}
+							} satisfies ApplyViewState,
+						})
+					})
+				} else if (toolArgs.type === 'search_and_replace') {
+					const fileContent = activeFile.path === toolArgs.filepath ? activeFileContent : readFileContent(toolArgs.filepath)
+					const applyRes = await SearchAndReplace(
+						activeFile,
+						fileContent,
+						toolArgs.operations
+					)
+					// 返回一个Promise，该Promise会在用户做出选择后解析
+					return new Promise<{ type: string; applyMsgId: string; applyStatus: ApplyStatus; returnMsg?: ChatUserMessage }>((resolve) => {
+						app.workspace.getLeaf(true).setViewState({
+							type: APPLY_VIEW_TYPE,
+							active: true,
+							state: {
+								file: activeFile,
+								originalContent: activeFileContent,
+								newContent: applyRes,
+								onClose: (applied: boolean) => {
+									const applyStatus = applied ? ApplyStatus.Applied : ApplyStatus.Rejected
+									const applyEditContent = applied ? 'Changes successfully applied'
+										: 'User rejected changes'
+									resolve({
+										type: 'search_and_replace',
+										applyMsgId,
+										applyStatus,
+										returnMsg: {
+											role: 'user',
+											applyStatus: ApplyStatus.Idle,
+											content: null,
+											promptContent: `[search_and_replace for '${toolArgs.filepath}'] Result:\n${applyEditContent}\n`,
+											id: uuidv4(),
+											mentionables: [],
+										}
+									});
+								}
+							} satisfies ApplyViewState,
+						})
+					})
+				} else if (toolArgs.type === 'read_file') {
+					const fileContent = activeFile.path === toolArgs.filepath ? activeFileContent : readFileContent(toolArgs.filepath)
+					const formattedContent = `[read_file for '${toolArgs.filepath}'] Result:\n${addLineNumbers(fileContent)}\n`;
+					return {
+						type: 'read_file',
+						applyMsgId,
+						applyStatus: ApplyStatus.Applied,
+						returnMsg: {
+							role: 'user',
+							applyStatus: ApplyStatus.Idle,
+							content: null,
+							promptContent: formattedContent,
+							id: uuidv4(),
+							mentionables: [],
+						}
+					};
+				} else if (toolArgs.type === 'list_files') {
+					const files = await listFilesAndFolders(app.vault, toolArgs.filepath)
+					const formattedContent = `[list_files for '${toolArgs.filepath}'] Result:\n${files.join('\n')}\n`;
+					return {
+						type: 'list_files',
+						applyMsgId,
+						applyStatus: ApplyStatus.Applied,
+						returnMsg: {
+							role: 'user',
+							applyStatus: ApplyStatus.Idle,
+							content: null,
+							promptContent: formattedContent,
+							id: uuidv4(),
+							mentionables: [],
+						}
+					}
+				} else if (toolArgs.type === 'regex_search_files') {
+					const baseVaultPath = app.vault.adapter.getBasePath()
+					const absolutePath = path.join(baseVaultPath, toolArgs.filepath)
+					console.log("absolutePath", absolutePath)
+					const results = await regexSearchFiles(absolutePath, toolArgs.regex)
+					console.log("results", results)
+					const formattedContent = `[regex_search_files for '${toolArgs.filepath}'] Result:\n${results}\n`;
+					return {
+						type: 'regex_search_files',
+						applyMsgId,
+						applyStatus: ApplyStatus.Applied,
+						returnMsg: {
+							role: 'user',
+							applyStatus: ApplyStatus.Idle,
+							content: null,
+							promptContent: formattedContent,
+							id: uuidv4(),
+							mentionables: [],
+						}
+					}
+				} else if (toolArgs.type === 'semantic_search_files') {
+					const scope_folders = toolArgs.filepath
+						&& toolArgs.filepath !== ''
+						&& toolArgs.filepath !== '.'
+						&& toolArgs.filepath !== '/'
+						? { files: [], folders: [toolArgs.filepath] }
+						: undefined
+					const results = await (await getRAGEngine()).processQuery({
+						query: toolArgs.query,
+						scope: scope_folders,
+					})
+					console.log("results", results)
+					let snippets = results.map(({ path, content, metadata }) => {
+						const contentWithLineNumbers = addLineNumbers(content, metadata.startLine)
+						return `<file_block_content location="${path}#L${metadata.startLine}-${metadata.endLine}">\n${contentWithLineNumbers}\n</file_block_content>`
+					}).join('\n\n')
+					if (snippets.length === 0) {
+						snippets = `No results found for '${toolArgs.query}'`
+					}
+					const formattedContent = `[semantic_search_files for '${toolArgs.filepath}'] Result:\n${snippets}\n`;
+					return {
+						type: 'semantic_search_files',
+						applyMsgId,
+						applyStatus: ApplyStatus.Applied,
+						returnMsg: {
+							role: 'user',
+							applyStatus: ApplyStatus.Idle,
+							content: null,
+							promptContent: formattedContent,
+							id: uuidv4(),
+							mentionables: [],
+						}
+					}
+				}
+			} catch (error) {
+				console.error('Failed to apply changes', error)
+				throw error
+			}
+		},
+		onSuccess: (result) => {
+			if (result.applyMsgId || result.returnMsg) {
+				let newChatMessages = [...chatMessages];
+
+				if (result.applyMsgId) {
+					newChatMessages = newChatMessages.map((message) =>
+						message.role === 'assistant' && message.id === result.applyMsgId ? {
+							...message,
+							applyStatus: result.applyStatus
+						} : message,
+					);
+				}
+				setChatMessages(newChatMessages);
+
+				if (result.returnMsg) {
+					handleSubmit([...newChatMessages, result.returnMsg], false);
+				}
+			}
 		},
 		onError: (error) => {
 			if (
@@ -404,13 +573,8 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 	})
 
 	const handleApply = useCallback(
-		(blockInfo: {
-			content: string
-			filename?: string
-			startLine?: number
-			endLine?: number
-		}) => {
-			applyMutation.mutate({ blockInfo })
+		(applyMsgId: string, toolArgs: ToolArgs) => {
+			applyMutation.mutate({ applyMsgId, toolArgs })
 		},
 		[applyMutation],
 	)
@@ -420,7 +584,6 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
-	// 
 	useEffect(() => {
 		const updateConversationAsync = async () => {
 			try {
@@ -597,8 +760,10 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 				}
 				{chatMessages.map((message, index) =>
 					message.role === 'user' ? (
-						<div key={message.id} className="infio-chat-messages-user">
+						message.content &&
+						<div key={"user-" + message.id} className="infio-chat-messages-user">
 							<PromptInputWithActions
+								key={"input-" + message.id}
 								ref={(ref) => registerChatUserInputRef(message.id, ref)}
 								initialSerializedEditorState={message.content}
 								onSubmit={(content, useVaultSearch) => {
@@ -608,6 +773,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 											...chatMessages.slice(0, index),
 											{
 												role: 'user',
+												applyStatus: ApplyStatus.Idle,
 												content: content,
 												promptContent: null,
 												id: message.id,
@@ -632,20 +798,24 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 							/>
 							{message.similaritySearchResults && (
 								<SimilaritySearchResults
+									key={"similarity-search-" + message.id}
 									similaritySearchResults={message.similaritySearchResults}
 								/>
 							)}
 						</div>
 					) : (
-						<div key={message.id} className="infio-chat-messages-assistant">
-							<MarkdownReasoningBlock reasoningContent={message.reasoningContent} />
+						<div key={"assistant-" + message.id} className="infio-chat-messages-assistant">
+							<MarkdownReasoningBlock
+								key={"reasoning-" + message.id}
+								reasoningContent={message.reasoningContent} />
 							<ReactMarkdownItem
-								handleApply={handleApply}
-								isApplying={applyMutation.isPending}
+								key={"content-" + message.id}
+								handleApply={(toolArgs) => handleApply(message.id, toolArgs)}
+								applyStatus={message.applyStatus}
 							>
 								{message.content}
 							</ReactMarkdownItem>
-							{message.content && <AssistantMessageActions message={message} />}
+							{/* {message.content && <AssistantMessageActions key={"actions-" + message.id} message={message} />} */}
 						</div>
 					),
 				)}
@@ -690,20 +860,19 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 
 function ReactMarkdownItem({
 	handleApply,
-	isApplying,
+	applyStatus,
+	// applyMutation,
 	children,
 }: {
-	handleApply: (blockInfo: {
-		content: string
-		filename?: string
-		startLine?: number
-		endLine?: number
-	}) => void
-	isApplying: boolean
+	handleApply: (toolArgs: ToolArgs) => void
+	applyStatus: ApplyStatus
 	children: string
 }) {
 	return (
-		<ReactMarkdown onApply={handleApply} isApplying={isApplying}>
+		<ReactMarkdown
+			applyStatus={applyStatus}
+			onApply={handleApply}
+		>
 			{children}
 		</ReactMarkdown>
 	)

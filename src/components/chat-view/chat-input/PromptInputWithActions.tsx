@@ -265,9 +265,6 @@ const PromptInputWithActions = forwardRef<ChatUserInputRef, ChatUserInputProps>(
 								handleSubmit({ useVaultSearch: true })
 							},
 						},
-						templatePopover: {
-							anchorElement: containerRef.current,
-						},
 					}}
 				/>
 
