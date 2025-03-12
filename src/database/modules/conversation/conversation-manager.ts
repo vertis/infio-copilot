@@ -108,6 +108,7 @@ export class ConversationManager {
 			const userMessage: ChatUserMessage = message
 			return {
 				...base,
+				apply_status: message.applyStatus,
 				content: userMessage.content ? JSON.stringify(userMessage.content) : null,
 				promptContent: userMessage.promptContent
 					? typeof userMessage.promptContent === 'string'
@@ -123,6 +124,7 @@ export class ConversationManager {
 			const assistantMessage: ChatAssistantMessage = message
 			return {
 				...base,
+				apply_status: message.applyStatus,
 				content: assistantMessage.content,
 				reasoningContent: assistantMessage.reasoningContent,
 				metadata: assistantMessage.metadata ? JSON.stringify(assistantMessage.metadata) : null,
@@ -136,6 +138,7 @@ export class ConversationManager {
 			return {
 				id: message.id,
 				role: 'user',
+				applyStatus: message.apply_status,
 				content: message.content ? JSON.parse(message.content) : null,
 				promptContent: message.prompt_content
 					? message.prompt_content.startsWith('{')
@@ -154,6 +157,7 @@ export class ConversationManager {
 		} else {
 			return {
 				id: message.id,
+				applyStatus: message.apply_status,
 				role: 'assistant',
 				content: message.content || '',
 				reasoningContent: message.reasoning_content || '',

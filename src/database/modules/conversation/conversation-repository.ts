@@ -35,15 +35,16 @@ export class ConversationRepository {
   async createMessage(message: InsertMessage): Promise<SelectMessage> {
 		const result = await this.db.query<SelectMessage>(
       `INSERT INTO messages (
-        id, conversation_id, role, content, reasoning_content,
+        id, conversation_id, apply_status, role, content, reasoning_content,
         prompt_content, metadata, mentionables, 
         similarity_search_results, created_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *`,
       [
         message.id,
         message.conversationId,
+        message.apply_status,
         message.role,
         message.content,
         message.reasoningContent,
@@ -53,7 +54,7 @@ export class ConversationRepository {
         message.similaritySearchResults,
         message.createdAt || new Date()
       ]
-    )
+		)
     return result.rows[0]
   }
 
