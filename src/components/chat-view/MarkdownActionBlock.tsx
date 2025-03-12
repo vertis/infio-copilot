@@ -2,12 +2,14 @@ import { Check, CopyIcon, Loader2 } from 'lucide-react'
 import { PropsWithChildren, useMemo, useState } from 'react'
 
 import { useDarkModeContext } from '../../contexts/DarkModeContext'
+import { ToolArgs } from "../../types/apply"
 import { InfioBlockAction } from '../../utils/parse-infio-block'
 
 import { MemoizedSyntaxHighlighterWrapper } from './SyntaxHighlighterWrapper'
 
 export default function MarkdownActionBlock({
-  onApply,
+  msgId,
+	onApply,
   isApplying,
   language,
   filename,
@@ -16,12 +18,8 @@ export default function MarkdownActionBlock({
   action,
   children,
 }: PropsWithChildren<{
-  onApply: (blockInfo: {
-    content: string
-    filename?: string
-    startLine?: number
-    endLine?: number
-  }) => void
+	msgId: string,
+  onApply: (args: ToolArgs) => void
   isApplying: boolean
   language?: string
   filename?: string
@@ -71,9 +69,11 @@ export default function MarkdownActionBlock({
           {action === InfioBlockAction.Edit && (
             <button
               onClick={() => {
-                onApply({
+								onApply({
+									type: 'write_to_file',
+									msgId,
                   content: String(children),
-                  filename,
+									filepath: filename,
                   startLine,
                   endLine
                 })
@@ -92,9 +92,13 @@ export default function MarkdownActionBlock({
           {action === InfioBlockAction.New && (
             <button
               onClick={() => {
-                onApply({
+								onApply({
+									type: 'write_to_file',
+									msgId,
                   content: String(children),
-                  filename
+                  filepath: filename,
+									startLine: 1,
+									endLine: undefined
                 })
               }}
               disabled={isApplying}

@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, Brain } from 'lucide-react'
 import { PropsWithChildren, useEffect, useRef, useState } from 'react'
 
 import { useDarkModeContext } from '../../contexts/DarkModeContext'
@@ -27,6 +27,7 @@ export default function MarkdownReasoningBlock({
 			>
 				<div className={'infio-chat-code-block-header'}>
 					<div className={'infio-chat-code-block-header-filename'}>
+						<Brain size={10} className="infio-chat-code-block-header-icon" />
 						Reasoning
 					</div>
 					<button
