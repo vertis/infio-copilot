@@ -116,15 +116,17 @@
   margin: var(--size-4-2) calc(var(--size-4-3) * -1) 0;
 
   .infio-chat-messages-user {
+		margin-top: 12px;
+		margin-bottom: 12px;
     display: flex;
     flex-direction: column;
     gap: var(--size-4-1);
   }
 
   .infio-chat-messages-assistant {
-    display: flex;
+		display: flex;
     flex-direction: column;
-    padding-bottom: var(--size-4-2);
+    /* padding-bottom: var(--size-4-2); */
   }
 }
 
@@ -163,10 +165,14 @@
   }
 
   p {
+		margin-top: 0;
+		margin-bottom: 0;
     font-size: var(--font-ui-small);
   }
 
   ul {
+		margin-top: 0;
+		margin-bottom: 0;
     font-size: var(--font-ui-small);
     padding-left: var(--size-4-4);
   }
@@ -223,6 +229,19 @@
   th {
     font-size: var(--font-ui-small);
   }
+}
+
+/* 为后续问题添加特殊样式 */
+.infio-markdown.infio-followup-question {
+	margin-top: 8px;
+	color: #e9730f; /* 橙色 */
+  font-weight: 500; /* 稍微加粗 */
+}
+
+.infio-markdown.infio-attempt-completion {
+	margin-top: 8px;
+  color: #008000; /* 绿色 */
+  font-weight: 500; /* 稍微加粗 */
 }
 
 /* 
@@ -620,13 +639,13 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
   position: relative;
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-s);
+	margin-top: 12px;
+	margin-bottom: 12px;
 }
 
 .infio-chat-code-block.infio-reasoning-block {
-  max-height: 222px;
+  max-height: 200px;
   overflow: hidden;
-	margin-top: 22px;
-	margin-bottom: 22px;
 }
 
 .infio-reasoning-content-wrapper {
@@ -674,6 +693,10 @@ input[type='text'].infio-chat-list-dropdown-item-title-input {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.infio-chat-code-block-header-icon {
+  margin-right: 6px;
 }
 
 .infio-chat-code-block-header-button {
