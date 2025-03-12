@@ -1,27 +1,106 @@
-import { App, TFile, htmlToMarkdown, requestUrl } from 'obsidian'
+import { App, MarkdownView, TAbstractFile, TFile, TFolder, Vault, htmlToMarkdown, requestUrl } from 'obsidian'
 
 import { editorStateToPlainText } from '../components/chat-view/chat-input/utils/editor-state-to-plain-text'
 import { QueryProgressState } from '../components/chat-view/QueryProgress'
+import { SYSTEM_PROMPT } from '../core/prompts/system'
 import { RAGEngine } from '../core/rag/rag-engine'
 import { SelectVector } from '../database/schema'
 import { ChatMessage, ChatUserMessage } from '../types/chat'
 import { ContentPart, RequestMessage } from '../types/llm/request'
 import {
-	MentionableBlock, MentionableCurrentFile, MentionableFile,
+	MentionableBlock,
+	MentionableFile,
 	MentionableFolder,
 	MentionableImage,
 	MentionableUrl,
 	MentionableVault
 } from '../types/mentionable'
 import { InfioSettings } from '../types/settings'
+import { defaultModeSlug, getFullModeDetails } from "../utils/modes"
 
+import { listFilesAndFolders } from './glob-utils'
 import {
-	getNestedFiles,
-	readMultipleTFiles,
-	readTFileContent,
+	readTFileContent
 } from './obsidian'
 import { tokenCount } from './token'
 import { YoutubeTranscript, isYoutubeUrl } from './youtube-transcript'
+
+export function addLineNumbers(content: string, startLine: number = 1): string {
+	const lines = content.split("\n")
+	const maxLineNumberWidth = String(startLine + lines.length - 1).length
+	return lines
+		.map((line, index) => {
+			const lineNumber = String(startLine + index).padStart(maxLineNumberWidth, " ")
+			return `${lineNumber} | ${line}`
+		})
+		.join("\n")
+}
+
+async function getFolderTreeContent(path: TFolder): Promise<string> {
+	try {
+		const entries = path.children
+		let folderContent = ""
+		entries.forEach((entry, index) => {
+			const isLast = index === entries.length - 1
+			const linePrefix = isLast ? "└── " : "├── "
+			if (entry instanceof TFile) {
+				folderContent += `${linePrefix}${entry.name}\n`
+			} else if (entry instanceof TFolder) {
+				folderContent += `${linePrefix}${entry.name}/\n`
+			} else {
+				folderContent += `${linePrefix}${entry.name}\n`
+			}
+		})
+		return folderContent
+	} catch (error) {
+		throw new Error(`Failed to access path "${path.path}": ${error.message}`)
+	}
+}
+
+async function getFileOrFolderContent(path: TAbstractFile, vault: Vault): Promise<string> {
+	try {
+		if (path instanceof TFile) {
+			if (path.extension != 'md') {
+				return "(Binary file, unable to display content)"
+			}
+			return addLineNumbers(await readTFileContent(path, vault))
+		} else if (path instanceof TFolder) {
+			const entries = path.children
+			let folderContent = ""
+			const fileContentPromises: Promise<string | undefined>[] = []
+			entries.forEach((entry, index) => {
+				const isLast = index === entries.length - 1
+				const linePrefix = isLast ? "└── " : "├── "
+				if (entry instanceof TFile) {
+					folderContent += `${linePrefix}${entry.name}\n`
+					fileContentPromises.push(
+						(async () => {
+							try {
+								if (entry.extension != 'md') {
+									return undefined
+								}
+								const content = addLineNumbers(await readTFileContent(entry, vault))
+								return `<file_content path="${entry.path}">\n${content}\n</file_content>`
+							} catch (error) {
+								return undefined
+							}
+						})(),
+					)
+				} else if (entry instanceof TFolder) {
+					folderContent += `${linePrefix}${entry.name}/\n`
+				} else {
+					folderContent += `${linePrefix}${entry.name}\n`
+				}
+			})
+			const fileContents = (await Promise.all(fileContentPromises)).filter((content) => content)
+			return `${folderContent}\n${fileContents.join("\n\n")}`.trim()
+		} else {
+			return `(Failed to read contents of ${path.path})`
+		}
+	} catch (error) {
+		throw new Error(`Failed to access path "${path.path}": ${error.message}`)
+	}
+}
 
 export class PromptGenerator {
 	private getRagEngine: () => Promise<RAGEngine>
@@ -47,12 +126,10 @@ export class PromptGenerator {
 		messages,
 		useVaultSearch,
 		onQueryProgressChange,
-		type,
 	}: {
 		messages: ChatMessage[]
 		useVaultSearch?: boolean
 		onQueryProgressChange?: (queryProgress: QueryProgressState) => void
-		type?: string
 	}): Promise<{
 		requestMessages: RequestMessage[]
 		compiledMessages: ChatMessage[]
@@ -64,14 +141,16 @@ export class PromptGenerator {
 		if (lastUserMessage.role !== 'user') {
 			throw new Error('Last message is not a user message')
 		}
+		const isNewChat = messages.filter(message => message.role === 'user').length === 1
 
-		const { promptContent, shouldUseRAG, similaritySearchResults } =
+		const { promptContent, similaritySearchResults } =
 			await this.compileUserMessagePrompt({
+				isNewChat,
 				message: lastUserMessage,
 				useVaultSearch,
 				onQueryProgressChange,
 			})
-		let compiledMessages = [
+		const compiledMessages = [
 			...messages.slice(0, -1),
 			{
 				...lastUserMessage,
@@ -80,39 +159,10 @@ export class PromptGenerator {
 			},
 		]
 
-		// Safeguard: ensure all user messages have parsed content
-		compiledMessages = await Promise.all(
-			compiledMessages.map(async (message) => {
-				if (message.role === 'user' && !message.promptContent) {
-					const { promptContent, similaritySearchResults } =
-						await this.compileUserMessagePrompt({
-							message,
-						})
-					return {
-						...message,
-						promptContent,
-						similaritySearchResults,
-					}
-				}
-				return message
-			}),
-		)
-
-		const systemMessage = this.getSystemMessage(shouldUseRAG, type)
-
-		const customInstructionMessage = this.getCustomInstructionMessage()
-
-		const currentFile = lastUserMessage.mentionables.find(
-			(m): m is MentionableCurrentFile => m.type === 'current-file',
-		)?.file
-		const currentFileMessage = currentFile
-			? await this.getCurrentFileMessage(currentFile)
-			: undefined
+		const systemMessage = await this.getSystemMessageNew()
 
 		const requestMessages: RequestMessage[] = [
 			systemMessage,
-			...(customInstructionMessage ? [customInstructionMessage, PromptGenerator.EMPTY_ASSISTANT_MESSAGE] : []),
-			...(currentFileMessage ? [currentFileMessage, PromptGenerator.EMPTY_ASSISTANT_MESSAGE] : []),
 			...compiledMessages.slice(-19).map((message): RequestMessage => {
 				if (message.role === 'user') {
 					return {
@@ -126,7 +176,6 @@ export class PromptGenerator {
 					}
 				}
 			}),
-			...(shouldUseRAG ? [this.getRagInstructionMessage()] : []),
 		]
 
 		return {
@@ -135,27 +184,101 @@ export class PromptGenerator {
 		}
 	}
 
+	private async getEnvironmentDetails() {
+		let details = ""
+		// Obsidian Current File
+		details += "\n\n# Obsidian Current File"
+		const currentFile = this.app.workspace.getActiveFile()
+		if (currentFile) {
+			details += `\n${currentFile?.path}`
+		} else {
+			details += "\n(No current file)"
+		}
+
+		// Obsidian Open Tabs
+		details += "\n\n# Obsidian Open Tabs"
+		const openTabs: string[] = [];
+		this.app.workspace.iterateAllLeaves(leaf => {
+			if (leaf.view instanceof MarkdownView && leaf.view.file) {
+				openTabs.push(leaf.view.file?.path);
+			}
+		});
+		if (openTabs.length === 0) {
+			details += "\n(No open tabs)"
+		} else {
+			details += `\n${openTabs.join("\n")}`
+		}
+
+		// Add current time information with timezone
+		const now = new Date()
+		const formatter = new Intl.DateTimeFormat(undefined, {
+			year: "numeric",
+			month: "numeric",
+			day: "numeric",
+			hour: "numeric",
+			minute: "numeric",
+			second: "numeric",
+			hour12: true,
+		})
+		const timeZone = formatter.resolvedOptions().timeZone
+		const timeZoneOffset = -now.getTimezoneOffset() / 60 // Convert to hours and invert sign to match conventional notation
+		const timeZoneOffsetStr = `${timeZoneOffset >= 0 ? "+" : ""}${timeZoneOffset}:00`
+		details += `\n\n# Current Time\n${formatter.format(now)} (${timeZone}, UTC${timeZoneOffsetStr})`
+
+		// Add current mode details
+		const currentMode = defaultModeSlug
+		const modeDetails = await getFullModeDetails(currentMode)
+		details += `\n\n# Current Mode\n`
+		details += `<slug>${currentMode}</slug>\n`
+		details += `<name>${modeDetails.name}</name>\n`
+
+		// // Obsidian Current Folder
+		// const currentFolder = this.app.workspace.getActiveFile() ? this.app.workspace.getActiveFile()?.parent?.path : "/"
+		// // Obsidian Vault Files and Folders
+		// if (currentFolder) {
+		// 	details += `\n\n# Obsidian Current Folder (${currentFolder}) Files`
+		// 	const filesAndFolders = await listFilesAndFolders(this.app.vault, currentFolder)
+		// 	if (filesAndFolders.length > 0) {
+		// 		details += `\n${filesAndFolders.filter(Boolean).join("\n")}`
+		// 	} else {
+		// 		details += "\n(No Markdown files in current folder)"
+		// 	}
+		// } else {
+		// 	details += "\n(No current folder)"
+		// }
+
+		return `<environment_details>\n${details.trim()}\n</environment_details>`
+	}
+
 	private async compileUserMessagePrompt({
+		isNewChat,
 		message,
 		useVaultSearch,
 		onQueryProgressChange,
 	}: {
+		isNewChat: boolean
 		message: ChatUserMessage
 		useVaultSearch?: boolean
 		onQueryProgressChange?: (queryProgress: QueryProgressState) => void
 	}): Promise<{
 		promptContent: ChatUserMessage['promptContent']
-		shouldUseRAG: boolean
 		similaritySearchResults?: (Omit<SelectVector, 'embedding'> & {
 			similarity: number
 		})[]
 	}> {
-		if (!message.content) {
+		// Add environment details
+		const environmentDetails = isNewChat
+			? await this.getEnvironmentDetails()
+			: undefined
+
+		// if isToolCallReturn, add read_file_content to promptContent
+		if (message.content === null) {
 			return {
-				promptContent: '',
-				shouldUseRAG: false,
+				promptContent: message.promptContent,
+				similaritySearchResults: undefined,
 			}
 		}
+
 		const query = editorStateToPlainText(message.content)
 		let similaritySearchResults = undefined
 
@@ -169,33 +292,94 @@ export class PromptGenerator {
 		onQueryProgressChange?.({
 			type: 'reading-mentionables',
 		})
+
+		const taskPrompt = isNewChat ? `<task>\n${query}\n</task>` : `<feedback>\n${query}\n</feedback>`
+
+		// user mention files
 		const files = message.mentionables
 			.filter((m): m is MentionableFile => m.type === 'file')
 			.map((m) => m.file)
+		let fileContentsPrompts = files.length > 0
+			? (await Promise.all(files.map(async (file) => {
+				const content = await getFileOrFolderContent(file, this.app.vault)
+				return `<file_content path="${file.path}">\n${content}\n</file_content>`
+			}))).join('\n')
+			: undefined
+
+		// user mention folders
 		const folders = message.mentionables
 			.filter((m): m is MentionableFolder => m.type === 'folder')
 			.map((m) => m.folder)
-		const nestedFiles = folders.flatMap((folder) =>
-			getNestedFiles(folder, this.app.vault),
+		let folderContentsPrompts = folders.length > 0
+			? (await Promise.all(folders.map(async (folder) => {
+				const content = await getFileOrFolderContent(folder, this.app.vault)
+				return `<folder_content path="${folder.path}">\n${content}\n</folder_content>`
+			}))).join('\n')
+			: undefined
+
+		// user mention blocks
+		const blocks = message.mentionables.filter(
+			(m): m is MentionableBlock => m.type === 'block',
 		)
-		const allFiles = [...files, ...nestedFiles]
-		const fileContents = await readMultipleTFiles(allFiles, this.app.vault)
+		const blockContentsPrompt = blocks.length > 0
+			? blocks
+				.map(({ file, content, startLine, endLine }) => {
+					const content_with_line_numbers = addLineNumbers(content, startLine)
+					return `<file_block_content location="${file.path}#L${startLine}-${endLine}">\n${content_with_line_numbers}\n</file_block_content>`
+				})
+				.join('\n')
+			: undefined
 
-		// Count tokens incrementally to avoid long processing times on large content sets
-		const exceedsTokenThreshold = async () => {
-			let accTokenCount = 0
-			for (const content of fileContents) {
-				const count = await tokenCount(content)
-				accTokenCount += count
-				if (accTokenCount > this.settings.ragOptions.thresholdTokens) {
-					return true
-				}
+		// user mention urls
+		const urls = message.mentionables.filter(
+			(m): m is MentionableUrl => m.type === 'url',
+		)
+		const urlContents = await Promise.all(
+			urls.map(async ({ url }) => ({
+				url,
+				content: await this.getWebsiteContent(url)
+			}))
+		)
+		const urlContentsPrompt = urlContents.length > 0
+			? urlContents
+				.map(({ url, content }) => (
+					`<url_content url="${url}">\n${content}\n</url_content>`
+				))
+				.join('\n') : undefined
+
+		const currentFile = message.mentionables
+			.filter((m): m is MentionableFile => m.type === 'current-file')
+			.first()
+		const currentFileContent = currentFile && currentFile.file != null
+			? await getFileOrFolderContent(currentFile.file, this.app.vault)
+			: undefined
+
+		const currentFileContentPrompt = isNewChat && currentFileContent
+			? `<current_file_content path="${currentFile.file.path}">\n${currentFileContent}\n</current_file_content>`
+			: undefined
+
+		// Count file and folder tokens
+		let accTokenCount = 0
+		let isOverThreshold = false
+		for (const content of [fileContentsPrompts, folderContentsPrompts].filter(Boolean)) {
+			const count = await tokenCount(content)
+			accTokenCount += count
+			if (accTokenCount > this.settings.ragOptions.thresholdTokens) {
+				isOverThreshold = true
 			}
-			return false
 		}
-		const shouldUseRAG = useVaultSearch || (await exceedsTokenThreshold())
+		if (isOverThreshold) {
+			fileContentsPrompts = files.map((file) => {
+				return `<file_content path="${file.path}">\n(Content omitted due to token limit. Relevant sections will be provided by semantic search below.)\n</file_content>`
+			}).join('\n')
+			folderContentsPrompts = folders.map(async (folder) => {
+				const tree_content = await getFolderTreeContent(folder)
+				return `<folder_content path="${folder.path}">\n${tree_content}\n(Content omitted due to token limit. Relevant sections will be provided by semantic search below.)\n</folder_content>`
+			}).join('\n')
+		}
 
-		let filePrompt: string
+		const shouldUseRAG = useVaultSearch || isOverThreshold
+		let similaritySearchContents
 		if (shouldUseRAG) {
 			similaritySearchResults = useVaultSearch
 				? await (
@@ -203,7 +387,7 @@ export class PromptGenerator {
 				).processQuery({
 					query,
 					onQueryProgressChange: onQueryProgressChange,
-				}) // TODO: Add similarity boosting for mentioned files or folders
+				})
 				: await (
 					await this.getRagEngine()
 				).processQuery({
@@ -214,60 +398,42 @@ export class PromptGenerator {
 					},
 					onQueryProgressChange: onQueryProgressChange,
 				})
-			filePrompt = `## Potentially relevant snippets from the current vault
-${similaritySearchResults
-					.map(({ path, content, metadata }) => {
-						const contentWithLineNumbers = this.addLineNumbersToContent({
-							content,
-							startLine: metadata.startLine,
-						})
-						return `\`\`\`${path}\n${contentWithLineNumbers}\n\`\`\`\n`
-					})
-					.join('')}\n`
-		} else {
-			filePrompt = allFiles
-				.map((file, index) => {
-					return `\`\`\`${file.path}\n${fileContents[index]}\n\`\`\`\n`
+			const snippets = similaritySearchResults.map(({ path, content, metadata }) => {
+				const contentWithLineNumbers = this.addLineNumbersToContent({
+					content,
+					startLine: metadata.startLine,
 				})
-				.join('')
+				return `<file_block_content location="${path}#L${metadata.startLine}-${metadata.endLine}">\n${contentWithLineNumbers}\n</file_block_content>`
+			}).join('\n')
+			similaritySearchContents = snippets.length > 0
+				? `<similarity_search_results>\n${snippets}\n</similarity_search_results>`
+				: '<similarity_search_results>\n(No relevant results found)\n</similarity_search_results>'
+		} else {
+			similaritySearchContents = undefined
 		}
 
-		const blocks = message.mentionables.filter(
-			(m): m is MentionableBlock => m.type === 'block',
-		)
-		const blockPrompt = blocks
-			.map(({ file, content, startLine, endLine }) => {
-				return `\`\`\`${file.path}#L${startLine}-${endLine}\n${content}\n\`\`\`\n`
-			})
-			.join('')
+		const parsedText = [
+			taskPrompt,
+			blockContentsPrompt,
+			fileContentsPrompts,
+			folderContentsPrompts,
+			urlContentsPrompt,
+			similaritySearchContents,
+			currentFileContentPrompt,
+			environmentDetails,
+		].filter(Boolean).join('\n\n')
 
-		const urls = message.mentionables.filter(
-			(m): m is MentionableUrl => m.type === 'url',
-		)
-
-		const urlPrompt =
-			urls.length > 0
-				? `## Potentially relevant web search results
-${(
-					await Promise.all(
-						urls.map(
-							async ({ url }) => `\`\`\`
-Website URL: ${url}
-Website Content:
-${await this.getWebsiteContent(url)}
-\`\`\``,
-						),
-					)
-				).join('\n')}
-`
-				: ''
-
+		// user mention images
 		const imageDataUrls = message.mentionables
 			.filter((m): m is MentionableImage => m.type === 'image')
 			.map(({ data }) => data)
 
 		return {
 			promptContent: [
+				{
+					type: 'text',
+					text: parsedText,
+				},
 				...imageDataUrls.map(
 					(data): ContentPart => ({
 						type: 'image_url',
@@ -275,14 +441,18 @@ ${await this.getWebsiteContent(url)}
 							url: data,
 						},
 					}),
-				),
-				{
-					type: 'text',
-					text: `${filePrompt}${blockPrompt}${urlPrompt}\n\n${query}\n\n`,
-				},
+				)
 			],
-			shouldUseRAG,
-			similaritySearchResults: similaritySearchResults,
+			similaritySearchResults,
+		}
+	}
+
+	private async getSystemMessageNew(): Promise<RequestMessage> {
+		const systemPrompt = await SYSTEM_PROMPT(this.app.vault.getRoot().path, false)
+
+		return {
+			role: 'system',
+			content: systemPrompt,
 		}
 	}
 
@@ -392,7 +562,7 @@ ${customInstruction}
 		return {
 			role: 'user',
 			content: `# Inputs
-## Current file
+## Current Open File
 Here is the file I'm looking at.
 \`\`\`${currentFile.path}
 ${fileContent}

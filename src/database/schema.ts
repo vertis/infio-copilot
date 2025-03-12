@@ -1,6 +1,7 @@
 import { SerializedLexicalNode } from 'lexical'
 
 import { SUPPORT_EMBEDDING_SIMENTION } from '../constants'
+import { ApplyStatus } from '../types/apply'
 // import { EmbeddingModelId } from '../types/embedding'
 
 // PostgreSQL column types
@@ -123,6 +124,7 @@ export type Conversation = {
 export type Message = {
 	id: string // uuid
 	conversationId: string // uuid
+	applyStatus: number
 	role: 'user' | 'assistant'
 	content: string | null
 	reasoningContent?: string | null
@@ -151,6 +153,7 @@ export type InsertMessage = {
 	id: string
 	conversationId: string
 	role: 'user' | 'assistant'
+	apply_status: number
 	content: string | null
 	reasoningContent?: string | null
 	promptContent?: string | null
@@ -163,6 +166,7 @@ export type InsertMessage = {
 export type SelectMessage = {
 	id: string // uuid
 	conversation_id: string // uuid
+	apply_status: number
 	role: 'user' | 'assistant'
 	content: string | null
 	reasoning_content?: string | null

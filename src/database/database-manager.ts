@@ -94,6 +94,7 @@ export class DBManager {
 			// return drizzle(this.pgClient)
 		} catch (error) {
 			console.error('Error loading database:', error)
+			console.log(this.dbPath)
 			return null
 		}
 	}

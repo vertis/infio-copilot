@@ -25,6 +25,7 @@ import {
 	InfioSettings,
 	parseInfioSettings,
 } from './types/settings'
+import './utils/path'
 import { getMentionableBlockData } from './utils/obsidian'
 
 // Remember to rename these classes and interfaces!

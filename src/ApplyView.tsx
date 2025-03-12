@@ -9,6 +9,7 @@ export type ApplyViewState = {
 	file: TFile
 	originalContent: string
 	newContent: string
+	onClose: (applied: boolean) => void
 }
 
 export class ApplyView extends View {

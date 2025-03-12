@@ -1,4 +1,4 @@
-import { InfioBlockAction, ParsedInfioBlock, parseinfioBlocks } from './parse-infio-block'
+import { InfioBlockAction, ParsedMsgBlock, parseMsgBlocks } from './parse-infio-block'
 
 describe('parseinfioBlocks', () => {
 	it('should parse a string with infio_block elements', () => {
@@ -22,7 +22,7 @@ print("Hello, world!")
 </infio_block>
 Some text after`
 
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{ type: 'string', content: 'Some text before\n' },
 			{
 				type: 'infio_block',
@@ -49,7 +49,7 @@ print("Hello, world!")
 			{ type: 'string', content: '\nSome text after' },
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
@@ -58,7 +58,7 @@ print("Hello, world!")
       <infio_block language="python"></infio_block>
     `
 
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{ type: 'string', content: '\n      ' },
 			{
 				type: 'infio_block',
@@ -69,16 +69,16 @@ print("Hello, world!")
 			{ type: 'string', content: '\n    ' },
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
 	it('should handle input without infio_block elements', () => {
 		const input = 'Just a regular string without any infio_block elements.'
 
-		const expected: ParsedInfioBlock[] = [{ type: 'string', content: input }]
+		const expected: ParsedMsgBlock[] = [{ type: 'string', content: input }]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
@@ -100,7 +100,7 @@ print("Hello, world!")
 </infio_block>
 End`
 
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{ type: 'string', content: 'Start\n' },
 			{
 				type: 'infio_block',
@@ -129,7 +129,7 @@ print("Hello, world!")
 			{ type: 'string', content: '\nEnd' },
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
@@ -139,7 +139,7 @@ print("Hello, world!")
 # Unfinished infio_block
 
 Some text after without closing tag`
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{ type: 'string', content: 'Start\n' },
 			{
 				type: 'infio_block',
@@ -152,13 +152,13 @@ Some text after without closing tag`,
 			},
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
 	it('should handle infio_block with startline and endline attributes', () => {
 		const input = `<infio_block language="markdown" startline="2" endline="5"></infio_block>`
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{
 				type: 'infio_block',
 				content: '',
@@ -168,13 +168,13 @@ Some text after without closing tag`,
 			},
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
 	it('should parse infio_block with action attribute', () => {
 		const input = `<infio_block type="edit"></infio_block>`
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{
 				type: 'infio_block',
 				content: '',
@@ -182,13 +182,13 @@ Some text after without closing tag`,
 			},
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
 	it('should handle invalid action attribute', () => {
 		const input = `<infio_block type="invalid"></infio_block>`
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{
 				type: 'infio_block',
 				content: '',
@@ -196,7 +196,7 @@ Some text after without closing tag`,
 			},
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
@@ -208,7 +208,7 @@ It might contain multiple lines of text.
 </think>
 Some text after`
 
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{ type: 'string', content: 'Some text before\n' },
 			{
 				type: 'think',
@@ -220,7 +220,7 @@ It might contain multiple lines of text.
 			{ type: 'string', content: '\nSome text after' },
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
@@ -229,7 +229,7 @@ It might contain multiple lines of text.
       <think></think>
     `
 
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{ type: 'string', content: '\n      ' },
 			{
 				type: 'think',
@@ -238,7 +238,7 @@ It might contain multiple lines of text.
 			{ type: 'string', content: '\n    ' },
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
@@ -255,7 +255,7 @@ I need to consider several approaches.
 </think>
 End`
 
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{ type: 'string', content: 'Start\n' },
 			{
 				type: 'infio_block',
@@ -277,7 +277,7 @@ I need to consider several approaches.
 			{ type: 'string', content: '\nEnd' },
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 
@@ -286,7 +286,7 @@ I need to consider several approaches.
 <think>
 Some unfinished thought
 without closing tag`
-		const expected: ParsedInfioBlock[] = [
+		const expected: ParsedMsgBlock[] = [
 			{ type: 'string', content: 'Start\n' },
 			{
 				type: 'think',
@@ -296,7 +296,7 @@ without closing tag`,
 			},
 		]
 
-		const result = parseinfioBlocks(input)
+		const result = parseMsgBlocks(input)
 		expect(result).toEqual(expected)
 	})
 })

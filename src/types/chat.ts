@@ -2,6 +2,7 @@ import { SerializedEditorState } from 'lexical'
 
 import { SelectVector } from '../database/schema'
 
+import { ApplyStatus } from './apply'
 import { LLMModel } from './llm/model'
 import { ContentPart } from './llm/request'
 import { ResponseUsage } from './llm/response'
@@ -9,6 +10,7 @@ import { Mentionable, SerializedMentionable } from './mentionable'
 
 export type ChatUserMessage = {
 	role: 'user'
+	applyStatus: ApplyStatus
 	content: SerializedEditorState | null
 	promptContent: string | ContentPart[] | null
 	id: string
@@ -20,6 +22,7 @@ export type ChatUserMessage = {
 
 export type ChatAssistantMessage = {
 	role: 'assistant'
+	applyStatus: ApplyStatus
 	content: string
 	reasoningContent: string
 	id: string
@@ -33,6 +36,7 @@ export type ChatMessage = ChatUserMessage | ChatAssistantMessage
 
 export type SerializedChatUserMessage = {
 	role: 'user'
+	applyStatus: ApplyStatus
 	content: SerializedEditorState | null
 	promptContent: string | ContentPart[] | null
 	id: string
@@ -44,6 +48,7 @@ export type SerializedChatUserMessage = {
 
 export type SerializedChatAssistantMessage = {
 	role: 'assistant'
+	applyStatus: ApplyStatus
 	content: string
 	reasoningContent: string
 	id: string

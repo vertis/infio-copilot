@@ -1,11 +1,12 @@
-import { MarkdownView, Plugin, Platform } from 'obsidian';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CornerDownLeft } from 'lucide-react';
+import { MarkdownView, Plugin } from 'obsidian';
+import React, { useEffect, useRef, useState } from 'react';
+
 import { APPLY_VIEW_TYPE } from '../../constants';
 import LLMManager from '../../core/llm/manager';
 import { InfioSettings } from '../../types/settings';
 import { GetProviderModelIds } from '../../utils/api';
-import { manualApplyChangesToFile } from '../../utils/apply';
+import { ApplyEditToFile } from '../../utils/apply';
 import { removeAITags } from '../../utils/content-filter';
 import { PromptGenerator } from '../../utils/prompt-generator';
 
@@ -239,10 +240,10 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
 			const startLine = parsedBlock?.startLine || defaultStartLine;
 			const endLine = parsedBlock?.endLine || defaultEndLine;
 
-			const updatedContent = await manualApplyChangesToFile(
-				finalContent,
+			const updatedContent = await ApplyEditToFile(
 				activeFile,
 				await plugin.app.vault.read(activeFile),
+				finalContent,
 				startLine,
 				endLine
 			);

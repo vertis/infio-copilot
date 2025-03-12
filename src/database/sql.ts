@@ -102,20 +102,10 @@ export const migrations: Record<string, SqlMigration> = {
                 "updated_at" timestamp DEFAULT now() NOT NULL
             );
 
-            DO $$
-            BEGIN
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns
-                    WHERE table_name = 'messages'
-                    AND column_name = 'reasoning_content'
-                ) THEN
-                    ALTER TABLE "messages" ADD COLUMN "reasoning_content" text;
-                END IF;
-            END $$;
-
             CREATE TABLE IF NOT EXISTS "messages" (
                 "id" uuid PRIMARY KEY NOT NULL,
                 "conversation_id" uuid NOT NULL REFERENCES "conversations"("id") ON DELETE CASCADE,
+								"apply_status" integer NOT NULL DEFAULT 0,
                 "role" text NOT NULL,
                 "content" text,
                 "reasoning_content" text,

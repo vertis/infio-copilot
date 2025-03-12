@@ -1,4 +1,6 @@
-import { TFile } from 'obsidian'
+import { TFile } from 'obsidian';
+
+import { SearchAndReplaceToolArgs } from '../types/apply';
 
 /**
  * Applies changes to a file by replacing content within specified line range
@@ -9,36 +11,95 @@ import { TFile } from 'obsidian'
  * @param endLine - Ending line number (1-based indexing, optional)
  * @returns Promise resolving to the modified content or null if operation fails
  */
-export const manualApplyChangesToFile = async (
-    content: string,
-    currentFile: TFile,
-    currentFileContent: string,
-    startLine?: number,
-    endLine?: number,
+export const ApplyEditToFile = async (
+	currentFile: TFile,
+	currentFileContent: string,
+	content: string,
+	startLine?: number,
+	endLine?: number,
 ): Promise<string | null> => {
-    try {
-        // Input validation
-        if (!content || !currentFileContent) {
-            throw new Error('Content cannot be empty')
-        }
+	try {
+		// 如果文件为空，直接返回新内容
+		if (!currentFileContent || currentFileContent.trim() === '') {
+			return content;
+		}
 
-        const lines = currentFileContent.split('\n')
-        const effectiveStartLine = Math.max(1, startLine ?? 1)
-        const effectiveEndLine = Math.min(endLine ?? lines.length, lines.length)
+		// 如果要清空文件，直接返回空字符串
+		if (content === '') {
+			return '';
+		}
 
-        // Validate line numbers
-        if (effectiveStartLine > effectiveEndLine) {
-            throw new Error('Start line cannot be greater than end line')
-        }
+		const lines = currentFileContent.split('\n')
+		const effectiveStartLine = Math.max(1, startLine ?? 1)
+		const effectiveEndLine = Math.min(endLine ?? lines.length, lines.length)
 
-        // Construct new content
-        return [
-            ...lines.slice(0, effectiveStartLine - 1),
-            content,
-            ...lines.slice(effectiveEndLine)
-        ].join('\n')
-    } catch (error) {
-        console.error('Error applying changes:', error instanceof Error ? error.message : 'Unknown error')
-        return null
-    }
+		// Validate line numbers
+		if (effectiveStartLine > effectiveEndLine) {
+			throw new Error('Start line cannot be greater than end line')
+		}
+
+		// Construct new content
+		return [
+			...lines.slice(0, effectiveStartLine - 1),
+			content,
+			...lines.slice(effectiveEndLine)
+		].join('\n')
+	} catch (error) {
+		console.error('Error applying changes:', error instanceof Error ? error.message : 'Unknown error')
+		return null
+	}
+}
+
+
+function escapeRegExp(string: string): string {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+/**
+ * 搜索和替换文件内容
+ * @param currentFile - 当前文件
+ * @param currentFileContent - 当前文件内容
+ * @param search - 搜索内容
+ * @param replace - 替换内容
+ */
+export const SearchAndReplace = async (
+	currentFile: TFile,
+	currentFileContent: string,
+	operations: SearchAndReplaceToolArgs['operations']
+) => {
+	let lines = currentFileContent.split("\n")
+
+	for (const op of operations) {
+		const flags = op.regexFlags ?? (op.ignoreCase ? "gi" : "g")
+		const multilineFlags = flags.includes("m") ? flags : flags + "m"
+
+		const searchPattern = op.useRegex
+			? new RegExp(op.search, multilineFlags)
+			: new RegExp(escapeRegExp(op.search), multilineFlags)
+
+		if (op.startLine || op.endLine) {
+			const startLine = Math.max((op.startLine ?? 1) - 1, 0)
+			const endLine = Math.min((op.endLine ?? lines.length) - 1, lines.length - 1)
+
+			// Get the content before and after the target section
+			const beforeLines = lines.slice(0, startLine)
+			const afterLines = lines.slice(endLine + 1)
+
+			// Get the target section and perform replacement
+			const targetContent = lines.slice(startLine, endLine + 1).join("\n")
+			const modifiedContent = targetContent.replace(searchPattern, op.replace)
+			const modifiedLines = modifiedContent.split("\n")
+
+			// Reconstruct the full content with the modified section
+			lines = [...beforeLines, ...modifiedLines, ...afterLines]
+		} else {
+			// Global replacement
+			const fullContent = lines.join("\n")
+			const modifiedContent = fullContent.replace(searchPattern, op.replace)
+			lines = modifiedContent.split("\n")
+		}
+	}
+
+	const newContent = lines.join("\n")
+	return newContent;
 }

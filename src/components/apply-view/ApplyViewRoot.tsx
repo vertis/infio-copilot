@@ -37,10 +37,16 @@ export default function ApplyViewRoot({
       .map((change) => change.value)
       .join('')
     await app.vault.modify(state.file, newContent)
+    if (state.onClose) {
+      state.onClose(true)
+    }
     close()
   }
 
   const handleReject = async () => {
+    if (state.onClose) {
+      state.onClose(false)
+    }
     close()
   }
 
