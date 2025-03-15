@@ -30,6 +30,9 @@ export const TOOL_GROUPS: Record<string, ToolGroupConfig> = {
 	edit: {
 		tools: ["apply_diff", "write_to_file", "insert_content", "search_and_replace"],
 	},
+	research: {
+		tools: ["search_web", "fetch_urls_content"],
+	},
 	// browser: {
 	// 	tools: ["browser_action"],
 	// },

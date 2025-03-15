@@ -7,13 +7,15 @@ import { getAskFollowupQuestionDescription } from "./ask-followup-question"
 import { getAttemptCompletionDescription } from "./attempt-completion"
 import { getBrowserActionDescription } from "./browser-action"
 import { getExecuteCommandDescription } from "./execute-command"
+import { getFetchUrlsContentDescription } from "./fetch-url-content"
 import { getInsertContentDescription } from "./insert-content"
 import { getListFilesDescription } from "./list-files"
 import { getReadFileDescription } from "./read-file"
 import { getSearchAndReplaceDescription } from "./search-and-replace"
 import { getSearchFilesDescription } from "./search-files"
+import { getSearchWebDescription } from "./search-web"
 import { getSwitchModeDescription } from "./switch-mode"
-import { ALWAYS_AVAILABLE_TOOLS, TOOL_GROUPS, ToolName } from "./tool-groups"
+import { ALWAYS_AVAILABLE_TOOLS, TOOL_GROUPS } from "./tool-groups"
 import { ToolArgs } from "./types"
 import { getUseMcpToolDescription } from "./use-mcp-tool"
 import { getWriteToFileDescription } from "./write-to-file"
@@ -32,6 +34,8 @@ const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined>
 	search_and_replace: (args) => getSearchAndReplaceDescription(args),
 	apply_diff: (args) =>
 		args.diffStrategy ? args.diffStrategy.getToolDescription({ cwd: args.cwd, toolOptions: args.toolOptions }) : "",
+	search_web: (args): string | undefined => getSearchWebDescription(args),
+	fetch_urls_content: (args): string | undefined => getFetchUrlsContentDescription(args),
 }
 
 export function getToolDescriptionsForMode(
@@ -63,7 +67,7 @@ export function getToolDescriptionsForMode(
 		const toolGroup = TOOL_GROUPS[groupName]
 		if (toolGroup) {
 			toolGroup.tools.forEach((tool) => {
-				if (isToolAllowedForMode(tool as ToolName, mode, customModes ?? [], experiments ?? {})) {
+				if (isToolAllowedForMode(tool, mode, customModes ?? [], experiments ?? {})) {
 					tools.add(tool)
 				}
 			})
@@ -93,6 +97,6 @@ export function getToolDescriptionsForMode(
 export {
 	getAccessMcpResourceDescription, getAskFollowupQuestionDescription,
 	getAttemptCompletionDescription, getBrowserActionDescription, getExecuteCommandDescription, getInsertContentDescription,
-	getListFilesDescription, getReadFileDescription, getSearchFilesDescription, getSearchAndReplaceDescription, getSwitchModeDescription, getUseMcpToolDescription, getWriteToFileDescription
+	getListFilesDescription, getReadFileDescription, getSearchAndReplaceDescription, getSearchFilesDescription, getSwitchModeDescription, getUseMcpToolDescription, getWriteToFileDescription
 }
 

@@ -25,6 +25,7 @@ Usage:
   }
 ]</operations>
 </search_and_replace>
+
 Example: Replace "climate change" with "climate crisis" in lines 1-10 of an essay
 <search_and_replace>
 <path>essays/environmental-impact.md</path>

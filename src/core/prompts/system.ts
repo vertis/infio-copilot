@@ -76,13 +76,24 @@ ${getToolUseGuidelinesSection()}
 
 ${mcpServersSection}
 
-${getCapabilitiesSection(cwd, searchTool)}
+${getCapabilitiesSection(
+	mode,
+	cwd,
+	searchTool,
+)}
 
-${getRulesSection(cwd, searchTool, supportsComputerUse, effectiveDiffStrategy, experiments)}
+${getRulesSection(
+	mode,
+	cwd,
+	searchTool,
+	supportsComputerUse,
+	effectiveDiffStrategy,
+	experiments,
+)}
 
 ${getSystemInfoSection(cwd)}
 
-${getObjectiveSection()}
+${getObjectiveSection(mode)}
 
 ${await addCustomInstructions(promptComponent?.customInstructions || modeConfig.customInstructions || "", globalCustomInstructions || "", cwd, mode, { preferredLanguage })}`
 
