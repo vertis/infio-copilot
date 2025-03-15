@@ -30,6 +30,9 @@ export const TOOL_GROUPS: Record<string, ToolGroupConfig> = {
 	edit: {
 		tools: ["apply_diff", "write_to_file", "insert_content", "search_and_replace"],
 	},
+	research: {
+		tools: ["search_web", "fetch_urls_content"],
+	},
 	// browser: {
 	// 	tools: ["browser_action"],
 	// },
@@ -52,7 +55,6 @@ export const ALWAYS_AVAILABLE_TOOLS = [
 	"ask_followup_question",
 	"attempt_completion",
 	"switch_mode",
-	"new_task",
 ] as const
 
 // Tool name types for type safety
@@ -71,6 +73,7 @@ export function getToolOptions(toolConfig: string | readonly [ToolName, ...any[]
 export const GROUP_DISPLAY_NAMES: Record<ToolGroup, string> = {
 	read: "Read Files",
 	edit: "Edit Files",
+	research: "Research",
 	browser: "Use Browser",
 	command: "Run Commands",
 	mcp: "Use MCP",

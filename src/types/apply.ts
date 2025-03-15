@@ -63,4 +63,17 @@ export type SearchAndReplaceToolArgs = {
 		regexFlags?: string;
 	}[];
 }
-export type ToolArgs = ReadFileToolArgs | WriteToFileToolArgs | InsertContentToolArgs | SearchAndReplaceToolArgs | ListFilesToolArgs | RegexSearchFilesToolArgs | SemanticSearchFilesToolArgs;
+
+export type SearchWebToolArgs = {
+	type: 'search_web';
+	query: string;
+	finish?: boolean;
+}
+
+export type FetchUrlsContentToolArgs = {
+	type: 'fetch_urls_content';
+	urls: string[];
+	finish?: boolean;
+}
+
+export type ToolArgs = ReadFileToolArgs | WriteToFileToolArgs | InsertContentToolArgs | SearchAndReplaceToolArgs | ListFilesToolArgs | RegexSearchFilesToolArgs | SemanticSearchFilesToolArgs | SearchWebToolArgs | FetchUrlsContentToolArgs;

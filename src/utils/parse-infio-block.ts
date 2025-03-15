@@ -60,6 +60,14 @@ export type ParsedMsgBlock =
 		path: string
 		query: string
 		finish: boolean
+	} | {
+		type: 'search_web'
+		query: string
+		finish: boolean
+	} | {
+		type: 'fetch_urls_content'
+		urls: string[]
+		finish: boolean
 	}
 
 export function parseMsgBlocks(
@@ -413,6 +421,66 @@ export function parseMsgBlocks(
 				parsedResult.push({
 					type: 'ask_followup_question',
 					question,
+				})
+				lastEndOffset = endOffset
+			}
+			else if (node.nodeName === 'search_web') {
+				if (!node.sourceCodeLocation) {
+					throw new Error('sourceCodeLocation is undefined')
+				}
+				const startOffset = node.sourceCodeLocation.startOffset
+				const endOffset = node.sourceCodeLocation.endOffset
+				if (startOffset > lastEndOffset) {
+					parsedResult.push({
+						type: 'string',
+						content: input.slice(lastEndOffset, startOffset),
+					})
+				}
+				let query: string | undefined
+				for (const childNode of node.childNodes) {
+					if (childNode.nodeName === 'query' && childNode.childNodes.length > 0) {
+						query = childNode.childNodes[0].value
+					}
+				}
+				parsedResult.push({
+					type: 'search_web',
+					query: query || '',
+					finish: node.sourceCodeLocation.endTag !== undefined
+				})
+				lastEndOffset = endOffset
+			} else if (node.nodeName === 'fetch_urls_content') {
+				if (!node.sourceCodeLocation) {
+					throw new Error('sourceCodeLocation is undefined')
+				}
+				const startOffset = node.sourceCodeLocation.startOffset
+				const endOffset = node.sourceCodeLocation.endOffset
+				if (startOffset > lastEndOffset) {
+					parsedResult.push({
+						type: 'string',
+						content: input.slice(lastEndOffset, startOffset),
+					})
+				}
+				
+				let urls: string[] = []
+				
+				for (const childNode of node.childNodes) {
+					if (childNode.nodeName === 'urls' && childNode.childNodes.length > 0) {
+						try {
+							const urlsJson = childNode.childNodes[0].value
+							const parsedUrls = JSON5.parse(urlsJson)
+							if (Array.isArray(parsedUrls)) {
+								urls = parsedUrls
+							}
+						} catch (error) {
+							console.error('Failed to parse URLs JSON', error)
+						}
+					}
+				}
+				
+				parsedResult.push({
+					type: 'fetch_urls_content',
+					urls,
+					finish: node.sourceCodeLocation.endTag !== undefined
 				})
 				lastEndOffset = endOffset
 			}

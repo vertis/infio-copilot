@@ -18,7 +18,6 @@ import {
 import { InfioSettings } from '../types/settings'
 import { defaultModeSlug, getFullModeDetails } from "../utils/modes"
 
-import { listFilesAndFolders } from './glob-utils'
 import {
 	readTFileContent
 } from './obsidian'

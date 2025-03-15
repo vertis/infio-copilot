@@ -44,6 +44,7 @@ import {
 import { readTFileContent } from '../../utils/obsidian'
 import { openSettingsModalWithError } from '../../utils/open-settings-modal'
 import { PromptGenerator, addLineNumbers } from '../../utils/prompt-generator'
+import { fetchUrlsContent, webSearch } from '../../utils/web-search'
 
 // Simple file reading function that returns a placeholder content for testing
 const readFileContent = (filePath: string): string => {
@@ -283,7 +284,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 					chatModel,
 					{
 						model: chatModel.modelId,
-						temperature: 0.5,
+						temperature: 0,
 						messages: requestMessages,
 						stream: true,
 					},
@@ -521,6 +522,38 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 					const formattedContent = `[semantic_search_files for '${toolArgs.filepath}'] Result:\n${snippets}\n`;
 					return {
 						type: 'semantic_search_files',
+						applyMsgId,
+						applyStatus: ApplyStatus.Applied,
+						returnMsg: {
+							role: 'user',
+							applyStatus: ApplyStatus.Idle,
+							content: null,
+							promptContent: formattedContent,
+							id: uuidv4(),
+							mentionables: [],
+						}
+					}
+				} else if (toolArgs.type === 'search_web') {
+					const results = await webSearch(toolArgs.query)
+					const formattedContent = `[search_web for '${toolArgs.query}'] Result:\n${results}\n`;
+					return {
+						type: 'search_web',
+						applyMsgId,
+						applyStatus: ApplyStatus.Applied,
+						returnMsg: {
+							role: 'user',
+							applyStatus: ApplyStatus.Idle,
+							content: null,
+							promptContent: formattedContent,
+							id: uuidv4(),
+							mentionables: [],
+						}
+					}
+				} else if (toolArgs.type === 'fetch_urls_content') {
+					const results = await fetchUrlsContent(toolArgs.urls)
+					const formattedContent = `[ fetch_urls_content ] Result:\n${results}\n`;
+					return {
+						type: 'fetch_urls_content',
 						applyMsgId,
 						applyStatus: ApplyStatus.Applied,
 						returnMsg: {

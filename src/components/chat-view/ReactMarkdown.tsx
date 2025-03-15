@@ -8,14 +8,15 @@ import {
 } from '../../utils/parse-infio-block'
 
 import MarkdownEditFileBlock from './MarkdownEditFileBlock'
+import MarkdownFetchUrlsContentBlock from './MarkdownFetchUrlsContentBlock'
 import MarkdownListFilesBlock from './MarkdownListFilesBlock'
 import MarkdownReadFileBlock from './MarkdownReadFileBlock'
 import MarkdownReasoningBlock from './MarkdownReasoningBlock'
 import MarkdownRegexSearchFilesBlock from './MarkdownRegexSearchFilesBlock'
 import MarkdownSearchAndReplace from './MarkdownSearchAndReplace'
+import MarkdownSearchWebBlock from './MarkdownSearchWebBlock'
 import MarkdownSemanticSearchFilesBlock from './MarkdownSemanticSearchFilesBlock'
 import MarkdownWithIcons from './MarkdownWithIcon'
-
 function ReactMarkdown({
 	applyStatus,
 	onApply,
@@ -131,6 +132,22 @@ function ReactMarkdown({
 						markdownContent={
 							`<icon name='ask_followup_question' size={14} className="infio-markdown-icon" />
 						${block.question && block.question.trimStart()}`} />
+				) : block.type === 'search_web' ? (
+					<MarkdownSearchWebBlock
+						key={"search-web-" + index}
+						applyStatus={applyStatus}
+						onApply={onApply}
+						query={block.query}
+						finish={block.finish}
+					/>
+				) : block.type === 'fetch_urls_content' ? (
+					<MarkdownFetchUrlsContentBlock
+						key={"fetch-urls-content-" + index}
+						applyStatus={applyStatus}
+						onApply={onApply}
+						urls={block.urls}
+						finish={block.finish}
+					/>
 				) : (
 					<Markdown key={"markdown-" + index} className="infio-markdown">
 						{block.content}
