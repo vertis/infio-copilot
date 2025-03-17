@@ -222,6 +222,10 @@ export const InfioSettingsSchema = z.object({
 	// Mode
 	mode: z.string().catch('ask'),
 
+	// Web Search
+	serperApiKey: z.string().catch(''),
+	jinaApiKey: z.string().catch(''),
+
 	/// [compatible]
 	// activeModels [compatible]
 	activeModels: z.array(

@@ -535,7 +535,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						}
 					}
 				} else if (toolArgs.type === 'search_web') {
-					const results = await webSearch(toolArgs.query)
+					const results = await webSearch(toolArgs.query, settings.serperApiKey)
 					const formattedContent = `[search_web for '${toolArgs.query}'] Result:\n${results}\n`;
 					return {
 						type: 'search_web',
@@ -551,7 +551,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						}
 					}
 				} else if (toolArgs.type === 'fetch_urls_content') {
-					const results = await fetchUrlsContent(toolArgs.urls)
+					const results = await fetchUrlsContent(toolArgs.urls, settings.jinaApiKey)
 					const formattedContent = `[ fetch_urls_content ] Result:\n${results}\n`;
 					return {
 						type: 'fetch_urls_content',

@@ -37,6 +37,7 @@ export class InfioSettingTab extends PluginSettingTab {
 		const { containerEl } = this
 		containerEl.empty()
 		this.renderModelsSection(containerEl)
+		this.renderDeepResearchSection(containerEl)
 		this.renderRAGSection(containerEl)
 		this.renderAutoCompleteSection(containerEl)
 	}
@@ -61,6 +62,58 @@ export class InfioSettingTab extends PluginSettingTab {
 		const modelsDiv = containerEl.createDiv("models-section");
 		this.modelsContainer = modelsDiv;
 		this.renderModelsContent(modelsDiv);
+	}
+
+	renderDeepResearchSection(containerEl: HTMLElement): void {
+		new Setting(containerEl)
+			.setHeading()
+			.setName('Deep Research')
+
+		new Setting(containerEl)
+			.setName('Serper Api Key')
+			.setDesc(createFragment(el => {
+				el.appendText('API key for web search functionality. Serper allows the plugin to search the internet for information, similar to a search engine. Get your key from ');
+				const a = el.createEl('a', { 
+					href: 'https://serpapi.com/manage-api-key',
+					text: 'https://serpapi.com/manage-api-key'
+				});
+				a.setAttr('target', '_blank');
+				a.setAttr('rel', 'noopener');
+			}))
+			.setClass('setting-item-heading-smaller')
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.serperApiKey)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							serperApiKey: value,
+						})
+					}),
+			)
+
+		new Setting(containerEl)
+			.setName('Jina Api Key (Optional)')
+			.setDesc(createFragment(el => {
+				el.appendText('API key for parsing web pages into markdown format. If not provided, local parsing will be used. Get your key from ');
+				const a = el.createEl('a', { 
+					href: 'https://jina.ai/api-key',
+					text: 'https://jina.ai/api-key'
+				});
+				a.setAttr('target', '_blank');
+				a.setAttr('rel', 'noopener');
+			}))
+			.setClass('setting-item-heading-smaller')
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.jinaApiKey)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							jinaApiKey: value,
+						})
+					}),
+			)
 	}
 
 	renderRAGSection(containerEl: HTMLElement): void {
