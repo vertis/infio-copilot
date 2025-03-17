@@ -16,7 +16,7 @@ import {
 	MentionableVault
 } from '../types/mentionable'
 import { InfioSettings } from '../types/settings'
-import { Mode, defaultModeSlug, getFullModeDetails, getModeBySlug } from "../utils/modes"
+import { Mode, getFullModeDetails } from "../utils/modes"
 
 import {
 	readTFileContent

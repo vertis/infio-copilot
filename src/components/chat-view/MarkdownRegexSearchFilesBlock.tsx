@@ -1,4 +1,4 @@
-import { FolderOpen } from 'lucide-react'
+import { FileSearch } from 'lucide-react'
 import React from 'react'
 
 import { useApp } from '../../contexts/AppContext'
@@ -44,7 +44,7 @@ export default function MarkdownRegexSearchFilesBlock({
 		>
 			<div className={'infio-chat-code-block-header'}>
 				<div className={'infio-chat-code-block-header-filename'}>
-					<FolderOpen size={14} className="infio-chat-code-block-header-icon" />
+					<FileSearch size={14} className="infio-chat-code-block-header-icon" />
 					<span>regex search files &quot;{regex}&quot; in {path}</span>
 				</div>
 			</div>

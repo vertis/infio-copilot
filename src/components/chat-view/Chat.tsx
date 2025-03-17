@@ -868,7 +868,6 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 							>
 								{message.content}
 							</ReactMarkdownItem>
-							{/* {message.content && <AssistantMessageActions key={"actions-" + message.id} message={message} />} */}
 						</div>
 					),
 				)}
