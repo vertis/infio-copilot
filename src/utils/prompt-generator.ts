@@ -158,7 +158,15 @@ export class PromptGenerator {
 			},
 		]
 		console.log('this.settings.mode', this.settings.mode)
-		const systemMessage = await this.getSystemMessageNew(this.settings.mode)
+		let filesSearchMethod = this.settings.filesSearchMethod
+		if (filesSearchMethod === 'auto' && this.settings.embeddingModelId && this.settings.embeddingModelId !== '') {
+			filesSearchMethod = 'semantic'
+		} else {
+			filesSearchMethod = 'regex'
+		}
+
+		console.log('filesSearchMethod: ', filesSearchMethod)
+		const systemMessage = await this.getSystemMessageNew(this.settings.mode, filesSearchMethod)
 
 		const requestMessages: RequestMessage[] = [
 			systemMessage,
@@ -446,8 +454,8 @@ export class PromptGenerator {
 		}
 	}
 
-	private async getSystemMessageNew(mode: Mode): Promise<RequestMessage> {
-		const systemPrompt = await SYSTEM_PROMPT(this.app.vault.getRoot().path, false, mode)
+	private async getSystemMessageNew(mode: Mode, filesSearchMethod: string): Promise<RequestMessage> {
+		const systemPrompt = await SYSTEM_PROMPT(this.app.vault.getRoot().path, false, mode, filesSearchMethod)
 
 		return {
 			role: 'system',

@@ -38,6 +38,7 @@ export class InfioSettingTab extends PluginSettingTab {
 		containerEl.empty()
 		this.renderModelsSection(containerEl)
 		this.renderDeepResearchSection(containerEl)
+		this.renderFilesSearchSection(containerEl)
 		this.renderRAGSection(containerEl)
 		this.renderAutoCompleteSection(containerEl)
 	}
@@ -58,6 +59,26 @@ export class InfioSettingTab extends PluginSettingTab {
 		);
 	}
 
+	private renderFilesSearchSection(containerEl: HTMLElement): void {
+		new Setting(containerEl)
+			.setHeading()
+			.setName('Files Search Method')
+			.setDesc('Choose the method to search for files.')
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption('auto', 'Auto')
+					.addOption('regex', 'Regex')
+					.addOption('semantic', 'Semantic')
+					.setValue(this.plugin.settings.filesSearchMethod)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							filesSearchMethod: value as 'regex' | 'semantic' | 'auto',
+						})
+					}),
+			)
+	}
+
 	renderModelsSection(containerEl: HTMLElement): void {
 		const modelsDiv = containerEl.createDiv("models-section");
 		this.modelsContainer = modelsDiv;
@@ -73,7 +94,7 @@ export class InfioSettingTab extends PluginSettingTab {
 			.setName('Serper Api Key')
 			.setDesc(createFragment(el => {
 				el.appendText('API key for web search functionality. Serper allows the plugin to search the internet for information, similar to a search engine. Get your key from ');
-				const a = el.createEl('a', { 
+				const a = el.createEl('a', {
 					href: 'https://serpapi.com/manage-api-key',
 					text: 'https://serpapi.com/manage-api-key'
 				});
@@ -96,7 +117,7 @@ export class InfioSettingTab extends PluginSettingTab {
 			.setName('Jina Api Key (Optional)')
 			.setDesc(createFragment(el => {
 				el.appendText('API key for parsing web pages into markdown format. If not provided, local parsing will be used. Get your key from ');
-				const a = el.createEl('a', { 
+				const a = el.createEl('a', {
 					href: 'https://jina.ai/api-key',
 					text: 'https://jina.ai/api-key'
 				});
@@ -290,16 +311,16 @@ export class InfioSettingTab extends PluginSettingTab {
 
 	private renderAutoCompleteContent(containerEl: HTMLElement): void {
 		const updateSettings = async (update: Partial<InfioSettings>) => {
-		    await this.plugin.setSettings({
-		        ...this.plugin.settings,
-		        ...update
-		    });
-		    
-		    // 只重新渲染 AutoComplete 部分
-		    if (this.autoCompleteContainer) {
-		        this.autoCompleteContainer.empty();
-		        this.renderAutoCompleteContent(this.autoCompleteContainer);
-		    }
+			await this.plugin.setSettings({
+				...this.plugin.settings,
+				...update
+			});
+
+			// 只重新渲染 AutoComplete 部分
+			if (this.autoCompleteContainer) {
+				this.autoCompleteContainer.empty();
+				this.renderAutoCompleteContent(this.autoCompleteContainer);
+			}
 		};
 
 		const errors = new Map();

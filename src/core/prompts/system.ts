@@ -28,6 +28,7 @@ async function generatePrompt(
 	cwd: string,
 	supportsComputerUse: boolean,
 	mode: Mode,
+	filesSearchMethod: string,
 	mcpHub?: McpHub,
 	diffStrategy?: DiffStrategy,
 	browserViewportSize?: string,
@@ -42,8 +43,6 @@ async function generatePrompt(
 	// if (!context) {
 	// 	throw new Error("Extension context is required for generating system prompt")
 	// }
-
-	const searchTool = "semantic"
 
 	// If diff is disabled, don't pass the diffStrategy
 	const effectiveDiffStrategy = diffEnabled ? diffStrategy : undefined
@@ -66,7 +65,7 @@ ${getSharedToolUseSection()}
 ${getToolDescriptionsForMode(
 		mode,
 		cwd,
-		searchTool,
+		filesSearchMethod,
 		supportsComputerUse,
 		effectiveDiffStrategy,
 		browserViewportSize,
@@ -82,7 +81,7 @@ ${mcpServersSection}
 ${getCapabilitiesSection(
 		mode,
 		cwd,
-		searchTool,
+		filesSearchMethod,
 	)}
 
 ${modesSection}
@@ -90,7 +89,7 @@ ${modesSection}
 ${getRulesSection(
 		mode,
 		cwd,
-		searchTool,
+		filesSearchMethod,
 		supportsComputerUse,
 		effectiveDiffStrategy,
 		experiments,
@@ -109,6 +108,7 @@ export const SYSTEM_PROMPT = async (
 	cwd: string,
 	supportsComputerUse: boolean,
 	mode: Mode = defaultModeSlug,
+	filesSearchMethod: string = 'regex',
 	mcpHub?: McpHub,
 	diffStrategy?: DiffStrategy,
 	browserViewportSize?: string,
@@ -158,6 +158,7 @@ export const SYSTEM_PROMPT = async (
 		cwd,
 		supportsComputerUse,
 		currentMode.slug,
+		filesSearchMethod,
 		mcpHub,
 		effectiveDiffStrategy,
 		browserViewportSize,
