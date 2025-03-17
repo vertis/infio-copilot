@@ -76,4 +76,11 @@ export type FetchUrlsContentToolArgs = {
 	finish?: boolean;
 }
 
-export type ToolArgs = ReadFileToolArgs | WriteToFileToolArgs | InsertContentToolArgs | SearchAndReplaceToolArgs | ListFilesToolArgs | RegexSearchFilesToolArgs | SemanticSearchFilesToolArgs | SearchWebToolArgs | FetchUrlsContentToolArgs;
+export type SwitchModeToolArgs = {
+	type: 'switch_mode';
+	mode: string;
+	reason: string;
+	finish?: boolean;
+}
+
+export type ToolArgs = ReadFileToolArgs | WriteToFileToolArgs | InsertContentToolArgs | SearchAndReplaceToolArgs | ListFilesToolArgs | RegexSearchFilesToolArgs | SemanticSearchFilesToolArgs | SearchWebToolArgs | FetchUrlsContentToolArgs | SwitchModeToolArgs;

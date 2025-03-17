@@ -248,15 +248,15 @@ export const defaultPrompts: Readonly<CustomModePrompts> = Object.freeze(
 )
 
 // Helper function to get all modes with their prompt overrides from extension state
-export async function getAllModesWithPrompts(context: vscode.ExtensionContext): Promise<ModeConfig[]> {
-	const customModes = (await context.globalState.get<ModeConfig[]>("customModes")) || []
-	const customModePrompts = (await context.globalState.get<CustomModePrompts>("customModePrompts")) || {}
+export async function getAllModesWithPrompts(): Promise<ModeConfig[]> {
+	// const customModes = (await context.globalState.get<ModeConfig[]>("customModes")) || []
+	// const customModePrompts = (await context.globalState.get<CustomModePrompts>("customModePrompts")) || {}
 
-	const allModes = getAllModes(customModes)
+	const allModes = getAllModes()
 	return allModes.map((mode) => ({
 		...mode,
-		roleDefinition: customModePrompts[mode.slug]?.roleDefinition ?? mode.roleDefinition,
-		customInstructions: customModePrompts[mode.slug]?.customInstructions ?? mode.customInstructions,
+		roleDefinition: mode.roleDefinition,
+		customInstructions: mode.customInstructions,
 	}))
 }
 

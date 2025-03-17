@@ -15,7 +15,7 @@ import {
 	addCustomInstructions,
 	getCapabilitiesSection,
 	getMcpServersSection,
-	// getModesSection,
+	getModesSection,
 	getObjectiveSection,
 	getRulesSection,
 	getSharedToolUseSection,
@@ -44,7 +44,7 @@ async function generatePrompt(
 	// }
 
 	const searchTool = "semantic"
-	
+
 	// If diff is disabled, don't pass the diffStrategy
 	const effectiveDiffStrategy = diffEnabled ? diffStrategy : undefined
 
@@ -52,9 +52,12 @@ async function generatePrompt(
 	const modeConfig = getModeBySlug(mode, customModeConfigs) || modes.find((m) => m.slug === mode) || modes[0]
 	const roleDefinition = promptComponent?.roleDefinition || modeConfig.roleDefinition
 
-	const mcpServersSection = modeConfig.groups.some((groupEntry) => getGroupName(groupEntry) === "mcp")
-		? await getMcpServersSection(mcpHub, effectiveDiffStrategy, enableMcpServerCreation)
-		: ""
+	const [modesSection, mcpServersSection] = await Promise.all([
+		getModesSection(),
+		modeConfig.groups.some((groupEntry) => getGroupName(groupEntry) === "mcp")
+			? getMcpServersSection(mcpHub, effectiveDiffStrategy, enableMcpServerCreation)
+			: Promise.resolve(""),
+	])
 
 	const basePrompt = `${roleDefinition}
 
@@ -77,19 +80,21 @@ ${getToolUseGuidelinesSection()}
 ${mcpServersSection}
 
 ${getCapabilitiesSection(
-	mode,
-	cwd,
-	searchTool,
-)}
+		mode,
+		cwd,
+		searchTool,
+	)}
+
+${modesSection}
 
 ${getRulesSection(
-	mode,
-	cwd,
-	searchTool,
-	supportsComputerUse,
-	effectiveDiffStrategy,
-	experiments,
-)}
+		mode,
+		cwd,
+		searchTool,
+		supportsComputerUse,
+		effectiveDiffStrategy,
+		experiments,
+	)}
 
 ${getSystemInfoSection(cwd)}
 

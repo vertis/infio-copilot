@@ -14,6 +14,7 @@ import {
 } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
+import { ModeSelect } from './chat-input/ModeSelect'
 import { ApplyViewState } from '../../ApplyView'
 import { APPLY_VIEW_TYPE } from '../../constants'
 import { useApp } from '../../contexts/AppContext'
@@ -90,7 +91,7 @@ export type ChatProps = {
 
 const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 	const app = useApp()
-	const { settings } = useSettings()
+	const { settings, setSettings } = useSettings()
 	const { getRAGEngine } = useRAG()
 
 	const {
@@ -565,6 +566,25 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 							mentionables: [],
 						}
 					}
+				} else if (toolArgs.type === 'switch_mode') {
+					setSettings({
+						...settings,
+						mode: toolArgs.mode,
+					})
+					const formattedContent = `[switch_mode to ${toolArgs.mode}] Result: successfully switched to ${toolArgs.mode}\n`
+					return {
+						type: 'switch_mode',
+						applyMsgId,
+						applyStatus: ApplyStatus.Applied,
+						returnMsg: {
+							role: 'user',
+							applyStatus: ApplyStatus.Idle,
+							content: null,
+							promptContent: formattedContent,
+							id: uuidv4(),
+							mentionables: [],
+						}
+					}
 				}
 			} catch (error) {
 				console.error('Failed to apply changes', error)
@@ -745,7 +765,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 	return (
 		<div className="infio-chat-container">
 			<div className="infio-chat-header">
-				<h1 className="infio-chat-header-title"> CHAT </h1>
+				<ModeSelect />
 				<div className="infio-chat-header-buttons">
 					<button
 						onClick={() => handleNewChat()}

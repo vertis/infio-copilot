@@ -68,6 +68,11 @@ export type ParsedMsgBlock =
 		type: 'fetch_urls_content'
 		urls: string[]
 		finish: boolean
+	} | {
+		type: 'switch_mode'
+		mode: string
+		reason: string
+		finish: boolean
 	}
 
 export function parseMsgBlocks(
@@ -399,7 +404,6 @@ export function parseMsgBlocks(
 					result,
 				})
 				lastEndOffset = endOffset
-
 			} else if (node.nodeName === 'ask_followup_question') {
 				if (!node.sourceCodeLocation) {
 					throw new Error('sourceCodeLocation is undefined')
@@ -423,8 +427,40 @@ export function parseMsgBlocks(
 					question,
 				})
 				lastEndOffset = endOffset
-			}
-			else if (node.nodeName === 'search_web') {
+			} else if (node.nodeName === 'switch_mode') {
+				if (!node.sourceCodeLocation) {
+					throw new Error('sourceCodeLocation is undefined')
+				}
+				const startOffset = node.sourceCodeLocation.startOffset
+				const endOffset = node.sourceCodeLocation.endOffset
+				if (startOffset > lastEndOffset) {
+					parsedResult.push({
+						type: 'string',
+						content: input.slice(lastEndOffset, startOffset),
+					})
+				}
+				
+				let mode: string = ''
+				let reason: string = ''
+				
+				for (const childNode of node.childNodes) {
+					if (childNode.nodeName === 'mode_slug' && childNode.childNodes.length > 0) {
+						// @ts-ignore - 忽略 value 属性的类型错误
+						mode = childNode.childNodes[0].value
+					} else if (childNode.nodeName === 'reason' && childNode.childNodes.length > 0) {
+						// @ts-ignore - 忽略 value 属性的类型错误
+						reason = childNode.childNodes[0].value
+					}
+				}
+				
+				parsedResult.push({
+					type: 'switch_mode',
+					mode,
+					reason,
+					finish: node.sourceCodeLocation.endTag !== undefined
+				})
+				lastEndOffset = endOffset
+			} else if (node.nodeName === 'search_web') {
 				if (!node.sourceCodeLocation) {
 					throw new Error('sourceCodeLocation is undefined')
 				}

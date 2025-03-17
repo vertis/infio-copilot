@@ -16,7 +16,7 @@ import {
 	MentionableVault
 } from '../types/mentionable'
 import { InfioSettings } from '../types/settings'
-import { defaultModeSlug, getFullModeDetails } from "../utils/modes"
+import { Mode, defaultModeSlug, getFullModeDetails, getModeBySlug } from "../utils/modes"
 
 import {
 	readTFileContent
@@ -157,8 +157,8 @@ export class PromptGenerator {
 				similaritySearchResults,
 			},
 		]
-
-		const systemMessage = await this.getSystemMessageNew()
+		console.log('this.settings.mode', this.settings.mode)
+		const systemMessage = await this.getSystemMessageNew(this.settings.mode)
 
 		const requestMessages: RequestMessage[] = [
 			systemMessage,
@@ -225,7 +225,7 @@ export class PromptGenerator {
 		details += `\n\n# Current Time\n${formatter.format(now)} (${timeZone}, UTC${timeZoneOffsetStr})`
 
 		// Add current mode details
-		const currentMode = defaultModeSlug
+		const currentMode = this.settings.mode
 		const modeDetails = await getFullModeDetails(currentMode)
 		details += `\n\n# Current Mode\n`
 		details += `<slug>${currentMode}</slug>\n`
@@ -446,8 +446,8 @@ export class PromptGenerator {
 		}
 	}
 
-	private async getSystemMessageNew(): Promise<RequestMessage> {
-		const systemPrompt = await SYSTEM_PROMPT(this.app.vault.getRoot().path, false)
+	private async getSystemMessageNew(mode: Mode): Promise<RequestMessage> {
+		const systemPrompt = await SYSTEM_PROMPT(this.app.vault.getRoot().path, false, mode)
 
 		return {
 			role: 'system',

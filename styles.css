@@ -493,7 +493,7 @@ button:not(.clickable-icon).infio-chat-list-dropdown {
   /* position: fixed; */
   border: 1px solid var(--background-modifier-border);
   overflow: hidden;
-  width: 240px;
+  min-width: 60px;
   max-width: 240px;
 }
 

@@ -219,6 +219,9 @@ export const InfioSettingsSchema = z.object({
 	embeddingModelProvider: z.nativeEnum(ApiProvider).catch(ApiProvider.Google),
 	embeddingModelId: z.string().catch(''),
 
+	// Mode
+	mode: z.string().catch('ask'),
+
 	/// [compatible]
 	// activeModels [compatible]
 	activeModels: z.array(

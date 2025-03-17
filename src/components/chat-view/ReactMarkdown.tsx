@@ -16,6 +16,7 @@ import MarkdownRegexSearchFilesBlock from './MarkdownRegexSearchFilesBlock'
 import MarkdownSearchAndReplace from './MarkdownSearchAndReplace'
 import MarkdownSearchWebBlock from './MarkdownSearchWebBlock'
 import MarkdownSemanticSearchFilesBlock from './MarkdownSemanticSearchFilesBlock'
+import MarkdownSwitchModeBlock from './MarkdownSwitchModeBlock'
 import MarkdownWithIcons from './MarkdownWithIcon'
 function ReactMarkdown({
 	applyStatus,
@@ -132,6 +133,15 @@ function ReactMarkdown({
 						markdownContent={
 							`<icon name='ask_followup_question' size={14} className="infio-markdown-icon" />
 						${block.question && block.question.trimStart()}`} />
+				) : block.type === 'switch_mode' ? (
+					<MarkdownSwitchModeBlock
+						key={"switch-mode-" + index}
+						applyStatus={applyStatus}
+						onApply={onApply}
+						mode={block.mode}
+						reason={block.reason}
+						finish={block.finish}
+					/>
 				) : block.type === 'search_web' ? (
 					<MarkdownSearchWebBlock
 						key={"search-web-" + index}

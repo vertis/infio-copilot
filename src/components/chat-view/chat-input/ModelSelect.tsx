@@ -18,15 +18,16 @@ export function ModelSelect() {
 			try {
 				const models = await GetProviderModelIds(settings.chatModelProvider)
 				setProviderModels(models)
+				setChatModelId(settings.chatModelId)
 			} catch (error) {
 				console.error('Failed to fetch provider models:', error)
 			} finally {
 				setIsLoading(false)
 			}
 		}
-		
+
 		fetchModels()
-	}, [settings.chatModelProvider])
+	}, [settings])
 
 	return (
 		<DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
