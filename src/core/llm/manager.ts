@@ -44,6 +44,7 @@ class LLMManager implements LLMManagerInterface {
 	private siliconflowProvider: OpenAICompatibleProvider
 	private alibabaQwenProvider: OpenAICompatibleProvider
 	private ollamaProvider: OllamaProvider
+	private openaiCompatibleProvider: OpenAICompatibleProvider
 	private isInfioEnabled: boolean
 
 	constructor(settings: InfioSettings) {
@@ -57,6 +58,7 @@ class LLMManager implements LLMManagerInterface {
 		this.googleProvider = new GeminiProvider(settings.googleProvider.apiKey)
 		this.groqProvider = new GroqProvider(settings.groqProvider.apiKey)
 		this.ollamaProvider = new OllamaProvider(settings.groqProvider.baseUrl)
+		this.openaiCompatibleProvider = new OpenAICompatibleProvider(settings.openaicompatibleProvider.apiKey, settings.openaicompatibleProvider.baseUrl)
 		this.isInfioEnabled = !!settings.infioProvider.apiKey
 	}
 
@@ -160,6 +162,8 @@ class LLMManager implements LLMManagerInterface {
 				return await this.groqProvider.streamResponse(model, request, options)
 			case ApiProvider.Ollama:
 				return await this.ollamaProvider.streamResponse(model, request, options)
+			case ApiProvider.OpenAICompatible:
+				return await this.openaiCompatibleProvider.streamResponse(model, request, options)
 		}
 	}
 }

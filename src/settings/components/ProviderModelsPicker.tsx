@@ -160,10 +160,10 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 	isEmbedding = false,
 	updateModel,
 }) => {
-	// 提供商选择状态
+	// provider state
 	const [modelProvider, setModelProvider] = useState(provider);
 
-	// 搜索输入状态
+	// search state
 	const [searchTerm, setSearchTerm] = useState("");
 	const [isOpen, setIsOpen] = useState(false);
 	const [selectedIndex, setSelectedIndex] = useState(0);
@@ -175,12 +175,12 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 	// Replace useMemo with useEffect for async fetching
 	useEffect(() => {
 		const fetchModelIds = async () => {
-			const ids = isEmbedding 
-				? GetEmbeddingProviderModelIds(modelProvider) 
+			const ids = isEmbedding
+				? GetEmbeddingProviderModelIds(modelProvider)
 				: await GetProviderModelIds(modelProvider);
 			setModelIds(ids);
 		};
-		
+
 		fetchModelIds();
 	}, [modelProvider, isEmbedding]);
 
@@ -191,7 +191,7 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 		}))
 	}, [modelIds])
 
-	// 初始化 fuse，用于模糊搜索，简单配置 threshold 可按需调整
+	// fuse, used for fuzzy search, simple configuration threshold can be adjusted as needed
 	const fuse: Fuse<SearchableItem> = useMemo(() => {
 		return new Fuse<SearchableItem>(searchableItems, {
 			keys: ["html"],
@@ -218,7 +218,7 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 	const listRef = useRef<HTMLDivElement>(null);
 	const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
 
-	// 当选中项发生变化时，滚动到可视区域内
+	// when selected index changes, scroll to visible area
 	useEffect(() => {
 		if (itemRefs.current[selectedIndex]) {
 			itemRefs.current[selectedIndex]?.scrollIntoView({
@@ -234,7 +234,7 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 			<Popover.Root modal={false} open={isOpen} onOpenChange={setIsOpen}>
 				<Popover.Trigger asChild>
 					<div className="infio-llm-setting-item-control">
-						<span className="infio-llm-setting-model-id">{modelId}</span>
+						<span className="infio-llm-setting-model-id">[{modelProvider}]{modelId}</span>
 					</div>
 				</Popover.Trigger>
 				<Popover.Content
@@ -260,45 +260,64 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 									</option>
 								))}
 							</select>
-							<input
-								type="text"
-								className="infio-llm-setting-item-search"
-								placeholder="search model..."
-								value={searchTerm}
-								onChange={(e) => {
-									setSearchTerm(e.target.value);
-									setSelectedIndex(0);
-								}}
-								onKeyDown={(e) => {
-									switch (e.key) {
-										case "ArrowDown":
-											e.preventDefault();
-											setSelectedIndex((prev) =>
-												Math.min(prev + 1, filteredOptions.length - 1)
-											);
-											break;
-										case "ArrowUp":
-											e.preventDefault();
-											setSelectedIndex((prev) => Math.max(prev - 1, 0));
-											break;
-										case "Enter": {
-											e.preventDefault();
-											const selectedOption = filteredOptions[selectedIndex];
-											if (selectedOption) {
-												updateModel(modelProvider, selectedOption.id);
+							{modelIds.length > 0 ? (
+								<input
+									type="text"
+									className="infio-llm-setting-item-search"
+									placeholder="search model..."
+									value={searchTerm}
+									onChange={(e) => {
+										setSearchTerm(e.target.value);
+										setSelectedIndex(0);
+									}}
+									onKeyDown={(e) => {
+										switch (e.key) {
+											case "ArrowDown":
+												e.preventDefault();
+												setSelectedIndex((prev) =>
+													Math.min(prev + 1, filteredOptions.length - 1)
+												);
+												break;
+											case "ArrowUp":
+												e.preventDefault();
+												setSelectedIndex((prev) => Math.max(prev - 1, 0));
+												break;
+											case "Enter": {
+												e.preventDefault();
+												const selectedOption = filteredOptions[selectedIndex];
+												if (selectedOption) {
+													updateModel(modelProvider, selectedOption.id);
+													setSearchTerm("");
+													setIsOpen(false);
+												}
+												break;
+											}
+											case "Escape":
+												e.preventDefault();
+												setIsOpen(false);
 												setSearchTerm("");
+												break;
+										}
+									}}
+								/>
+							) : (
+									<input
+										type="text"
+										className="infio-llm-setting-item-search"
+										placeholder="input custom model name"
+										value={searchTerm}
+										onChange={(e) => {
+											setSearchTerm(e.target.value);
+										}}
+										onKeyDown={(e) => {
+											if (e.key === "Enter") {
+												e.preventDefault();
+												updateModel(modelProvider, searchTerm);
 												setIsOpen(false);
 											}
-											break;
-										}
-										case "Escape":
-											e.preventDefault();
-											setIsOpen(false);
-											setSearchTerm("");
-											break;
-									}
-								}}
-							/>
+										}}
+									/>
+							)}
 						</div>
 						{filteredOptions.map((option, index) => (
 							<Popover.Close key={option.id} asChild>
