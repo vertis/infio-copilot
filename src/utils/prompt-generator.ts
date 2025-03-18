@@ -1,4 +1,4 @@
-import { App, MarkdownView, TAbstractFile, TFile, TFolder, Vault, htmlToMarkdown, requestUrl } from 'obsidian'
+import { App, MarkdownView, TAbstractFile, TFile, TFolder, Vault, htmlToMarkdown, requestUrl, getLanguage } from 'obsidian'
 
 import { editorStateToPlainText } from '../components/chat-view/chat-input/utils/editor-state-to-plain-text'
 import { QueryProgressState } from '../components/chat-view/QueryProgress'
@@ -33,6 +33,14 @@ export function addLineNumbers(content: string, startLine: number = 1): string {
 			return `${lineNumber} | ${line}`
 		})
 		.join("\n")
+}
+
+export function getFullLanguageName(code: string): string {
+	try {
+		return new Intl.DisplayNames([code], { type: 'language' }).of(code) || code;
+	} catch {
+		return code.toUpperCase();
+	}
 }
 
 async function getFolderTreeContent(path: TFolder): Promise<string> {
@@ -166,7 +174,10 @@ export class PromptGenerator {
 		}
 
 		console.log('filesSearchMethod: ', filesSearchMethod)
-		const systemMessage = await this.getSystemMessageNew(this.settings.mode, filesSearchMethod)
+
+		const userLanguage = getFullLanguageName(getLanguage())
+		console.log(' current user language: ', userLanguage)
+		const systemMessage = await this.getSystemMessageNew(this.settings.mode, filesSearchMethod, userLanguage)
 
 		const requestMessages: RequestMessage[] = [
 			systemMessage,
@@ -454,8 +465,8 @@ export class PromptGenerator {
 		}
 	}
 
-	private async getSystemMessageNew(mode: Mode, filesSearchMethod: string): Promise<RequestMessage> {
-		const systemPrompt = await SYSTEM_PROMPT(this.app.vault.getRoot().path, false, mode, filesSearchMethod)
+	private async getSystemMessageNew(mode: Mode, filesSearchMethod: string, preferredLanguage: string): Promise<RequestMessage> {
+		const systemPrompt = await SYSTEM_PROMPT(this.app.vault.getRoot().path, false, mode, filesSearchMethod, preferredLanguage)
 
 		return {
 			role: 'system',
