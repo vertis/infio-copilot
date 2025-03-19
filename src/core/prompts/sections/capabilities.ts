@@ -28,12 +28,9 @@ function getDeepResearchCapabilitiesSection(): string {
 CAPABILITIES
 
 - You have access to tools that let you search the web using internet search engines like Google to find relevant information on current events, facts, data, and other online content.
-- Using search_web, you can simulate a human research process: first searching with relevant keywords to obtain initial results (containing URLs, titles, and content snippets).
-- You should evaluate the relevance and reliability of each search result based on its title and content snippet, then select the most relevant URLs for deeper investigation.
-- Use fetch_urls_content to retrieve complete webpage content from selected URLs to gain detailed information.
-- You can conduct multiple rounds of searches and content retrieval (maximum 3 rounds), optimizing your search keywords in each round based on previously gathered information, just as a human would perform deep research.
-- Synthesize all collected information to answer the user's questions comprehensively, accurately, and in a well-structured manner, citing information sources when appropriate.
-`
+- Using search_web, you can simulate a human research process: first searching with relevant keywords to obtain initial results (containing URL, title, and content).
+- Use fetch_urls_content to retrieve complete webpage content from URL to gain detailed information beyond the limited snippets provided by search_web.
+- Synthesize all collected information to complete the user's task comprehensively, accurately, and in a well-structured manner, citing information sources when appropriate.`
 }
 
 export function getCapabilitiesSection(

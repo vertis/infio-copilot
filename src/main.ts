@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { EditorView } from '@codemirror/view'
+// import { PGlite } from '@electric-sql/pglite'
 import { Editor, MarkdownView, Notice, Plugin, TFile } from 'obsidian'
 
 import { ApplyView } from './ApplyView'
@@ -25,8 +26,8 @@ import {
 	InfioSettings,
 	parseInfioSettings,
 } from './types/settings'
-import './utils/path'
 import { getMentionableBlockData } from './utils/obsidian'
+import './utils/path'
 
 // Remember to rename these classes and interfaces!
 export default class InfioPlugin extends Plugin {
@@ -41,13 +42,16 @@ export default class InfioPlugin extends Plugin {
 	inlineEdit: InlineEdit | null = null
 	private dbManagerInitPromise: Promise<DBManager> | null = null
 	private ragEngineInitPromise: Promise<RAGEngine> | null = null
-
+	// private pg: PGlite | null = null
 	async onload() {
 		await this.loadSettings()
 
 		// Add settings tab
 		this.settingTab = new InfioSettingTab(this.app, this)
 		this.addSettingTab(this.settingTab)
+
+		// create and init pglite db
+		// this.pg = await createAndInitDb()
 
 		// This creates an icon in the left ribbon.
 		this.addRibbonIcon('wand-sparkles', 'Open infio copilot', () =>
@@ -120,6 +124,17 @@ export default class InfioPlugin extends Plugin {
 			this.app.metadataCache.on("changed", (file: TFile) => {
 				if (file) {
 					eventListener.handleFileChange(file);
+					console.log("file changed: filename: ", file.name);
+					this.ragEngine?.updateFileIndex(file);
+				}
+			})
+		);
+
+		this.registerEvent(
+			this.app.metadataCache.on("deleted", (file: TFile) => {
+				if (file) {
+					console.log("file deleted: filename: ", file.name)
+					this.ragEngine?.deleteFileIndex(file);
 				}
 			})
 		);
@@ -322,7 +337,7 @@ export default class InfioPlugin extends Plugin {
 	}
 
 	onunload() {
-		this.dbManager?.cleanup()
+		// this.dbManager?.cleanup()
 		this.dbManager = null
 	}
 

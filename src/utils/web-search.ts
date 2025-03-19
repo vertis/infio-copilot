@@ -20,8 +20,6 @@ export async function webSearch(query: string, serperApiKey: string): Promise<st
 	return new Promise((resolve, reject) => {
 		const url = `${SERPER_BASE_URL}?q=${encodeURIComponent(query)}&engine=google&api_key=${serperApiKey}&num=20`;
 
-		console.log(url)
-
 		https.get(url, (res: any) => {
 			let data = '';
 
@@ -31,7 +29,6 @@ export async function webSearch(query: string, serperApiKey: string): Promise<st
 
 			res.on('end', () => {
 				try {
-					console.log(data)
 					let parsedData: SearchResponse;
 					try {
 						parsedData = JSON.parse(data);
@@ -90,8 +87,6 @@ export async function fetchUrlsContent(urls: string[], apiKey: string): Promise<
 			}
 		});
 
-		console.log('fetchUrlsContent', results);
-
 		Promise.all(results).then((texts) => {
 			resolve(texts.join('\n\n'));
 		}).catch((error) => {
@@ -123,8 +118,6 @@ function fetchJina(url: string, apiKey: string): Promise<string> {
 			});
 
 			res.on('end', () => {
-				console.log(data);
-
 				try {
 					// check if there is an error response
 					const response = JSON.parse(data);

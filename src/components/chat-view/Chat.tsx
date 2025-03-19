@@ -14,7 +14,6 @@ import {
 } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-import { ModeSelect } from './chat-input/ModeSelect'
 import { ApplyViewState } from '../../ApplyView'
 import { APPLY_VIEW_TYPE } from '../../constants'
 import { useApp } from '../../contexts/AppContext'
@@ -53,6 +52,7 @@ const readFileContent = (filePath: string): string => {
 	return `Content of file: ${filePath}`;
 }
 
+import { ModeSelect } from './chat-input/ModeSelect'
 import PromptInputWithActions, { ChatUserInputRef } from './chat-input/PromptInputWithActions'
 import { editorStateToPlainText } from './chat-input/utils/editor-state-to-plain-text'
 import { ChatHistory } from './ChatHistory'

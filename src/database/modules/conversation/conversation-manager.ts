@@ -30,7 +30,6 @@ export class ConversationManager {
 			updatedAt: new Date(),
 		}
 		await this.repository.create(conversation)
-		await this.dbManager.save()
 	}
 
 	async saveConversation(id: string, messages: ChatMessage[]): Promise<void> {
@@ -59,7 +58,6 @@ export class ConversationManager {
 
 		// Update conversation timestamp
 		await this.repository.update(id, { updatedAt: new Date() })
-		await this.dbManager.save()
 	}
 
 	async findConversation(id: string): Promise<ChatMessage[] | null> {
@@ -74,7 +72,6 @@ export class ConversationManager {
 
 	async deleteConversation(id: string): Promise<void> {
 		await this.repository.delete(id)
-		await this.dbManager.save()
 	}
 
 	getAllConversations(callback: (conversations: ChatConversationMeta[]) => void): void {
@@ -92,7 +89,6 @@ export class ConversationManager {
 
 	async updateConversationTitle(id: string, title: string): Promise<void> {
 		await this.repository.update(id, { title })
-		await this.dbManager.save()
 	}
 
 	// convert ChatMessage to InsertMessage

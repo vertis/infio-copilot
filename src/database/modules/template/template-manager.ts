@@ -24,7 +24,6 @@ export class TemplateManager {
 			throw new DuplicateTemplateException(template.name)
 		}
 		const created = await this.repository.create(template)
-		await this.dbManager.save()
 		return created
 	}
 
@@ -45,7 +44,6 @@ export class TemplateManager {
 
 	async deleteTemplate(id: string): Promise<boolean> {
 		const deleted = await this.repository.delete(id)
-		await this.dbManager.save()
 		return deleted
 	}
 }

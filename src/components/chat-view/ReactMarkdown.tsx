@@ -123,16 +123,22 @@ function ReactMarkdown({
 					<MarkdownWithIcons
 						key={"attempt-completion-" + index}
 						className="infio-markdown infio-attempt-completion"
-						markdownContent={
-							`<icon name='attempt_completion' size={14} className="infio-markdown-icon" />
-						${block.result && block.result.trimStart()}`} />
+						markdownContent={block.result}
+						finish={block.finish}
+						iconName="attempt_completion"
+						iconSize={14}
+						iconClassName="infio-markdown-icon"
+					/>
 				) : block.type === 'ask_followup_question' ? (
 					<MarkdownWithIcons
 						key={"ask-followup-question-" + index}
 						className="infio-markdown infio-followup-question"
-						markdownContent={
-							`<icon name='ask_followup_question' size={14} className="infio-markdown-icon" />
-						${block.question && block.question.trimStart()}`} />
+						markdownContent={block.question}
+						finish={block.finish}
+						iconName="ask_followup_question"
+						iconSize={14}
+						iconClassName="infio-markdown-icon"
+					/>
 				) : block.type === 'switch_mode' ? (
 					<MarkdownSwitchModeBlock
 						key={"switch-mode-" + index}

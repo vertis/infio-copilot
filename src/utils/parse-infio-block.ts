@@ -29,6 +29,7 @@ export type ParsedMsgBlock =
 	} | {
 		type: 'attempt_completion'
 		result: string
+		finish: boolean
 	} | {
 		type: 'search_and_replace'
 		path: string
@@ -44,7 +45,8 @@ export type ParsedMsgBlock =
 		finish: boolean
 	} | {
 		type: 'ask_followup_question'
-		question: string
+		question: string,
+		finish: boolean
 	} | {
 		type: 'list_files'
 		path: string
@@ -402,6 +404,7 @@ export function parseMsgBlocks(
 				parsedResult.push({
 					type: 'attempt_completion',
 					result,
+					finish: node.sourceCodeLocation.endTag !== undefined
 				})
 				lastEndOffset = endOffset
 			} else if (node.nodeName === 'ask_followup_question') {
@@ -425,6 +428,7 @@ export function parseMsgBlocks(
 				parsedResult.push({
 					type: 'ask_followup_question',
 					question,
+					finish: node.sourceCodeLocation.endTag !== undefined
 				})
 				lastEndOffset = endOffset
 			} else if (node.nodeName === 'switch_mode') {

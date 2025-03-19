@@ -22,7 +22,7 @@ export class VectorRepository {
     return tableDefinition.name
   }
 
-  async getIndexedFilePaths(embeddingModel: EmbeddingModel): Promise<string[]> {
+  async getAllIndexedFilePaths(embeddingModel: EmbeddingModel): Promise<string[]> {
     if (!this.db) {
       throw new DatabaseNotInitializedException()
     }
@@ -80,7 +80,7 @@ export class VectorRepository {
     if (!this.db) {
       throw new DatabaseNotInitializedException()
     }
-    const tableName = this.getTableName(embeddingModel)
+		const tableName = this.getTableName(embeddingModel)
     await this.db.query(`DELETE FROM "${tableName}"`)
   }
 
@@ -160,7 +160,11 @@ export class VectorRepository {
       if (conditions.length > 0) {
         scopeCondition = `AND (${conditions.join(' OR ')})`
       }
-    }
+		}
+		
+		const queryVectorLength = `SELECT count(1) FROM "${tableName}"`;
+		const queryVectorLengthResult = await this.db.query(queryVectorLength)
+		console.log('queryVectorLengthResult, ', queryVectorLengthResult)
 
     const query = `
       SELECT 

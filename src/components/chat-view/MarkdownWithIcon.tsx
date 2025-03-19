@@ -1,16 +1,15 @@
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { Check, CircleCheckBig, CircleHelp, CopyIcon, FilePlus2 } from 'lucide-react';
-import { ComponentPropsWithoutRef, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useApp } from 'src/contexts/AppContext';
-
 
 function CopyButton({ message }: { message: string }) {
 	const [copied, setCopied] = useState(false)
 
 	const handleCopy = async () => {
-		await navigator.clipboard.writeText(message.trim())
+		await navigator.clipboard.writeText(message)
 		setCopied(true)
 		setTimeout(() => {
 			setCopied(false)
@@ -49,8 +48,6 @@ function CreateNewFileButton({ message }: { message: string }) {
 	const handleCreate = async () => {
 		const firstLine = message.split('\n')[0].trim().replace(/[\\\/:]/g, '');
 		const filename = firstLine.slice(0, 200) + (firstLine.length > 200 ? '...' : '') || 'untitled';
-		console.log('filename', filename)
-		console.log('message', message)
 		await app.vault.create(`/${filename}.md`, message)
 		setCreated(true)
 		setTimeout(() => {
@@ -68,7 +65,7 @@ function CreateNewFileButton({ message }: { message: string }) {
 								className="infio-chat-message-actions-icon--copied"
 							/>
 						) : (
-								<FilePlus2 onClick={handleCreate} size={12} />
+							<FilePlus2 onClick={handleCreate} size={12} />
 						)}
 					</button>
 				</Tooltip.Trigger>
@@ -82,58 +79,70 @@ function CreateNewFileButton({ message }: { message: string }) {
 	)
 }
 
-const MarkdownWithIcons = ({ markdownContent, className }: { markdownContent: string, className?: string }) => {
-	// 预处理markdown内容，将<icon>标签转换为ReactMarkdown可以处理的格式
-	const processedContent = markdownContent.replace(
-		/<icon\s+name=['"]([^'"]+)['"]\s+size=\{(\d+)\}(\s+className=['"]([^'"]+)['"])?[^>]*\/>/g,
-		(_, name, size, __, className) =>
-			`<span data-icon="${name}" data-size="${size}" ${className ? `class="${className}"` : ''}></span>`
-	);
+type IconType = 'ask_followup_question' | 'attempt_completion';
 
-	const rawContent = markdownContent.replace(
-		/<icon\s+name=['"]([^'"]+)['"]\s+size=\{(\d+)\}(\s+className=['"]([^'"]+)['"])?[^>]*\/>/g,
-		() => ``
-	).trim();
+interface MarkdownWithIconsProps {
+	markdownContent: string;
+	finish: boolean
+	className?: string;
+	iconName?: IconType;
+	iconSize?: number;
+	iconClassName?: string;
+}
 
-	const components = {
-		span: (props: ComponentPropsWithoutRef<'span'> & {
-			'data-icon'?: string;
-			'data-size'?: string;
-		}) => {
-			if (props['data-icon']) {
-				const name = props['data-icon'];
-				const size = props['data-size'] ? Number(props['data-size']) : 16;
-				const className = props.className || '';
+const MarkdownWithIcons = ({
+	markdownContent,
+	finish,
+	className,
+	iconName,
+	iconSize = 14,
+	iconClassName = "infio-markdown-icon"
+}: MarkdownWithIconsProps) => {
+	// Handle icon rendering directly without string manipulation
+	const renderIcon = (): ReactNode => {
+		if (!iconName) return null;
 
-				switch (name) {
-					case 'ask_followup_question':
-						return <CircleHelp size={size} className={className} />;
-					case 'attempt_completion':
-						return <CircleCheckBig size={size} className={className} />;
-					default:
-						return null;
-				}
-			}
-			return <span {...props} />;
-		},
+		switch (iconName) {
+			case 'ask_followup_question':
+				return <CircleHelp size={iconSize} className={iconClassName} />;
+			case 'attempt_completion':
+				return <CircleCheckBig size={iconSize} className={iconClassName} />;
+			default:
+				return null;
+		}
 	};
 
+	const renderTitle = (): ReactNode => {
+		if (!iconName) return null;
+
+		switch (iconName) {
+			case 'ask_followup_question':
+				return 'Ask Followup Question:';
+			case 'attempt_completion':
+				return 'Task Completion';
+			default:
+				return null;
+		}
+	};
+
+	// Component for markdown content
 	return (
 		<>
-			<ReactMarkdown
-				className={`${className}`}
-				components={components}
-				rehypePlugins={[rehypeRaw]}
-			>
-				{processedContent}
-			</ReactMarkdown>
-			{processedContent &&
+			<div className={`${className}`}>
+				<span>{iconName && renderIcon()} {renderTitle()}</span>
+				<ReactMarkdown
+					className={`${className}`}
+					rehypePlugins={[rehypeRaw]}
+				>
+					{markdownContent}
+				</ReactMarkdown>
+			</div>
+			{markdownContent && finish &&
 				<div className="infio-chat-message-actions">
-					<CopyButton message={rawContent} />
-					<CreateNewFileButton message={rawContent} />
+					<CopyButton message={markdownContent} />
+					<CreateNewFileButton message={markdownContent} />
 				</div>}
 		</>
-
 	);
 };
 

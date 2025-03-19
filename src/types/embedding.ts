@@ -1,7 +1,5 @@
 import { LLMModel } from './llm/model'
 
-import { EmbeddingModelInfo } from '../utils/api'
-
 export type EmbeddingModelId =
   | 'text-embedding-3-small'
   | 'text-embedding-004'

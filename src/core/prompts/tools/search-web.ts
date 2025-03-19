@@ -16,15 +16,17 @@ Usage:
 <query>Your search query here</query>
 </search_web>
 
-Examples: 
+Examples1: 
 <search_web>
 <query>capital of France population statistics 2023</query>
 </search_web>
 
+Examples2:
 <search_web>
 <query>"renewable energy" growth statistics Europe</query>
 </search_web>
 
+Examples3:
 <search_web>
 <query>react vs angular vs vue.js comparison</query>
 </search_web>`

@@ -1,4 +1,4 @@
-import { App } from 'obsidian'
+import { App, TFile } from 'obsidian'
 
 import { QueryProgressState } from '../../components/chat-view/QueryProgress'
 import { DBManager } from '../../database/database-manager'
@@ -13,7 +13,8 @@ export class RAGEngine {
   private app: App
   private settings: InfioSettings
   private vectorManager: VectorManager
-  private embeddingModel: EmbeddingModel | null = null
+	private embeddingModel: EmbeddingModel | null = null
+	private initialized = false
 
   constructor(
     app: App,
@@ -23,7 +24,7 @@ export class RAGEngine {
     this.app = app
     this.settings = settings
     this.vectorManager = dbManager.getVectorManager()
-    this.embeddingModel = getEmbeddingModel(settings)
+		this.embeddingModel = getEmbeddingModel(settings)
   }
 
   setSettings(settings: InfioSettings) {
@@ -34,16 +35,14 @@ export class RAGEngine {
   // TODO: Implement automatic vault re-indexing when settings are changed.
   // Currently, users must manually re-index the vault.
   async updateVaultIndex(
-    options: { reindexAll: boolean } = {
-      reindexAll: false,
-    },
+    options: { reindexAll: boolean },
     onQueryProgressChange?: (queryProgress: QueryProgressState) => void,
-  ): Promise<void> {
-    if (!this.embeddingModel) {
-      throw new Error('Embedding model is not set')
+	): Promise<void> {
+		if (!this.embeddingModel) {
+			throw new Error('Embedding model is not set')
     }
     await this.vectorManager.updateVaultIndex(
-      this.embeddingModel,
+			this.embeddingModel,
       {
         chunkSize: this.settings.ragOptions.chunkSize,
         excludePatterns: this.settings.ragOptions.excludePatterns,
@@ -57,7 +56,23 @@ export class RAGEngine {
         })
       },
     )
-  }
+		this.initialized = true
+	}
+
+  async updateFileIndex(file: TFile) {
+    await this.vectorManager.UpdateFileVectorIndex(
+      this.embeddingModel,
+      this.settings.ragOptions.chunkSize,
+      file,
+    )
+	}
+	
+	async deleteFileIndex(file: TFile) {
+		await this.vectorManager.DeleteFileVectorIndex(
+			this.embeddingModel,
+			file,
+		)
+	}
 
   async processQuery({
     query,
@@ -78,13 +93,19 @@ export class RAGEngine {
     if (!this.embeddingModel) {
       throw new Error('Embedding model is not set')
     }
-    // TODO: Decide the vault index update strategy.
-    // Current approach: Update on every query.
-    await this.updateVaultIndex({ reindexAll: false }, onQueryProgressChange)
+
+		if (!this.initialized) {
+      await this.updateVaultIndex({ reindexAll: false }, onQueryProgressChange)
+    }
     const queryEmbedding = await this.getQueryEmbedding(query)
     onQueryProgressChange?.({
       type: 'querying',
-    })
+		})
+		console.log('query, ', {
+			minSimilarity: this.settings.ragOptions.minSimilarity,
+			limit: this.settings.ragOptions.limit,
+			scope,
+		})
     const queryResult = await this.vectorManager.performSimilaritySearch(
       queryEmbedding,
       this.embeddingModel,
@@ -93,7 +114,8 @@ export class RAGEngine {
         limit: this.settings.ragOptions.limit,
         scope,
       },
-    )
+		)
+		console.log('queryResult', queryResult)
     onQueryProgressChange?.({
       type: 'querying-done',
       queryResult,

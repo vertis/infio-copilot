@@ -234,7 +234,7 @@ export const ComboBoxComponent: React.FC<ComboBoxComponentProps> = ({
 			<Popover.Root modal={false} open={isOpen} onOpenChange={setIsOpen}>
 				<Popover.Trigger asChild>
 					<div className="infio-llm-setting-item-control">
-						<span className="infio-llm-setting-model-id">[{modelProvider}]{modelId}</span>
+						<span className="infio-llm-setting-model-id">[{modelProvider}]&nbsp;{modelId}</span>
 					</div>
 				</Popover.Trigger>
 				<Popover.Content

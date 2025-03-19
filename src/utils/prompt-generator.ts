@@ -372,7 +372,7 @@ export class PromptGenerator {
 			? await getFileOrFolderContent(currentFile.file, this.app.vault)
 			: undefined
 
-		const currentFileContentPrompt = isNewChat && currentFileContent
+		const currentFileContentPrompt = isNewChat && currentFileContent && this.settings.mode !== 'research'
 			? `<current_file_content path="${currentFile.file.path}">\n${currentFileContent}\n</current_file_content>`
 			: undefined
 
