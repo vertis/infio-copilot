@@ -97,7 +97,7 @@ export class RAGEngine {
 		if (!this.initialized) {
       await this.updateVaultIndex({ reindexAll: false }, onQueryProgressChange)
     }
-    const queryEmbedding = await this.getQueryEmbedding(query)
+    const queryEmbedding = await this.getEmbedding(query)
     onQueryProgressChange?.({
       type: 'querying',
 		})
@@ -123,7 +123,7 @@ export class RAGEngine {
     return queryResult
   }
 
-  private async getQueryEmbedding(query: string): Promise<number[]> {
+  async getEmbedding(query: string): Promise<number[]> {
     if (!this.embeddingModel) {
       throw new Error('Embedding model is not set')
     }
