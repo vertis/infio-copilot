@@ -125,14 +125,14 @@ const OpenAICompatibleProviderSchema = z.object({
 
 const OllamaProviderSchema = z.object({
 	name: z.literal('Ollama'),
-	apiKey: z.string().catch(''),
+	apiKey: z.string().catch('ollama'),
 	baseUrl: z.string().catch(''),
 	useCustomUrl: z.boolean().catch(false)
 }).catch({
 	name: 'Ollama',
-	apiKey: '',
+	apiKey: 'ollama',
 	baseUrl: '',
-	useCustomUrl: false
+	useCustomUrl: true
 })
 
 const GroqProviderSchema = z.object({

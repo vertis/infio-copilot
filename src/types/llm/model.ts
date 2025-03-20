@@ -10,7 +10,6 @@ export enum ApiProvider {
 	Groq = "Groq",
 	Ollama = "Ollama",
 	OpenAICompatible = "OpenAICompatible",
-	TransformersJs = "TransformersJs",
 }
 
 export type LLMModel = {

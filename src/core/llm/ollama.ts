@@ -68,7 +68,7 @@ export class OllamaProvider implements BaseLLMProvider {
 
 		const client = new NoStainlessOpenAI({
 			baseURL: `${this.baseUrl}/v1`,
-			apiKey: '',
+			apiKey: 'ollama',
 			dangerouslyAllowBrowser: true,
 		})
 		return this.adapter.generateResponse(client, request, options)
@@ -87,7 +87,7 @@ export class OllamaProvider implements BaseLLMProvider {
 
 		const client = new NoStainlessOpenAI({
 			baseURL: `${this.baseUrl}/v1`,
-			apiKey: '',
+			apiKey: 'ollama',
 			dangerouslyAllowBrowser: true,
 		})
 		return this.adapter.streamResponse(client, request, options)

@@ -210,7 +210,6 @@ export async function webSearch(query: string, serperApiKey: string, jinaApiKey:
 	}
 }
 
-// todo: update 
 export async function fetchUrlsContent(urls: string[], apiKey: string): Promise<string> {
 	return new Promise((resolve) => {
 		const results = urls.map(async (url) => {

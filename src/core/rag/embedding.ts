@@ -159,10 +159,9 @@ export const getEmbeddingModel = (
 				dangerouslyAllowBrowser: true,
 				baseURL: `${settings.ollamaProvider.baseUrl}/v1`,
 			})
-			const modelInfo = GetEmbeddingModelInfo(settings.embeddingModelProvider, settings.embeddingModelId)
 			return {
 				id: settings.embeddingModelId,
-				dimension: modelInfo.dimensions,
+				dimension: 0,
 				getEmbedding: async (text: string) => {
 					if (!settings.ollamaProvider.baseUrl) {
 						throw new LLMBaseUrlNotSetException(

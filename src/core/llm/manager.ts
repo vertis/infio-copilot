@@ -49,15 +49,35 @@ class LLMManager implements LLMManagerInterface {
 
 	constructor(settings: InfioSettings) {
 		this.infioProvider = new InfioProvider(settings.infioProvider.apiKey)
-		this.openrouterProvider = new OpenAICompatibleProvider(settings.openrouterProvider.apiKey, OPENROUTER_BASE_URL)
-		this.siliconflowProvider = new OpenAICompatibleProvider(settings.siliconflowProvider.apiKey, SILICONFLOW_BASE_URL)
-		this.alibabaQwenProvider = new OpenAICompatibleProvider(settings.alibabaQwenProvider.apiKey, ALIBABA_QWEN_BASE_URL)
-		this.deepseekProvider = new OpenAICompatibleProvider(settings.deepseekProvider.apiKey, DEEPSEEK_BASE_URL)
+		this.openrouterProvider = new OpenAICompatibleProvider(
+			settings.openrouterProvider.apiKey,
+			settings.openrouterProvider.baseUrl && settings.openrouterProvider.useCustomUrl ?
+				settings.openrouterProvider.baseUrl
+				: OPENROUTER_BASE_URL
+		)
+		this.siliconflowProvider = new OpenAICompatibleProvider(
+			settings.siliconflowProvider.apiKey,
+			settings.siliconflowProvider.baseUrl && settings.siliconflowProvider.useCustomUrl ?
+				settings.siliconflowProvider.baseUrl
+				: SILICONFLOW_BASE_URL
+		)
+		this.alibabaQwenProvider = new OpenAICompatibleProvider(
+			settings.alibabaQwenProvider.apiKey,
+			settings.alibabaQwenProvider.baseUrl && settings.alibabaQwenProvider.useCustomUrl ?
+				settings.alibabaQwenProvider.baseUrl
+				: ALIBABA_QWEN_BASE_URL
+		)
+		this.deepseekProvider = new OpenAICompatibleProvider(
+			settings.deepseekProvider.apiKey,
+			settings.deepseekProvider.baseUrl && settings.deepseekProvider.useCustomUrl ?
+				settings.deepseekProvider.baseUrl
+				: DEEPSEEK_BASE_URL
+		)
 		this.openaiProvider = new OpenAIAuthenticatedProvider(settings.openaiProvider.apiKey)
 		this.anthropicProvider = new AnthropicProvider(settings.anthropicProvider.apiKey)
 		this.googleProvider = new GeminiProvider(settings.googleProvider.apiKey)
 		this.groqProvider = new GroqProvider(settings.groqProvider.apiKey)
-		this.ollamaProvider = new OllamaProvider(settings.groqProvider.baseUrl)
+		this.ollamaProvider = new OllamaProvider(settings.ollamaProvider.baseUrl)
 		this.openaiCompatibleProvider = new OpenAICompatibleProvider(settings.openaicompatibleProvider.apiKey, settings.openaicompatibleProvider.baseUrl)
 		this.isInfioEnabled = !!settings.infioProvider.apiKey
 	}
@@ -125,6 +145,8 @@ class LLMManager implements LLMManagerInterface {
 					request,
 					options,
 				)
+			case ApiProvider.OpenAICompatible:
+				return await this.openaiCompatibleProvider.generateResponse(model, request, options)
 			default:
 				throw new Error(`Unsupported model provider: ${model.provider}`)
 		}

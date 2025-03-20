@@ -1141,7 +1141,9 @@ export const GetEmbeddingProviders = (): ApiProvider[] => {
 		ApiProvider.OpenAI,
 		ApiProvider.SiliconFlow,
 		ApiProvider.Google,
-		ApiProvider.AlibabaQwen
+		ApiProvider.AlibabaQwen,
+		ApiProvider.OpenAICompatible,
+		ApiProvider.Ollama,
 	]
 }
 

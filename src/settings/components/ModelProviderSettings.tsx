@@ -141,13 +141,15 @@ const CustomProviderSettings: React.FC<CustomProviderSettingsProps> = ({ plugin,
 				onChange={updateProvider}
 			/>
 			<div className="infio-llm-setting-divider"></div>
-			<TextComponent
-				name={currProvider + " api key:"}
-				placeholder="Enter your api key"
-				value={providerSetting.apiKey || ''}
-				onChange={updateProviderApiKey}
-				type="password"
-			/>
+			{currProvider !== ApiProvider.Ollama && (
+				<TextComponent
+					name={currProvider + " api key:"}
+					placeholder="Enter your api key"
+					value={providerSetting.apiKey || ''}
+					onChange={updateProviderApiKey}
+					type="password"
+				/>
+			)}
 			<div className="infio-llm-setting-divider"></div>
 			<ToggleComponent
 				name="Use custom base url"
