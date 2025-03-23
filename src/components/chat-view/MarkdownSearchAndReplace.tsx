@@ -1,24 +1,29 @@
 import { Check, Loader2, Replace, X } from 'lucide-react'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { useApp } from '../../contexts/AppContext'
 import { ApplyStatus, SearchAndReplaceToolArgs } from '../../types/apply'
 import { openMarkdownFile } from '../../utils/obsidian'
+import { MemoizedSyntaxHighlighterWrapper } from './SyntaxHighlighterWrapper'
+import { useDarkModeContext } from '../../contexts/DarkModeContext'
 
 export default function MarkdownSearchAndReplace({
 	applyStatus,
 	onApply,
 	path,
+	content,
 	operations,
 	finish
 }: {
 	applyStatus: ApplyStatus
 	onApply: (args: SearchAndReplaceToolArgs) => void
 	path: string,
+	content: string,
 	operations: SearchAndReplaceToolArgs['operations'],
 	finish: boolean
 }) {
 	const app = useApp()
+	const { isDarkMode } = useDarkModeContext()
 
 	const [applying, setApplying] = React.useState(false)
 
@@ -51,9 +56,13 @@ export default function MarkdownSearchAndReplace({
 				<div className={'infio-chat-code-block-header-button'}>
 					<button
 						onClick={handleApply}
-						disabled={applyStatus !== ApplyStatus.Idle || applying}
+						disabled={applyStatus !== ApplyStatus.Idle || applying || !finish}
 					>
-						{applyStatus === ApplyStatus.Idle ? (
+						{!finish ? (
+							<>
+								<Loader2 className="spinner" size={14} />
+							</>
+						) : applyStatus === ApplyStatus.Idle ? (
 							applying ? (
 								<>
 									<Loader2 className="spinner" size={14} /> Applying...
@@ -73,6 +82,14 @@ export default function MarkdownSearchAndReplace({
 					</button>
 				</div>
 			</div>
+			<MemoizedSyntaxHighlighterWrapper
+				isDarkMode={isDarkMode}
+				language="markdown"
+				hasFilename={!!path}
+				wrapLines={true}
+			>
+				{content}
+			</MemoizedSyntaxHighlighterWrapper>
 		</div>
 	)
 } 

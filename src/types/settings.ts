@@ -219,6 +219,15 @@ export const InfioSettingsSchema = z.object({
 	embeddingModelProvider: z.nativeEnum(ApiProvider).catch(ApiProvider.Google),
 	embeddingModelId: z.string().catch(''),
 
+	// fuzzyMatchThreshold
+	fuzzyMatchThreshold: z.number().catch(0.85),
+
+	// experimentalDiffStrategy
+	experimentalDiffStrategy: z.boolean().catch(false),
+
+	// multiSearchReplaceDiffStrategy
+	multiSearchReplaceDiffStrategy: z.boolean().catch(true),
+
 	// Mode
 	mode: z.string().catch('ask'),
 

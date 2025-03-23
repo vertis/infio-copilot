@@ -1,18 +1,33 @@
-import { Diff, Hunk, Change } from "./types"
-import { findBestMatch, prepareSearchString } from "./search-strategies"
-import { applyEdit } from "./edit-strategies"
+import { App } from 'obsidian'
+
 import { DiffResult, DiffStrategy } from "../../types"
+
+import { applyEdit } from "./edit-strategies"
+import { findBestMatch, prepareSearchString } from "./search-strategies"
+import { Change, Diff, Hunk } from "./types"
+
+// 中文引号转英文引号
+export function convertQuotes(str: string) {
+	return str.replace(/[“”]/g, '"');
+}
 
 export class NewUnifiedDiffStrategy implements DiffStrategy {
 	private readonly confidenceThreshold: number
+	private app: App
 
-	constructor(confidenceThreshold: number = 1) {
+	getName(): string {
+		return "NewUnified"
+	}
+
+	constructor(app: App, confidenceThreshold: number = 1) {
+		this.app = app
 		this.confidenceThreshold = Math.max(confidenceThreshold, 0.8)
 	}
 
 	private parseUnifiedDiff(diff: string): Diff {
 		const MAX_CONTEXT_LINES = 6 // Number of context lines to keep before/after changes
 		const lines = diff.split("\n")
+		// console.log("lines: ", lines)
 		const hunks: Hunk[] = []
 		let currentHunk: Hunk | null = null
 
@@ -60,7 +75,7 @@ export class NewUnifiedDiffStrategy implements DiffStrategy {
 			}
 
 			const content = line.slice(1)
-			const indentMatch = content.match(/^(\s*)/)
+			const indentMatch = /^(\s*)/.exec(content)
 			const indent = indentMatch ? indentMatch[0] : ""
 			const trimmedContent = content.slice(indent.length)
 
@@ -85,6 +100,8 @@ export class NewUnifiedDiffStrategy implements DiffStrategy {
 					indent,
 					originalLine: content,
 				})
+			} else if (line.startsWith("reason: ")) {
+				// ignore reason
 			} else {
 				const finalContent = trimmedContent ? " " + trimmedContent : " "
 				currentHunk.changes.push({
@@ -108,9 +125,9 @@ export class NewUnifiedDiffStrategy implements DiffStrategy {
 	}
 
 	getToolDescription(args: { cwd: string; toolOptions?: { [key: string]: string } }): string {
-		return `# apply_diff Tool - Generate Precise Code Changes
+		return `# apply_diff Tool - Generate Precise Markdown Changes
 
-Generate a unified diff that can be cleanly applied to modify code files.
+Generate a unified diff that can be cleanly applied to modify markdown files.
 
 ## Step-by-Step Instructions:
 
@@ -120,47 +137,45 @@ Generate a unified diff that can be cleanly applied to modify code files.
 
 2. For each change section:
    - Begin with "@@ ... @@" separator line without line numbers
-   - Include 2-3 lines of context before and after changes
-   - Mark removed lines with "-"
-   - Mark added lines with "+"
-   - Preserve exact indentation
+   - Mark added lines with "+" prefix (without line numbers)
+   - Mark removed lines with "-" prefix (without line numbers)
+	 - Mark reason with "reason: "
+   - Preserve exact spacing and formatting
 
 3. Group related changes:
    - Keep related modifications in the same hunk
    - Start new hunks for logically separate changes
-   - When modifying functions/methods, include the entire block
 
 ## Requirements:
 
-1. MUST include exact indentation
-2. MUST include sufficient context for unique matching
-3. MUST group related changes together
-4. MUST use proper unified diff format
-5. MUST NOT include timestamps in file headers
-6. MUST NOT include line numbers in the @@ header
+1. MUST include reason, avoid unnecessary modifications
+2. MUST include exact spacing and formatting
+3. MUST include sufficient context for unique matching
+4. MUST group related changes together
+5. MUST use proper unified diff format
+6. MUST NOT include timestamps in file headers
+7. MUST NOT include line numbers in the @@ header
+8. MUST NOT include line numbers in the added lines and removed lines
 
 ## Examples:
 
 ✅ Good diff (follows all requirements):
 \`\`\`diff
---- src/utils.ts
-+++ src/utils.ts
+--- docs/example.md
++++ docs/example.md
 @@ ... @@
-    def calculate_total(items):
--      total = 0
--      for item in items:
--          total += item.price
-+      return sum(item.price for item in items)
+-old content
++new content
+reason: change reason
 \`\`\`
 
-❌ Bad diff (violates requirements #1 and #2):
+❌ Bad diff (violates requirements #8)
 \`\`\`diff
---- src/utils.ts
-+++ src/utils.ts
+--- docs/example.md
++++ docs/example.md
 @@ ... @@
--total = 0
--for item in items:
-+return sum(item.price for item in items)
+- 6 | old content
++ 6 | new content
 \`\`\`
 
 Parameters:
@@ -169,7 +184,7 @@ Parameters:
 
 Usage:
 <apply_diff>
-<path>path/to/file.ext</path>
+<path>path/to/file.md</path>
 <diff>
 Your diff here
 </diff>
@@ -236,7 +251,7 @@ Your diff here
 		endLine?: number,
 	): Promise<DiffResult> {
 		const parsedDiff = this.parseUnifiedDiff(diffContent)
-		const originalLines = originalContent.split("\n")
+		const originalLines = convertQuotes(originalContent).split("\n")
 		let result = [...originalLines]
 
 		if (!parsedDiff.hunks.length) {
@@ -247,13 +262,12 @@ Your diff here
 		}
 
 		for (const hunk of parsedDiff.hunks) {
-			const contextStr = prepareSearchString(hunk.changes)
+			const contextStr = convertQuotes(prepareSearchString(hunk.changes))
 			const {
 				index: matchPosition,
 				confidence,
 				strategy,
 			} = findBestMatch(contextStr, result, 0, this.confidenceThreshold)
-
 			if (confidence < this.confidenceThreshold) {
 				console.log("Full hunk application failed, trying sub-hunks strategy")
 				// Try splitting the hunk into smaller hunks
@@ -267,6 +281,7 @@ Your diff here
 
 					if (subSearchResult.confidence >= this.confidenceThreshold) {
 						const subEditResult = await applyEdit(
+							this.app,
 							subHunk,
 							subHunkResult,
 							subSearchResult.index,
@@ -324,7 +339,14 @@ Your diff here
 				return { success: false, error: errorMsg }
 			}
 
-			const editResult = await applyEdit(hunk, result, matchPosition, confidence, this.confidenceThreshold)
+			const editResult = await applyEdit(
+				this.app,
+				hunk,
+				result,
+				matchPosition,
+				confidence,
+				this.confidenceThreshold,
+			)
 			if (editResult.confidence >= this.confidenceThreshold) {
 				result = editResult.result
 			} else {

@@ -3,20 +3,28 @@
  */
 
 export type DiffResult =
-	| { success: true; content: string }
-	| {
-			success: false
-			error: string
-			details?: {
-				similarity?: number
-				threshold?: number
-				matchedRange?: { start: number; end: number }
-				searchContent?: string
-				bestMatch?: string
-			}
-	  }
+	| { success: true; content: string; failParts?: DiffResult[] }
+	| ({
+		success: false
+		error?: string
+		details?: {
+			similarity?: number
+			threshold?: number
+			matchedRange?: { start: number; end: number }
+			searchContent?: string
+			bestMatch?: string
+		}
+		failParts?: DiffResult[]
+	} & ({ error: string } | { failParts: DiffResult[] }))
 
 export interface DiffStrategy {
+
+	/**
+	 * Get the name of this diff strategy for analytics and debugging
+	 * @returns The name of the diff strategy
+	 */
+	getName(): string
+
 	/**
 	 * Get the tool description for this diff strategy
 	 * @param args The tool arguments including cwd and toolOptions

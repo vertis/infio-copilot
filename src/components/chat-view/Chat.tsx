@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { ApplyViewState } from '../../ApplyView'
 import { APPLY_VIEW_TYPE } from '../../constants'
 import { useApp } from '../../contexts/AppContext'
+import { useDiffStrategy } from '../../contexts/DiffStrategyContext'
 import { useLLM } from '../../contexts/LLMContext'
 import { useRAG } from '../../contexts/RAGContext'
 import { useSettings } from '../../contexts/SettingsContext'
@@ -93,6 +94,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 	const app = useApp()
 	const { settings, setSettings } = useSettings()
 	const { getRAGEngine } = useRAG()
+	const diffStrategy = useDiffStrategy()
 
 	const {
 		createOrUpdateConversation,
@@ -104,8 +106,8 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 	const { streamResponse, chatModel } = useLLM()
 
 	const promptGenerator = useMemo(() => {
-		return new PromptGenerator(getRAGEngine, app, settings)
-	}, [getRAGEngine, app, settings])
+		return new PromptGenerator(getRAGEngine, app, settings, diffStrategy)
+	}, [getRAGEngine, app, settings, diffStrategy])
 
 	const [inputMessage, setInputMessage] = useState<ChatUserMessage>(() => {
 		const newMessage = getNewInputMessage(app)
@@ -382,7 +384,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 					if (!applyRes) {
 						throw new Error('Failed to apply edit changes')
 					}
-					// 返回一个Promise，该Promise会在用户做出选择后解析
+					// return a Promise, which will be resolved after user makes a choice
 					return new Promise<{ type: string; applyMsgId: string; applyStatus: ApplyStatus; returnMsg?: ChatUserMessage }>((resolve) => {
 						app.workspace.getLeaf(true).setViewState({
 							type: APPLY_VIEW_TYPE,
@@ -419,7 +421,10 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						fileContent,
 						toolArgs.operations
 					)
-					// 返回一个Promise，该Promise会在用户做出选择后解析
+					if (!applyRes) {
+						throw new Error('Failed to search_and_replace')
+					}
+					// return a Promise, which will be resolved after user makes a choice
 					return new Promise<{ type: string; applyMsgId: string; applyStatus: ApplyStatus; returnMsg?: ChatUserMessage }>((resolve) => {
 						app.workspace.getLeaf(true).setViewState({
 							type: APPLY_VIEW_TYPE,
@@ -441,6 +446,45 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 											applyStatus: ApplyStatus.Idle,
 											content: null,
 											promptContent: `[search_and_replace for '${toolArgs.filepath}'] Result:\n${applyEditContent}\n`,
+											id: uuidv4(),
+											mentionables: [],
+										}
+									});
+								}
+							} satisfies ApplyViewState,
+						})
+					})
+				} else if (toolArgs.type === 'apply_diff') {
+					const diffResult = await diffStrategy.applyDiff(
+						activeFileContent,
+						toolArgs.diff
+					)
+					if (!diffResult.success) {
+						console.log(diffResult)
+						throw new Error(`Failed to apply_diff`)
+					}
+					// return a Promise, which will be resolved after user makes a choice
+					return new Promise<{ type: string; applyMsgId: string; applyStatus: ApplyStatus; returnMsg?: ChatUserMessage }>((resolve) => {
+						app.workspace.getLeaf(true).setViewState({
+							type: APPLY_VIEW_TYPE,
+							active: true,
+							state: {
+								file: activeFile,
+								originalContent: activeFileContent,
+								newContent: diffResult.content,
+								onClose: (applied: boolean) => {
+									const applyStatus = applied ? ApplyStatus.Applied : ApplyStatus.Rejected
+									const applyEditContent = applied ? 'Changes successfully applied'
+										: 'User rejected changes'
+									resolve({
+										type: 'apply_diff',
+										applyMsgId,
+										applyStatus,
+										returnMsg: {
+											role: 'user',
+											applyStatus: ApplyStatus.Idle,
+											content: null,
+											promptContent: `[apply_diff for '${toolArgs.filepath}'] Result:\n${applyEditContent}\n`,
 											id: uuidv4(),
 											mentionables: [],
 										}

@@ -1,7 +1,8 @@
-import { App, MarkdownView, TAbstractFile, TFile, TFolder, Vault, htmlToMarkdown, requestUrl, getLanguage } from 'obsidian'
+import { App, MarkdownView, TAbstractFile, TFile, TFolder, Vault, getLanguage, htmlToMarkdown, requestUrl } from 'obsidian'
 
 import { editorStateToPlainText } from '../components/chat-view/chat-input/utils/editor-state-to-plain-text'
 import { QueryProgressState } from '../components/chat-view/QueryProgress'
+import { DiffStrategy } from '../core/diff/DiffStrategy'
 import { SYSTEM_PROMPT } from '../core/prompts/system'
 import { RAGEngine } from '../core/rag/rag-engine'
 import { SelectVector } from '../database/schema'
@@ -113,7 +114,7 @@ export class PromptGenerator {
 	private getRagEngine: () => Promise<RAGEngine>
 	private app: App
 	private settings: InfioSettings
-
+	private diffStrategy: DiffStrategy
 	private static readonly EMPTY_ASSISTANT_MESSAGE: RequestMessage = {
 		role: 'assistant',
 		content: '',
@@ -123,10 +124,12 @@ export class PromptGenerator {
 		getRagEngine: () => Promise<RAGEngine>,
 		app: App,
 		settings: InfioSettings,
+		diffStrategy?: DiffStrategy,
 	) {
 		this.getRagEngine = getRagEngine
 		this.app = app
 		this.settings = settings
+		this.diffStrategy = diffStrategy
 	}
 
 	public async generateRequestMessages({
@@ -165,7 +168,7 @@ export class PromptGenerator {
 				similaritySearchResults,
 			},
 		]
-		console.log('this.settings.mode', this.settings.mode)
+
 		let filesSearchMethod = this.settings.filesSearchMethod
 		if (filesSearchMethod === 'auto' && this.settings.embeddingModelId && this.settings.embeddingModelId !== '') {
 			filesSearchMethod = 'semantic'
@@ -173,10 +176,8 @@ export class PromptGenerator {
 			filesSearchMethod = 'regex'
 		}
 
-		console.log('filesSearchMethod: ', filesSearchMethod)
-
 		const userLanguage = getFullLanguageName(getLanguage())
-		console.log(' current user language: ', userLanguage)
+
 		const systemMessage = await this.getSystemMessageNew(this.settings.mode, filesSearchMethod, userLanguage)
 
 		const requestMessages: RequestMessage[] = [
@@ -466,7 +467,7 @@ export class PromptGenerator {
 	}
 
 	private async getSystemMessageNew(mode: Mode, filesSearchMethod: string, preferredLanguage: string): Promise<RequestMessage> {
-		const systemPrompt = await SYSTEM_PROMPT(this.app.vault.getRoot().path, false, mode, filesSearchMethod, preferredLanguage)
+		const systemPrompt = await SYSTEM_PROMPT(this.app.vault.getRoot().path, false, mode, filesSearchMethod, preferredLanguage, this.diffStrategy)
 
 		return {
 			role: 'system',

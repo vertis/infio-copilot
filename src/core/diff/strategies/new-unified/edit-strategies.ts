@@ -1,31 +1,35 @@
-import { diff_match_patch } from "diff-match-patch"
-import { EditResult, Hunk } from "./types"
-import { getDMPSimilarity, validateEditResult } from "./search-strategies"
-import * as path from "path"
-import simpleGit, { SimpleGit } from "simple-git"
-import * as tmp from "tmp"
+import { App, FileSystemAdapter, normalizePath } from "obsidian"
+
 import * as fs from "fs"
+import * as path from "path"
 
-// Helper function to infer indentation - simplified version
-function inferIndentation(line: string, contextLines: string[], previousIndent: string = ""): string {
-	// If the line has explicit indentation in the change, use it exactly
-	const lineMatch = line.match(/^(\s+)/)
-	if (lineMatch) {
-		return lineMatch[1]
-	}
+import { diff_match_patch } from "diff-match-patch"
+import simpleGit, { SimpleGit } from "simple-git"
 
-	// If we have context lines, use the indentation from the first context line
-	const contextLine = contextLines[0]
-	if (contextLine) {
-		const contextMatch = contextLine.match(/^(\s+)/)
-		if (contextMatch) {
-			return contextMatch[1]
-		}
-	}
+import { validateEditResult } from "./search-strategies"
+import { EditResult, Hunk } from "./types"
 
-	// Fallback to previous indent
-	return previousIndent
-}
+
+// // Helper function to infer indentation - simplified version
+// function inferIndentation(line: string, contextLines: string[], previousIndent: string = ""): string {
+// 	// If the line has explicit indentation in the change, use it exactly
+// 	const lineMatch = line.match(/^(\s+)/)
+// 	if (lineMatch) {
+// 		return lineMatch[1]
+// 	}
+
+// 	// If we have context lines, use the indentation from the first context line
+// 	const contextLine = contextLines[0]
+// 	if (contextLine) {
+// 		const contextMatch = contextLine.match(/^(\s+)/)
+// 		if (contextMatch) {
+// 			return contextMatch[1]
+// 		}
+// 	}
+
+// 	// Fallback to previous indent
+// 	return previousIndent
+// }
 
 // Context matching edit strategy
 export function applyContextMatching(hunk: Hunk, content: string[], matchPosition: number): EditResult {
@@ -147,18 +151,28 @@ export function applyDMP(hunk: Hunk, content: string[], matchPosition: number): 
 }
 
 // Git fallback strategy that works with full content
-export async function applyGitFallback(hunk: Hunk, content: string[]): Promise<EditResult> {
-	let tmpDir: tmp.DirResult | undefined
+export async function applyGitFallback(app: App, hunk: Hunk, content: string[]): Promise<EditResult> {
+	// let tmpDir: tmp.DirResult | undefined
+	const adapter = app.vault.adapter as FileSystemAdapter;
+	const vaultBasePath = adapter.getBasePath();
+	const tmpGitPath = normalizePath(path.join(vaultBasePath, ".tmp_git"));
+
+	console.log("tmpGitPath", tmpGitPath)
 
 	try {
-		tmpDir = tmp.dirSync({ unsafeCleanup: true })
-		const git: SimpleGit = simpleGit(tmpDir.name)
+		const exists = await adapter.exists(tmpGitPath);
+		if (exists) {
+			await adapter.rmdir(tmpGitPath, true);
+		}
+		await adapter.mkdir(tmpGitPath);
+		// tmpDir = tmp.dirSync({ unsafeCleanup: true })
+		const git: SimpleGit = simpleGit(tmpGitPath)
 
 		await git.init()
 		await git.addConfig("user.name", "Temp")
 		await git.addConfig("user.email", "temp@example.com")
 
-		const filePath = path.join(tmpDir.name, "file.txt")
+		const filePath = path.join(tmpGitPath, "file.txt")
 
 		const searchLines = hunk.changes
 			.filter((change) => change.type === "context" || change.type === "remove")
@@ -256,14 +270,15 @@ export async function applyGitFallback(hunk: Hunk, content: string[]): Promise<E
 		console.error("Git fallback strategy failed:", error)
 		return { confidence: 0, result: content, strategy: "git-fallback" }
 	} finally {
-		if (tmpDir) {
-			tmpDir.removeCallback()
+		if (tmpGitPath) {
+			await adapter.rmdir(tmpGitPath, true);
 		}
 	}
 }
 
 // Main edit function that tries strategies sequentially
 export async function applyEdit(
+	app: App,
 	hunk: Hunk,
 	content: string[],
 	matchPosition: number,
@@ -275,14 +290,14 @@ export async function applyEdit(
 		console.log(
 			`Search confidence (${confidence}) below minimum threshold (${confidenceThreshold}), trying git fallback...`,
 		)
-		return applyGitFallback(hunk, content)
+		return applyGitFallback(app, hunk, content)
 	}
 
 	// Try each strategy in sequence until one succeeds
 	const strategies = [
 		{ name: "dmp", apply: () => applyDMP(hunk, content, matchPosition) },
 		{ name: "context", apply: () => applyContextMatching(hunk, content, matchPosition) },
-		{ name: "git-fallback", apply: () => applyGitFallback(hunk, content) },
+		{ name: "git-fallback", apply: () => applyGitFallback(app, hunk, content) },
 	]
 
 	// Try strategies sequentially until one succeeds

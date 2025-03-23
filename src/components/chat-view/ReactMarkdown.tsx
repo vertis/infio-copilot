@@ -7,6 +7,7 @@ import {
 	parseMsgBlocks,
 } from '../../utils/parse-infio-block'
 
+import MarkdownApplyDiffBlock from './MarkdownApplyDiffBlock'
 import MarkdownEditFileBlock from './MarkdownEditFileBlock'
 import MarkdownFetchUrlsContentBlock from './MarkdownFetchUrlsContentBlock'
 import MarkdownListFilesBlock from './MarkdownListFilesBlock'
@@ -18,6 +19,7 @@ import MarkdownSearchWebBlock from './MarkdownSearchWebBlock'
 import MarkdownSemanticSearchFilesBlock from './MarkdownSemanticSearchFilesBlock'
 import MarkdownSwitchModeBlock from './MarkdownSwitchModeBlock'
 import MarkdownWithIcons from './MarkdownWithIcon'
+
 function ReactMarkdown({
 	applyStatus,
 	onApply,
@@ -27,6 +29,7 @@ function ReactMarkdown({
 	onApply: (toolArgs: ToolArgs) => void
 	children: string
 }) {
+
 	const blocks: ParsedMsgBlock[] = useMemo(
 		() => parseMsgBlocks(children),
 		[children],
@@ -73,6 +76,7 @@ function ReactMarkdown({
 						applyStatus={applyStatus}
 						onApply={onApply}
 						path={block.path}
+						content={block.content}
 						operations={block.operations.map(op => ({
 							search: op.search,
 							replace: op.replace,
@@ -82,6 +86,16 @@ function ReactMarkdown({
 							ignoreCase: op.ignore_case,
 							regexFlags: op.regex_flags,
 						}))}
+						finish={block.finish}
+					/>
+				) : block.type === 'apply_diff' ? (
+					<MarkdownApplyDiffBlock
+						key={"apply-diff-" + index}
+						applyStatus={applyStatus}
+						mode={block.type}
+						onApply={onApply}
+						path={block.path}
+						diff={block.diff}
 						finish={block.finish}
 					/>
 				) : block.type === 'read_file' ? (

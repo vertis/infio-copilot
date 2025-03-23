@@ -12,7 +12,7 @@ import { VectorManager } from './modules/vector/vector-manager'
 // import { migrations } from './sql'
 
 export class DBManager {
-	// private app: App
+	private app: App
 	// private dbPath: string
 	private db: PGliteWithLive | null = null
 	// private db: PgliteDatabase | null = null
@@ -65,34 +65,34 @@ export class DBManager {
 	// 	})
 	// }
 
-	// private async loadExistingDatabase() {
-	// 	try {
-	// 		const databaseFileExists = await this.app.vault.adapter.exists(
-	// 			this.dbPath,
-	// 		)
-	// 		if (!databaseFileExists) {
-	// 			return null
-	// 		}
-	// 		const fileBuffer = await this.app.vault.adapter.readBinary(this.dbPath)
-	// 		const fileBlob = new Blob([fileBuffer], { type: 'application/x-gzip' })
-	// 		const { fsBundle, wasmModule, vectorExtensionBundlePath } =
-	// 			await this.loadPGliteResources()
-	// 		this.db = await PGlite.create({
-	// 			loadDataDir: fileBlob,
-	// 			fsBundle: fsBundle,
-	// 			wasmModule: wasmModule,
-	// 			extensions: {
-	// 				vector: vectorExtensionBundlePath,
-	// 				live
-	// 			},
-	// 		})
-	// 		// return drizzle(this.pgClient)
-	// 	} catch (error) {
-	// 		console.error('Error loading database:', error)
-	// 		console.log(this.dbPath)
-	// 		return null
-	// 	}
-	// }
+	private async loadExistingDatabase() {
+		try {
+			const databaseFileExists = await this.app.vault.adapter.exists(
+				this.dbPath,
+			)
+			if (!databaseFileExists) {
+				return null
+			}
+			const fileBuffer = await this.app.vault.adapter.readBinary(this.dbPath)
+			const fileBlob = new Blob([fileBuffer], { type: 'application/x-gzip' })
+			const { fsBundle, wasmModule, vectorExtensionBundlePath } =
+				await this.loadPGliteResources()
+			this.db = await PGlite.create({
+				loadDataDir: fileBlob,
+				fsBundle: fsBundle,
+				wasmModule: wasmModule,
+				extensions: {
+					vector: vectorExtensionBundlePath,
+					live
+				},
+			})
+			// return drizzle(this.pgClient)
+		} catch (error) {
+			console.error('Error loading database:', error)
+			console.log(this.dbPath)
+			return null
+		}
+	}
 
 	// private async migrateDatabase(): Promise<void> {
 	// 	if (!this.db) {

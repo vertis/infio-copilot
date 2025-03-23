@@ -44,8 +44,8 @@ async function generatePrompt(
 	// 	throw new Error("Extension context is required for generating system prompt")
 	// }
 
-	// If diff is disabled, don't pass the diffStrategy
-	const effectiveDiffStrategy = diffEnabled ? diffStrategy : undefined
+	// // If diff is disabled, don't pass the diffStrategy
+	// const effectiveDiffStrategy = diffEnabled ? diffStrategy : undefined
 
 	// Get the full mode config to ensure we have the role definition
 	const modeConfig = getModeBySlug(mode, customModeConfigs) || modes.find((m) => m.slug === mode) || modes[0]
@@ -54,7 +54,7 @@ async function generatePrompt(
 	const [modesSection, mcpServersSection] = await Promise.all([
 		getModesSection(),
 		modeConfig.groups.some((groupEntry) => getGroupName(groupEntry) === "mcp")
-			? getMcpServersSection(mcpHub, effectiveDiffStrategy, enableMcpServerCreation)
+			? getMcpServersSection(mcpHub, diffStrategy, enableMcpServerCreation)
 			: Promise.resolve(""),
 	])
 
@@ -67,7 +67,7 @@ ${getToolDescriptionsForMode(
 		cwd,
 		filesSearchMethod,
 		supportsComputerUse,
-		effectiveDiffStrategy,
+		diffStrategy,
 		browserViewportSize,
 		mcpHub,
 		customModeConfigs,
@@ -91,7 +91,7 @@ ${getRulesSection(
 		cwd,
 		filesSearchMethod,
 		supportsComputerUse,
-		effectiveDiffStrategy,
+		diffStrategy,
 		experiments,
 	)}
 
@@ -110,8 +110,8 @@ export const SYSTEM_PROMPT = async (
 	mode: Mode = defaultModeSlug,
 	filesSearchMethod: string = 'regex',
 	preferredLanguage?: string,
-	mcpHub?: McpHub,
 	diffStrategy?: DiffStrategy,
+	mcpHub?: McpHub,
 	browserViewportSize?: string,
 	customModePrompts?: CustomModePrompts,
 	customModes?: ModeConfig[],
@@ -150,8 +150,8 @@ export const SYSTEM_PROMPT = async (
 	// ${await addCustomInstructions(promptComponent?.customInstructions || currentMode.customInstructions || "", globalCustomInstructions || "", cwd, mode, { preferredLanguage })}`
 	// 	}
 
-	// If diff is disabled, don't pass the diffStrategy
-	const effectiveDiffStrategy = diffEnabled ? diffStrategy : undefined
+	// // If diff is disabled, don't pass the diffStrategy
+	// const effectiveDiffStrategy = diffEnabled ? diffStrategy : undefined
 
 	return generatePrompt(
 		// context,
@@ -160,7 +160,7 @@ export const SYSTEM_PROMPT = async (
 		currentMode.slug,
 		filesSearchMethod,
 		mcpHub,
-		effectiveDiffStrategy,
+		diffStrategy,
 		browserViewportSize,
 		promptComponent,
 		customModes,

@@ -7,6 +7,7 @@ import { ApplyView } from './ApplyView'
 import { ChatView } from './ChatView'
 import { ChatProps } from './components/chat-view/Chat'
 import { APPLY_VIEW_TYPE, CHAT_VIEW_TYPE } from './constants'
+import { getDiffStrategy } from "./core/diff/DiffStrategy"
 import { InlineEdit } from './core/edit/inline-edit-processor'
 import { RAGEngine } from './core/rag/rag-engine'
 import { DBManager } from './database/database-manager'
@@ -29,61 +30,77 @@ import {
 import { getMentionableBlockData } from './utils/obsidian'
 import './utils/path'
 
-// Remember to rename these classes and interfaces!
 export default class InfioPlugin extends Plugin {
+	private metadataCacheUnloadFn: (() => void) | null = null
+	private activeLeafChangeUnloadFn: (() => void) | null = null
+	private dbManagerInitPromise: Promise<DBManager> | null = null
+	private ragEngineInitPromise: Promise<RAGEngine> | null = null
 	settings: InfioSettings
 	settingTab: InfioSettingTab
 	settingsListeners: ((newSettings: InfioSettings) => void)[] = []
-	private activeLeafChangeUnloadFn: (() => void) | null = null
-	private metadataCacheUnloadFn: (() => void) | null = null
 	initChatProps?: ChatProps
 	dbManager: DBManager | null = null
 	ragEngine: RAGEngine | null = null
 	inlineEdit: InlineEdit | null = null
-	private dbManagerInitPromise: Promise<DBManager> | null = null
-	private ragEngineInitPromise: Promise<RAGEngine> | null = null
-	// private pg: PGlite | null = null
+	diffStrategy?: DiffStrategy
+
 	async onload() {
+		// load settings
 		await this.loadSettings()
 
-		// Add settings tab
+		// add settings tab
 		this.settingTab = new InfioSettingTab(this.app, this)
 		this.addSettingTab(this.settingTab)
 
-		// create and init pglite db
-		// this.pg = await createAndInitDb()
-
-		// This creates an icon in the left ribbon.
+		// add icon to ribbon
 		this.addRibbonIcon('wand-sparkles', 'Open infio copilot', () =>
 			this.openChatView(),
 		)
 
+		// register views
 		this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf, this))
 		this.registerView(APPLY_VIEW_TYPE, (leaf) => new ApplyView(leaf))
 
-		// Register markdown processor for ai blocks
+		// register markdown processor for Inline Edit
 		this.inlineEdit = new InlineEdit(this, this.settings);
 		this.registerMarkdownCodeBlockProcessor("infioedit", (source, el, ctx) => {
 			this.inlineEdit?.Processor(source, el, ctx);
 		});
 
-		// Update inlineEdit when settings change
-		this.addSettingsListener((newSettings) => {
-			this.inlineEdit = new InlineEdit(this, newSettings);
-		});
-
-		// Setup event listener
+		// setup autocomplete event listener
 		const statusBar = StatusBar.fromApp(this);
 		const eventListener = EventListener.fromSettings(
 			this.settings,
 			statusBar,
 			this.app
 		);
+
+		// initialize diff strategy
+		this.diffStrategy = getDiffStrategy(
+			this.settings.chatModelId || "",
+			this.app,
+			this.settings.fuzzyMatchThreshold,
+			this.settings.experimentalDiffStrategy,
+			this.settings.multiSearchReplaceDiffStrategy,
+		)
+
+		// add settings change listener
 		this.addSettingsListener((newSettings) => {
+			// Update inlineEdit when settings change
+			this.inlineEdit = new InlineEdit(this, newSettings);
+			// Update autocomplete event listener when settings change
 			eventListener.handleSettingChanged(newSettings)
+			// Update diff strategy when settings change
+			this.diffStrategy = getDiffStrategy(
+				this.settings.chatModelId || "",
+				this.app,
+				this.settings.fuzzyMatchThreshold,
+				this.settings.experimentalDiffStrategy,
+				this.settings.multiSearchReplaceDiffStrategy,
+			)
 		});
 
-		// Setup render plugin
+		// setup autocomplete render plugin
 		this.registerEditorExtension([
 			InlineSuggestionState,
 			CompletionKeyWatcher(
@@ -107,6 +124,7 @@ export default class InfioPlugin extends Plugin {
 			}
 		});
 
+		/// *** Event Listeners ***
 		this.registerEvent(
 			this.app.workspace.on("active-leaf-change", (leaf) => {
 				if (leaf?.view instanceof MarkdownView) {
@@ -139,7 +157,7 @@ export default class InfioPlugin extends Plugin {
 			})
 		);
 
-		// This adds a simple command that can be triggered anywhere
+		/// *** Commands ***
 		this.addCommand({
 			id: 'open-new-chat',
 			name: 'Open new chat',
@@ -337,7 +355,6 @@ export default class InfioPlugin extends Plugin {
 	}
 
 	onunload() {
-		// this.dbManager?.cleanup()
 		this.dbManager = null
 	}
 

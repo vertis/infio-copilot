@@ -34,7 +34,7 @@ export type LLMContextType = {
 		options?: LLMOptions,
 	) => Promise<AsyncIterable<LLMResponseStreaming>>
 	chatModel: LLMModel
-	applyModel: LLMModel
+	// applyModel: LLMModel
 }
 
 const LLMContext = createContext<LLMContextType | null>(null)
@@ -50,12 +50,12 @@ export function LLMProvider({ children }: PropsWithChildren) {
 		}
 	}, [settings])
 
-	const applyModel = useMemo((): LLMModel => {
-		return {
-			provider: settings.applyModelProvider,
-			modelId: settings.applyModelId,
-		}
-	}, [settings])
+	// const applyModel = useMemo((): LLMModel => {
+	// 	return {
+	// 		provider: settings.applyModelProvider,
+	// 		modelId: settings.applyModelId,
+	// 	}
+	// }, [settings])
 
 	useEffect(() => {
 		const manager = new LLMManager(settings)
@@ -92,7 +92,7 @@ export function LLMProvider({ children }: PropsWithChildren) {
 
 	return (
 		<LLMContext.Provider
-			value={{ generateResponse, streamResponse, chatModel, applyModel }}
+			value={{ generateResponse, streamResponse, chatModel }}
 		>
 			{children}
 		</LLMContext.Provider>

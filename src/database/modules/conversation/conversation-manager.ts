@@ -1,4 +1,5 @@
 import { App } from 'obsidian'
+import { Transaction } from '@electric-sql/pglite'
 
 import { editorStateToPlainText } from '../../../components/chat-view/chat-input/utils/editor-state-to-plain-text'
 import { ChatAssistantMessage, ChatConversationMeta, ChatMessage, ChatUserMessage } from '../../../types/chat'
@@ -22,42 +23,44 @@ export class ConversationManager {
 		this.repository = new ConversationRepository(app, db)
 	}
 
-	async createConversation(id: string, title = 'New chat'): Promise<void> {
+	async createConversation(id: string, title = 'New chat', tx?: Transaction): Promise<void> {
 		const conversation = {
 			id,
 			title,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		}
-		await this.repository.create(conversation)
+		await this.repository.create(conversation, tx)
 	}
 
-	async saveConversation(id: string, messages: ChatMessage[]): Promise<void> {
-		const conversation = await this.repository.findById(id)
-		if (!conversation) {
-			let title = 'New chat'
-			if (messages.length > 0 && messages[0].role === 'user') {
-				const query = editorStateToPlainText(messages[0].content)
-				if (query.length > 20) {
-					title = `${query.slice(0, 20)}...`
-				} else {
-					title = query
+	async txCreateOrUpdateConversation(id: string, messages: ChatMessage[]): Promise<void> {
+		await this.repository.tx(async (tx) => {
+			const conversation = await this.repository.findById(id, tx)
+			if (!conversation) {
+				let title = 'New chat'
+				if (messages.length > 0 && messages[0].role === 'user') {
+					const query = editorStateToPlainText(messages[0].content)
+					if (query.length > 20) {
+						title = `${query.slice(0, 20)}...`
+					} else {
+						title = query
+					}
 				}
+				await this.createConversation(id, title, tx)
 			}
-			await this.createConversation(id, title)
-		}
 
-		// Delete existing messages
-		await this.repository.deleteAllMessagesFromConversation(id)
+			// Delete existing messages
+			await this.repository.deleteAllMessagesFromConversation(id, tx)
 
-		// Insert new messages
-		for (const message of messages) {
-			const insertMessage = this.serializeMessage(message, id)
-			await this.repository.createMessage(insertMessage)
-		}
+			// Insert new messages
+			for (const message of messages) {
+				const insertMessage = this.serializeMessage(message, id)
+				await this.repository.createMessage(insertMessage, tx)
+			}
 
-		// Update conversation timestamp
-		await this.repository.update(id, { updatedAt: new Date() })
+			// Update conversation timestamp
+			await this.repository.update(id, { updatedAt: new Date() }, tx)
+		})
 	}
 
 	async findConversation(id: string): Promise<ChatMessage[] | null> {

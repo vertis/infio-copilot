@@ -1,6 +1,7 @@
-import { compareTwoStrings } from "string-similarity"
-import { closest } from "fastest-levenshtein"
 import { diff_match_patch } from "diff-match-patch"
+import { closest } from "fastest-levenshtein"
+import { compareTwoStrings } from "string-similarity"
+
 import { Change, Hunk } from "./types"
 
 export type SearchResult = {
@@ -44,7 +45,7 @@ function evaluateContentUniqueness(searchStr: string, content: string[]): number
 
 // Helper function to prepare search string from context
 export function prepareSearchString(changes: Change[]): string {
-	const lines = changes.filter((c) => c.type === "context" || c.type === "remove").map((c) => c.originalLine)
+	const lines = changes.filter((c) => c.type === "remove").map((c) => c.content)
 	return lines.join("\n")
 }
 
@@ -198,12 +199,16 @@ export function findExactMatch(
 	startIndex: number = 0,
 	confidenceThreshold: number = 0.97,
 ): SearchResult {
+	// console.log("searchStr: ", searchStr)
+	// console.log("content: ", content)
 	const searchLines = searchStr.split("\n")
 	const windows = createOverlappingWindows(content.slice(startIndex), searchLines.length)
 	const matches: (SearchResult & { windowIndex: number })[] = []
 
 	windows.forEach((windowData, windowIndex) => {
 		const windowStr = windowData.window.join("\n")
+		// console.log("searchStr: ", searchStr)
+		// console.log("windowStr:", windowStr)
 		const exactMatch = windowStr.indexOf(searchStr)
 
 		if (exactMatch !== -1) {
@@ -399,10 +404,18 @@ export function findBestMatch(
 
 	for (const strategy of strategies) {
 		const result = strategy(searchStr, content, startIndex, confidenceThreshold)
+		if (searchStr === "由于年久失修，街区路面坑洼不平，污水横流，垃圾遍地，甚至可见弹痕血迹。") {
+			console.log("findBestMatch result: ", strategy.name, result)
+		}
 		if (result.confidence > bestResult.confidence) {
 			bestResult = result
 		}
 	}
+	// if (bestResult.confidence < 0.97) {
+	// 	console.log("searchStr: ", searchStr)
+	// 	console.log("content: ", content)
+	// 	console.log("findBestMatch result: ", bestResult)
+	// }
 
 	return bestResult
 }

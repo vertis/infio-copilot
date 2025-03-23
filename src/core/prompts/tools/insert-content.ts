@@ -18,6 +18,7 @@ Usage:
   }
 ]</operations>
 </insert_content>
+
 Example: Insert a new section heading and paragraph
 <insert_content>
 <path>chapter1.md</path>

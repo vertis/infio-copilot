@@ -26,7 +26,7 @@ Usage:
 ]</operations>
 </search_and_replace>
 
-Example: Replace "climate change" with "climate crisis" in lines 1-10 of an essay
+Example 1: Replace "climate change" with "climate crisis" in lines 1-10 of an essay
 <search_and_replace>
 <path>essays/environmental-impact.md</path>
 <operations>[
@@ -38,7 +38,8 @@ Example: Replace "climate change" with "climate crisis" in lines 1-10 of an essa
   }
 ]</operations>
 </search_and_replace>
-Example: Update citation format throughout a document using regex
+
+Example 2: Update citation format throughout a document using regex
 <search_and_replace>
 <path>research-paper.md</path>
 <operations>[

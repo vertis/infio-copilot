@@ -1,6 +1,7 @@
-import { DiffStrategy, DiffResult } from "../types"
-import { addLineNumbers, everyLineHasLineNumbers, stripLineNumbers } from "../../../integrations/misc/extract-text"
 import { distance } from "fastest-levenshtein"
+
+import { addLineNumbers, everyLineHasLineNumbers, stripLineNumbers } from "../../../utils/extract-text"
+import { DiffResult, DiffStrategy } from "../types"
 
 const BUFFER_LINES = 20 // Number of extra context lines to show before and after matches
 
@@ -30,6 +31,10 @@ function getSimilarity(original: string, search: string): number {
 export class SearchReplaceDiffStrategy implements DiffStrategy {
 	private fuzzyThreshold: number
 	private bufferLines: number
+
+	getName(): string {
+		return "SearchReplace"
+	}
 
 	constructor(fuzzyThreshold?: number, bufferLines?: number) {
 		// Use provided threshold or default to exact matching (1.0)
@@ -225,14 +230,14 @@ Your search/replace content here
 			const originalContentSection =
 				startLine !== undefined && endLine !== undefined
 					? `\n\nOriginal Content:\n${addLineNumbers(
-							originalLines
-								.slice(
-									Math.max(0, startLine - 1 - this.bufferLines),
-									Math.min(originalLines.length, endLine + this.bufferLines),
-								)
-								.join("\n"),
-							Math.max(1, startLine - this.bufferLines),
-						)}`
+						originalLines
+							.slice(
+								Math.max(0, startLine - 1 - this.bufferLines),
+								Math.min(originalLines.length, endLine + this.bufferLines),
+							)
+							.join("\n"),
+						Math.max(1, startLine - this.bufferLines),
+					)}`
 					: `\n\nOriginal Content:\n${addLineNumbers(originalLines.join("\n"))}`
 
 			const bestMatchSection = bestMatchContent

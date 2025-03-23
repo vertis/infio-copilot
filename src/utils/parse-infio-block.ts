@@ -33,6 +33,7 @@ export type ParsedMsgBlock =
 	} | {
 		type: 'search_and_replace'
 		path: string
+		content: string
 		operations: {
 			search: string
 			replace: string
@@ -42,6 +43,11 @@ export type ParsedMsgBlock =
 			ignore_case?: boolean
 			regex_flags?: string
 		}[]
+		finish: boolean
+	} | {
+		type: 'apply_diff'
+		path: string
+		diff: string
 		finish: boolean
 	} | {
 		type: 'ask_followup_question'
@@ -224,7 +230,7 @@ export function parseMsgBlocks(
 				}
 				let path: string | undefined
 				let regex: string | undefined
-				
+
 				for (const childNode of node.childNodes) {
 					if (childNode.nodeName === 'path' && childNode.childNodes.length > 0) {
 						path = childNode.childNodes[0].value
@@ -361,6 +367,7 @@ export function parseMsgBlocks(
 				}
 				let path: string | undefined
 				let operations = []
+				let content: string = ''
 
 				// 处理子标签
 				for (const childNode of node.childNodes) {
@@ -368,8 +375,8 @@ export function parseMsgBlocks(
 						path = childNode.childNodes[0].value
 					} else if (childNode.nodeName === 'operations' && childNode.childNodes.length > 0) {
 						try {
-							const operationsJson = childNode.childNodes[0].value
-							operations = JSON5.parse(operationsJson)
+							content = childNode.childNodes[0].value
+							operations = JSON5.parse(content)
 						} catch (error) {
 							console.error('Failed to parse operations JSON', error)
 						}
@@ -379,7 +386,38 @@ export function parseMsgBlocks(
 				parsedResult.push({
 					type: 'search_and_replace',
 					path,
+					content,
 					operations,
+					finish: node.sourceCodeLocation.endTag !== undefined
+				})
+				lastEndOffset = endOffset
+			} else if (node.nodeName === 'apply_diff') {
+				if (!node.sourceCodeLocation) {
+					throw new Error('sourceCodeLocation is undefined')
+				}
+				const startOffset = node.sourceCodeLocation.startOffset
+				const endOffset = node.sourceCodeLocation.endOffset
+				if (startOffset > lastEndOffset) {
+					parsedResult.push({
+						type: 'string',
+						content: input.slice(lastEndOffset, startOffset),
+					})
+				}
+				let path: string | undefined
+				let diff: string | undefined
+
+				for (const childNode of node.childNodes) {
+					if (childNode.nodeName === 'path' && childNode.childNodes.length > 0) {
+						path = childNode.childNodes[0].value
+					} else if (childNode.nodeName === 'diff' && childNode.childNodes.length > 0) {
+						diff = childNode.childNodes[0].value
+					}
+				}
+
+				parsedResult.push({
+					type: 'apply_diff',
+					path,
+					diff,
 					finish: node.sourceCodeLocation.endTag !== undefined
 				})
 				lastEndOffset = endOffset
@@ -443,10 +481,10 @@ export function parseMsgBlocks(
 						content: input.slice(lastEndOffset, startOffset),
 					})
 				}
-				
+
 				let mode: string = ''
 				let reason: string = ''
-				
+
 				for (const childNode of node.childNodes) {
 					if (childNode.nodeName === 'mode_slug' && childNode.childNodes.length > 0) {
 						// @ts-ignore - 忽略 value 属性的类型错误
@@ -456,7 +494,7 @@ export function parseMsgBlocks(
 						reason = childNode.childNodes[0].value
 					}
 				}
-				
+
 				parsedResult.push({
 					type: 'switch_mode',
 					mode,
@@ -500,9 +538,9 @@ export function parseMsgBlocks(
 						content: input.slice(lastEndOffset, startOffset),
 					})
 				}
-				
+
 				let urls: string[] = []
-				
+
 				for (const childNode of node.childNodes) {
 					if (childNode.nodeName === 'urls' && childNode.childNodes.length > 0) {
 						try {
@@ -516,7 +554,7 @@ export function parseMsgBlocks(
 						}
 					}
 				}
-				
+
 				parsedResult.push({
 					type: 'fetch_urls_content',
 					urls,

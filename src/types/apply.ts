@@ -64,6 +64,13 @@ export type SearchAndReplaceToolArgs = {
 	}[];
 }
 
+export type ApplyDiffToolArgs = {
+	type: 'apply_diff';
+	filepath: string;
+	diff: string;
+	finish?: boolean;
+}
+
 export type SearchWebToolArgs = {
 	type: 'search_web';
 	query: string;
@@ -83,4 +90,4 @@ export type SwitchModeToolArgs = {
 	finish?: boolean;
 }
 
-export type ToolArgs = ReadFileToolArgs | WriteToFileToolArgs | InsertContentToolArgs | SearchAndReplaceToolArgs | ListFilesToolArgs | RegexSearchFilesToolArgs | SemanticSearchFilesToolArgs | SearchWebToolArgs | FetchUrlsContentToolArgs | SwitchModeToolArgs;
+export type ToolArgs = ReadFileToolArgs | WriteToFileToolArgs | InsertContentToolArgs | SearchAndReplaceToolArgs | ListFilesToolArgs | RegexSearchFilesToolArgs | SemanticSearchFilesToolArgs | SearchWebToolArgs | FetchUrlsContentToolArgs | SwitchModeToolArgs | ApplyDiffToolArgs;

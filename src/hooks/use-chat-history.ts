@@ -36,12 +36,11 @@ export function useChatHistory(): UseChatHistory {
     void fetchChatList()
   }, [fetchChatList])
 
-  // 只新增消息
-  const createConversation = useCallback(
+  const createOrUpdateConversation = useCallback(
     async (id: string, messages: ChatMessage[]): Promise<void> => {
       const dbManager = await getManager()
       const conversationManager = dbManager.getConversationManager()
-      await conversationManager.saveConversation(id, messages)
+      await conversationManager.txCreateOrUpdateConversation(id, messages)
     },
     [getManager],
   )
@@ -74,7 +73,7 @@ export function useChatHistory(): UseChatHistory {
   )
 
   return {
-    createOrUpdateConversation: createConversation,
+    createOrUpdateConversation,
     deleteConversation,
     getChatMessagesById,
     updateConversationTitle,
