@@ -57,7 +57,7 @@ export default function MarkdownEditFileBlock({
 	}
 
 	return (
-		<div className={`infio-chat-code-block ${path ? 'has-filename' : ''}`}>
+		<div className={`infio-chat-code-block ${path ? 'has-filename' : ''} infio-reasoning-block`}>
 			<div className={'infio-chat-code-block-header'}>
 				{path && (
 					<div className={'infio-chat-code-block-header-filename'}>
@@ -106,14 +106,16 @@ export default function MarkdownEditFileBlock({
 					</button>
 				</div>
 			</div>
-			<MemoizedSyntaxHighlighterWrapper
-				isDarkMode={isDarkMode}
-				language={language}
-				hasFilename={!!path}
-				wrapLines={wrapLines}
-			>
-				{String(children)}
-			</MemoizedSyntaxHighlighterWrapper>
+			<div className="infio-reasoning-content-wrapper">
+				<MemoizedSyntaxHighlighterWrapper
+					isDarkMode={isDarkMode}
+					language={language}
+					hasFilename={!!path}
+					wrapLines={wrapLines}
+				>
+					{String(children)}
+				</MemoizedSyntaxHighlighterWrapper>
+			</div>
 		</div>
 	)
 }

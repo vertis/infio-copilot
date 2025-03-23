@@ -1,11 +1,12 @@
 import { Check, Loader2, Replace, X } from 'lucide-react'
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import { useApp } from '../../contexts/AppContext'
+import { useDarkModeContext } from '../../contexts/DarkModeContext'
 import { ApplyStatus, SearchAndReplaceToolArgs } from '../../types/apply'
 import { openMarkdownFile } from '../../utils/obsidian'
+
 import { MemoizedSyntaxHighlighterWrapper } from './SyntaxHighlighterWrapper'
-import { useDarkModeContext } from '../../contexts/DarkModeContext'
 
 export default function MarkdownSearchAndReplace({
 	applyStatus,
@@ -45,7 +46,7 @@ export default function MarkdownSearchAndReplace({
 
 	return (
 		<div
-			className={`infio-chat-code-block ${path ? 'has-filename' : ''}`}
+			className={`infio-chat-code-block ${path ? 'has-filename' : ''}  infio-reasoning-block`}
 			onClick={handleClick}
 		>
 			<div className={'infio-chat-code-block-header'}>
@@ -82,14 +83,16 @@ export default function MarkdownSearchAndReplace({
 					</button>
 				</div>
 			</div>
-			<MemoizedSyntaxHighlighterWrapper
-				isDarkMode={isDarkMode}
-				language="markdown"
-				hasFilename={!!path}
-				wrapLines={true}
-			>
-				{content}
-			</MemoizedSyntaxHighlighterWrapper>
+			<div className="infio-reasoning-content-wrapper">
+				<MemoizedSyntaxHighlighterWrapper
+					isDarkMode={isDarkMode}
+					language="markdown"
+					hasFilename={!!path}
+					wrapLines={true}
+				>
+					{content}
+				</MemoizedSyntaxHighlighterWrapper>
+			</div>
 		</div>
 	)
 } 

@@ -1,4 +1,4 @@
-import { Check, Edit, Loader2, X } from 'lucide-react'
+import { Check, Edit, Loader2, X, Diff } from 'lucide-react'
 import { PropsWithChildren, useState } from 'react'
 
 import { useDarkModeContext } from '../../contexts/DarkModeContext'
@@ -24,7 +24,6 @@ export default function MarkdownApplyDiffBlock({
 	const [applying, setApplying] = useState(false)
 	const { isDarkMode } = useDarkModeContext()
 
-	console.log('MarkdownApplyDiffBlock', { mode, applyStatus, onApply, path, diff, finish })
 	const handleApply = async () => {
 		if (applyStatus !== ApplyStatus.Idle) {
 			return
@@ -43,7 +42,7 @@ export default function MarkdownApplyDiffBlock({
 			<div className={'infio-chat-code-block-header'}>
 				{path && (
 					<div className={'infio-chat-code-block-header-filename'}>
-						<Edit size={10} className="infio-chat-code-block-header-icon" />
+						<Diff size={10} className="infio-chat-code-block-header-icon" />
 						{mode}: {path}
 					</div>
 				)}
