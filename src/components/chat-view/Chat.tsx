@@ -48,9 +48,12 @@ import { PromptGenerator, addLineNumbers } from '../../utils/prompt-generator'
 import { fetchUrlsContent, webSearch } from '../../utils/web-search'
 
 // Simple file reading function that returns a placeholder content for testing
-const readFileContent = (filePath: string): string => {
-	// In a real implementation, this would use filePath to read the actual file
-	return `Content of file: ${filePath}`;
+const readFileContent = async (app: App, filePath: string): Promise<string> => {
+	const file = app.vault.getFileByPath(filePath)
+	if (!file) {
+		throw new Error(`File not found: ${filePath}`)
+	}
+	return await readTFileContent(file, app.vault)
 }
 
 import { ModeSelect } from './chat-input/ModeSelect'
@@ -415,7 +418,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						})
 					})
 				} else if (toolArgs.type === 'search_and_replace') {
-					const fileContent = activeFile.path === toolArgs.filepath ? activeFileContent : readFileContent(toolArgs.filepath)
+					const fileContent = activeFile.path === toolArgs.filepath ? activeFileContent : await readFileContent(app, toolArgs.filepath)
 					const applyRes = await SearchAndReplace(
 						activeFile,
 						fileContent,
@@ -494,7 +497,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						})
 					})
 				} else if (toolArgs.type === 'read_file') {
-					const fileContent = activeFile.path === toolArgs.filepath ? activeFileContent : readFileContent(toolArgs.filepath)
+					const fileContent = await readFileContent(app, toolArgs.filepath)
 					const formattedContent = `[read_file for '${toolArgs.filepath}'] Result:\n${addLineNumbers(fileContent)}\n`;
 					return {
 						type: 'read_file',
