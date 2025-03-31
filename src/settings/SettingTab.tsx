@@ -116,16 +116,20 @@ export class InfioSettingTab extends PluginSettingTab {
 				a.setAttr('rel', 'noopener');
 			}))
 			.setClass('setting-item-heading-smaller')
-			.addText((text) =>
-				text
+			.addText((text) => {
+				const t = text
 					.setValue(this.plugin.settings.serperApiKey)
 					.onChange(async (value) => {
 						await this.plugin.setSettings({
 							...this.plugin.settings,
 							serperApiKey: value,
 						})
-					}),
-			)
+					});
+				if (t.inputEl) {
+					t.inputEl.type = "password";
+				}
+				return t;
+			})
 
 		new Setting(containerEl)
 			.setName('Jina API key (Optional)')
@@ -139,16 +143,20 @@ export class InfioSettingTab extends PluginSettingTab {
 				a.setAttr('rel', 'noopener');
 			}))
 			.setClass('setting-item-heading-smaller')
-			.addText((text) =>
-				text
+			.addText((text) => {
+				const t = text
 					.setValue(this.plugin.settings.jinaApiKey)
 					.onChange(async (value) => {
 						await this.plugin.setSettings({
 							...this.plugin.settings,
 							jinaApiKey: value,
 						})
-					}),
-			)
+					});
+				if (t.inputEl) {
+					t.inputEl.type = "password";
+				}
+				return t;
+			})
 	}
 
 	renderRAGSection(containerEl: HTMLElement): void {

@@ -111,7 +111,6 @@ export async function regexSearchFiles(
 	let output: string
 	try {
 		output = await execRipgrep(rgPath, args)
-		console.log("output", output)
 	} catch (error) {
 		console.error("Error executing ripgrep:", error)
 		return "No results found"
@@ -161,9 +160,6 @@ export async function regexSearchFiles(
 		results.push(currentResult as SearchResult)
 	}
 	
-	console.log("results", results)
-	console.log("currentResult", currentResult)
-
 	return formatResults(results, directoryPath)
 }
 
