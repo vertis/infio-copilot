@@ -578,7 +578,13 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						}
 					}
 				} else if (toolArgs.type === 'search_web') {
-					const results = await webSearch(toolArgs.query, settings.serperApiKey, settings.jinaApiKey, (await getRAGEngine()))
+					const results = await webSearch(
+						toolArgs.query,
+						settings.serperApiKey,
+						settings.serperSearchEngine,
+						settings.jinaApiKey,
+						(await getRAGEngine())
+					)
 					const formattedContent = `[search_web for '${toolArgs.query}'] Result:\n${results}\n`;
 					return {
 						type: 'search_web',

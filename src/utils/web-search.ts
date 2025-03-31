@@ -29,9 +29,9 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
 	return dotProduct / (magnitudeA * magnitudeB);
 }
 
-async function serperSearch(query: string, serperApiKey: string): Promise<SearchResult[]> {
+async function serperSearch(query: string, serperApiKey: string, serperSearchEngine: string): Promise<SearchResult[]> {
 	return new Promise((resolve, reject) => {
-		const url = `${SERPER_BASE_URL}?q=${encodeURIComponent(query)}&engine=google&api_key=${serperApiKey}&num=20`;
+		const url = `${SERPER_BASE_URL}?q=${encodeURIComponent(query)}&engine=${serperSearchEngine}&api_key=${serperApiKey}&num=20`;
 
 		https.get(url, (res: any) => {
 			let data = '';
@@ -192,9 +192,15 @@ export async function fetchUrlContent(url: string, apiKey: string): Promise<stri
 	}
 }
 
-export async function webSearch(query: string, serperApiKey: string, jinaApiKey: string, ragEngine: RAGEngine): Promise<string> {
+export async function webSearch(
+	query: string,
+	serperApiKey: string,
+	jinaApiKey: string,
+	serperSearchEngine: string,
+	ragEngine: RAGEngine
+): Promise<string> {
 	try {
-		const results = await serperSearch(query, serperApiKey);
+		const results = await serperSearch(query, serperApiKey, serperSearchEngine);
 		const filteredResults = await filterByEmbedding(query, results, ragEngine);
 		const filteredResultsWithContent = await Promise.all(filteredResults.map(async (result) => {
 			let content = await fetchUrlContent(result.link, jinaApiKey);

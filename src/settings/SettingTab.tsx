@@ -102,7 +102,7 @@ export class InfioSettingTab extends PluginSettingTab {
 	renderDeepResearchSection(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setHeading()
-			.setName('Deep research')
+			.setName('Web search')
 
 		new Setting(containerEl)
 			.setName('Serper API key')
@@ -130,6 +130,23 @@ export class InfioSettingTab extends PluginSettingTab {
 				}
 				return t;
 			})
+		
+		new Setting(containerEl)
+			.setName('Serper search engine')
+			.setDesc('Choose the search engine to use for web search.')
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption('google', 'Google')
+					.addOption('duckduckgo', 'DuckDuckGo')
+					.addOption('bing', 'Bing')
+					.setValue(this.plugin.settings.serperSearchEngine)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							serperSearchEngine: value,
+						})
+					}),
+			)
 
 		new Setting(containerEl)
 			.setName('Jina API key (Optional)')

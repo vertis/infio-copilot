@@ -231,8 +231,9 @@ export const InfioSettingsSchema = z.object({
 	// Mode
 	mode: z.string().catch('ask'),
 
-	// Deep Research
+	// web search
 	serperApiKey: z.string().catch(''),
+	serperSearchEngine: z.enum(['google', 'duckduckgo', 'bing']).catch('google'),
 	jinaApiKey: z.string().catch(''),
 
 	// Files Search

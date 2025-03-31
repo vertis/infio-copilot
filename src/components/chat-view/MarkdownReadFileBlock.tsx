@@ -23,9 +23,7 @@ export default function MarkdownReadFileBlock({
 	}
 
 	React.useEffect(() => {
-		console.log('finish', finish, applyStatus)
 		if (finish && applyStatus === ApplyStatus.Idle) {
-			console.log('finish auto read file', path)
 			onApply({
 				type: 'read_file',
 				filepath: path

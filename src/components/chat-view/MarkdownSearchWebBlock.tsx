@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react'
 import React from 'react'
 
+import { useSettings } from '../../contexts/SettingsContext'
 import { ApplyStatus, SearchWebToolArgs } from '../../types/apply'
 
 export default function MarkdownWebSearchBlock({
@@ -15,10 +16,20 @@ export default function MarkdownWebSearchBlock({
 	finish: boolean
 }) {
 
+	const { settings } = useSettings()
+
+	const handleClick = () => {
+		if (settings.serperSearchEngine === 'google') {
+			window.open(`https://www.google.com/search?q=${query}`, '_blank')
+		} else if (settings.serperSearchEngine === 'bing') {
+			window.open(`https://www.bing.com/search?q=${query}`, '_blank')
+		} else {
+			window.open(`https://duckduckgo.com/?q=${query}`, '_blank')
+		}
+	}
+
 	React.useEffect(() => {
-		console.log('finish', finish, applyStatus)
 		if (finish && applyStatus === ApplyStatus.Idle) {
-			console.log('finish auto web search', query)
 			onApply({
 				type: 'search_web',
 				query: query,
@@ -28,7 +39,9 @@ export default function MarkdownWebSearchBlock({
 
 	return (
 		<div
-			className={`infio-chat-code-block has-filename`}
+			className={`infio-chat-code-block has-filename`
+			}
+			onClick={handleClick}
 		>
 			<div className={'infio-chat-code-block-header'}>
 				<div className={'infio-chat-code-block-header-filename'}>
