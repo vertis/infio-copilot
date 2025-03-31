@@ -142,8 +142,8 @@ export default class InfioPlugin extends Plugin {
 			this.app.metadataCache.on("changed", (file: TFile) => {
 				if (file) {
 					eventListener.handleFileChange(file);
-					console.log("file changed: filename: ", file.name);
-					this.ragEngine?.updateFileIndex(file);
+					// is not worth it to update the file index on every file change
+					// this.ragEngine?.updateFileIndex(file);
 				}
 			})
 		);
@@ -151,7 +151,6 @@ export default class InfioPlugin extends Plugin {
 		this.registerEvent(
 			this.app.metadataCache.on("deleted", (file: TFile) => {
 				if (file) {
-					console.log("file deleted: filename: ", file.name)
 					this.ragEngine?.deleteFileIndex(file);
 				}
 			})

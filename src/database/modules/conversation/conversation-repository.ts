@@ -62,7 +62,6 @@ export class ConversationRepository {
 				message.createdAt || new Date()
 			]
 		)
-		console.log('createMessage: ', message.id, result)
 		return result.rows[0]
 	}
 
@@ -129,11 +128,10 @@ export class ConversationRepository {
 	}
 
 	async deleteAllMessagesFromConversation(conversationId: string, tx?: Transaction): Promise<void> {
-		const result = await (tx ?? this.db).query(
+		await (tx ?? this.db).query(
 			`DELETE FROM messages WHERE conversation_id = $1`,
 			[conversationId]
 		)
-		console.log('deleteAllMessagesFromConversation', conversationId, result)
 		return
 	}
 }

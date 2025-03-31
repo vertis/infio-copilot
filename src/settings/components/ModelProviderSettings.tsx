@@ -50,7 +50,7 @@ const CustomProviderSettings: React.FC<CustomProviderSettingsProps> = ({ plugin,
 
 	const handleSettingsUpdate = async (newSettings: InfioSettings) => {
 		await plugin.setSettings(newSettings);
-		// 使用父组件传入的回调函数来刷新整个容器
+		// Use the callback function passed from the parent component to refresh the entire container
 		onSettingsUpdate?.();
 	};
 

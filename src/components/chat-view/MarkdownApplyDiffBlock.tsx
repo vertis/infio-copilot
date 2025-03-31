@@ -1,4 +1,4 @@
-import { Check, Edit, Loader2, X, Diff } from 'lucide-react'
+import { Check, Diff, Loader2, X } from 'lucide-react'
 import { PropsWithChildren, useState } from 'react'
 
 import { useDarkModeContext } from '../../contexts/DarkModeContext'

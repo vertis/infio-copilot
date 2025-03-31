@@ -467,7 +467,14 @@ export class PromptGenerator {
 	}
 
 	private async getSystemMessageNew(mode: Mode, filesSearchMethod: string, preferredLanguage: string): Promise<RequestMessage> {
-		const systemPrompt = await SYSTEM_PROMPT(this.app.vault.getRoot().path, false, mode, filesSearchMethod, preferredLanguage, this.diffStrategy)
+		const systemPrompt = await SYSTEM_PROMPT(
+			this.app.vault.getRoot().path,
+			false,
+			mode,
+			filesSearchMethod,
+			preferredLanguage,
+			this.diffStrategy
+		)
 
 		return {
 			role: 'system',

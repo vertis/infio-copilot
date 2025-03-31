@@ -137,7 +137,7 @@ const MarkdownWithIcons = ({
 					{markdownContent}
 				</ReactMarkdown>
 			</div>
-			{markdownContent && finish &&
+			{markdownContent && finish && iconName === "attempt_completion" &&
 				<div className="infio-chat-message-actions">
 					<CopyButton message={markdownContent} />
 					<CreateNewFileButton message={markdownContent} />

@@ -237,6 +237,7 @@ export const InfioSettingsSchema = z.object({
 
 	// Files Search
 	filesSearchMethod: z.enum(['regex', 'semantic', 'auto']).catch('auto'),
+	ripgrepPath: z.string().catch(''),
 
 	/// [compatible]
 	// activeModels [compatible]

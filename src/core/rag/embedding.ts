@@ -1,3 +1,6 @@
+import https from 'https'
+import { URL } from 'url'
+
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { OpenAI } from 'openai'
 
@@ -173,6 +176,42 @@ export const getEmbeddingModel = (
 						input: text,
 					})
 					return embedding.data[0].embedding
+				},
+			}
+		}
+		case ApiProvider.OpenAICompatible: {
+			const openai = new OpenAI({
+				apiKey: settings.openaicompatibleProvider.apiKey,
+				baseURL: settings.openaicompatibleProvider.baseUrl,
+				dangerouslyAllowBrowser: true,
+			});
+			return {
+				id: settings.embeddingModelId,
+				dimension: 0,
+				getEmbedding: async (text: string) => {
+					try {
+						if (!openai.apiKey) {
+							throw new LLMAPIKeyNotSetException(
+								'OpenAI Compatible API key is missing. Please set it in settings menu.',
+							)
+						}
+						const embedding = await openai.embeddings.create({
+							model: settings.embeddingModelId,
+							input: text,
+							encoding_format: "float",
+						})
+						return embedding.data[0].embedding
+					} catch (error) {
+						if (
+							error.status === 429 &&
+							error.message.toLowerCase().includes('rate limit')
+						) {
+							throw new LLMRateLimitExceededException(
+								'OpenAI Compatible API rate limit exceeded. Please try again later.',
+							)
+						}
+						throw error
+					}
 				},
 			}
 		}

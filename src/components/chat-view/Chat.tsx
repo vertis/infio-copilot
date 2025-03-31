@@ -27,7 +27,7 @@ import {
 	LLMBaseUrlNotSetException,
 	LLMModelNotSetException,
 } from '../../core/llm/exception'
-import { regexSearchFiles } from '../../core/services/ripgrep'
+import { regexSearchFiles } from '../../core/ripgrep'
 import { useChatHistory } from '../../hooks/use-chat-history'
 import { ApplyStatus, ToolArgs } from '../../types/apply'
 import { ChatMessage, ChatUserMessage } from '../../types/chat'
@@ -527,10 +527,9 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 					}
 				} else if (toolArgs.type === 'regex_search_files') {
 					const baseVaultPath = app.vault.adapter.getBasePath()
+					const ripgrepPath = settings.ripgrepPath
 					const absolutePath = path.join(baseVaultPath, toolArgs.filepath)
-					console.log("absolutePath", absolutePath)
-					const results = await regexSearchFiles(absolutePath, toolArgs.regex)
-					console.log("results", results)
+					const results = await regexSearchFiles(absolutePath, toolArgs.regex, ripgrepPath)
 					const formattedContent = `[regex_search_files for '${toolArgs.filepath}'] Result:\n${results}\n`;
 					return {
 						type: 'regex_search_files',

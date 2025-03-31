@@ -30,8 +30,8 @@ export function truncateLine(line: string, maxLength: number = MAX_LINE_LENGTH):
 	return line.length > maxLength ? line.substring(0, maxLength) + " [truncated...]" : line
 }
 
-async function getBinPath(): Promise<string | undefined> {
-	const binPath = path.join("/opt/homebrew/bin/", binName)
+async function getBinPath(ripgrepPath: string): Promise<string | undefined> {
+	const binPath = path.join(ripgrepPath, binName)
 	return (await pathExists(binPath)) ? binPath : undefined
 }
 
@@ -86,20 +86,21 @@ async function execRipgrep(bin: string, args: string[]): Promise<string> {
 export async function regexSearchFiles(
 	directoryPath: string,
 	regex: string,
+	ripgrepPath: string,
 ): Promise<string> {
-	const rgPath = await getBinPath()
+	const rgPath = await getBinPath(ripgrepPath)
 
 	if (!rgPath) {
 		throw new Error("Could not find ripgrep binary")
 	}
 
-	// 使用--glob参数排除.obsidian目录
+	// use --glob param to exclude .obsidian directory
 	const args = [
 		"--json", 
 		"-e", 
 		regex, 
 		"--glob", 
-		"!.obsidian/**", // 排除.obsidian目录及其所有子目录
+		"!.obsidian/**", // exclude .obsidian directory and all its subdirectories
 		"--glob",
 		"!.git/**",
 		"--context", 

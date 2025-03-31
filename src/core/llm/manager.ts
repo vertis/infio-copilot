@@ -17,7 +17,7 @@ import { GroqProvider } from './groq'
 import { InfioProvider } from './infio'
 import { OllamaProvider } from './ollama'
 import { OpenAIAuthenticatedProvider } from './openai'
-import { OpenAICompatibleProvider } from './openai-compatible-provider'
+import { OpenAICompatibleProvider } from './openai-compatible'
 
 
 export type LLMManagerInterface = {

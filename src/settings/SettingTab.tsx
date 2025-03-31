@@ -37,8 +37,8 @@ export class InfioSettingTab extends PluginSettingTab {
 		const { containerEl } = this
 		containerEl.empty()
 		this.renderModelsSection(containerEl)
-		this.renderDeepResearchSection(containerEl)
 		this.renderFilesSearchSection(containerEl)
+		this.renderDeepResearchSection(containerEl)
 		this.renderRAGSection(containerEl)
 		this.renderAutoCompleteSection(containerEl)
 	}
@@ -60,20 +60,34 @@ export class InfioSettingTab extends PluginSettingTab {
 	}
 
 	private renderFilesSearchSection(containerEl: HTMLElement): void {
+		new Setting(containerEl).setHeading().setName('File search')
 		new Setting(containerEl)
-			.setHeading()
-			.setName('Files Search Method')
+			.setName('Files search method')
 			.setDesc('Choose the method to search for files.')
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOption('auto', 'Auto')
-					.addOption('regex', 'Regex')
 					.addOption('semantic', 'Semantic')
+					.addOption('regex', 'Regex')
 					.setValue(this.plugin.settings.filesSearchMethod)
 					.onChange(async (value) => {
 						await this.plugin.setSettings({
 							...this.plugin.settings,
 							filesSearchMethod: value as 'regex' | 'semantic' | 'auto',
+						})
+					}),
+			)
+		new Setting(containerEl)
+			.setName('ripgrep path')
+			.setDesc('Path to the ripgrep binary. When using regex search, this is required.')
+			.addText((text) =>
+				text
+					.setPlaceholder('/opt/homebrew/bin/')
+					.setValue(this.plugin.settings.ripgrepPath)
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							ripgrepPath: value,
 						})
 					}),
 			)
@@ -88,10 +102,10 @@ export class InfioSettingTab extends PluginSettingTab {
 	renderDeepResearchSection(containerEl: HTMLElement): void {
 		new Setting(containerEl)
 			.setHeading()
-			.setName('Deep Research')
+			.setName('Deep research')
 
 		new Setting(containerEl)
-			.setName('Serper Api Key')
+			.setName('Serper API key')
 			.setDesc(createFragment(el => {
 				el.appendText('API key for web search functionality. Serper allows the plugin to search the internet for information, similar to a search engine. Get your key from ');
 				const a = el.createEl('a', {
@@ -114,7 +128,7 @@ export class InfioSettingTab extends PluginSettingTab {
 			)
 
 		new Setting(containerEl)
-			.setName('Jina Api Key (Optional)')
+			.setName('Jina API key (Optional)')
 			.setDesc(createFragment(el => {
 				el.appendText('API key for parsing web pages into markdown format. If not provided, local parsing will be used. Get your key from ');
 				const a = el.createEl('a', {
