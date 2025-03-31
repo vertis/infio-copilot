@@ -46,9 +46,10 @@ function CreateNewFileButton({ message }: { message: string }) {
 	const [created, setCreated] = useState(false)
 
 	const handleCreate = async () => {
-		const firstLine = message.split('\n')[0].trim().replace(/[\\\/:]/g, '');
+		const firstLine = message.trimStart().split('\n')[0].trim().replace(/[\\\/:]/g, '');
 		const filename = firstLine.slice(0, 200) + (firstLine.length > 200 ? '...' : '') || 'untitled';
 		await app.vault.create(`/${filename}.md`, message)
+		await app.workspace.openLinkText(filename, 'split', true)
 		setCreated(true)
 		setTimeout(() => {
 			setCreated(false)
