@@ -4,32 +4,31 @@ import { SearchAndReplaceToolArgs } from '../types/apply';
 
 /**
  * Applies changes to a file by replacing content within specified line range
- * @param content - The new content to insert
+ * @param updateContent - The new content to insert
  * @param currentFile - The file being modified
- * @param currentFileContent - The current content of the file
+ * @param rawContent - The current content of the file
  * @param startLine - Starting line number (1-based indexing, optional)
  * @param endLine - Ending line number (1-based indexing, optional)
  * @returns Promise resolving to the modified content or null if operation fails
  */
 export const ApplyEditToFile = async (
-	currentFile: TFile,
-	currentFileContent: string,
-	content: string,
+	rawContent: string,
+	updateContent: string,
 	startLine?: number,
 	endLine?: number,
 ): Promise<string | null> => {
 	try {
-		// 如果文件为空，直接返回新内容
-		if (!currentFileContent || currentFileContent.trim() === '') {
-			return content;
+		// if file is empty, return new content
+		if (!rawContent || rawContent.trim() === '') {
+			return updateContent;
 		}
 
-		// 如果要清空文件，直接返回空字符串
-		if (content === '') {
+		// if content is empty, return empty string
+		if (updateContent === '') {
 			return '';
 		}
 
-		const lines = currentFileContent.split('\n')
+		const lines = rawContent.split('\n')
 		const effectiveStartLine = Math.max(1, startLine ?? 1)
 		const effectiveEndLine = Math.min(endLine ?? lines.length, lines.length)
 
@@ -41,7 +40,7 @@ export const ApplyEditToFile = async (
 		// Construct new content
 		return [
 			...lines.slice(0, effectiveStartLine - 1),
-			content,
+			updateContent,
 			...lines.slice(effectiveEndLine)
 		].join('\n')
 	} catch (error) {
@@ -58,16 +57,15 @@ function escapeRegExp(string: string): string {
 /**
  * 搜索和替换文件内容
  * @param currentFile - 当前文件
- * @param currentFileContent - 当前文件内容
+ * @param rawContent - 当前文件内容
  * @param search - 搜索内容
  * @param replace - 替换内容
  */
 export const SearchAndReplace = async (
-	currentFile: TFile,
-	currentFileContent: string,
+	rawContent: string,
 	operations: SearchAndReplaceToolArgs['operations']
 ) => {
-	let lines = currentFileContent.split("\n")
+	let lines = rawContent.split("\n")
 
 	for (const op of operations) {
 		const flags = op.regexFlags ?? (op.ignoreCase ? "gi" : "g")

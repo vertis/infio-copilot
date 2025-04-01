@@ -48,7 +48,7 @@ import { PromptGenerator, addLineNumbers } from '../../utils/prompt-generator'
 import { fetchUrlsContent, webSearch } from '../../utils/web-search'
 
 // Simple file reading function that returns a placeholder content for testing
-const readFileContent = async (app: App, filePath: string): Promise<string> => {
+const readFileContentByPath = async (app: App, filePath: string): Promise<string> => {
 	const file = app.vault.getFileByPath(filePath)
 	if (!file) {
 		throw new Error(`File not found: ${filePath}`)
@@ -367,24 +367,23 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 	>({
 		mutationFn: async ({ applyMsgId, toolArgs }) => {
 			try {
-				const activeFile = app.workspace.getActiveFile()
-				if (!activeFile) {
-					throw new Error(
-						'No file is currently open to apply changes. Please open a file and try again.',
-					)
+				let opFile = app.workspace.getActiveFile()
+				if ('filepath' in toolArgs && toolArgs.filepath) {
+					opFile = app.vault.getFileByPath(toolArgs.filepath)
 				}
 
-				const activeFileContent = await readTFileContent(activeFile, app.vault)
-
 				if (toolArgs.type === 'write_to_file' || toolArgs.type === 'insert_content') {
-					const applyRes = await ApplyEditToFile(
-						activeFile,
-						activeFileContent,
+					if (!opFile) {
+						throw new Error(`File not found: ${toolArgs.filepath}`)
+					}
+					const fileContent = await readTFileContent(opFile, app.vault)
+					const appliedFileContent = await ApplyEditToFile(
+						fileContent,
 						toolArgs.content,
 						toolArgs.startLine,
 						toolArgs.endLine
 					)
-					if (!applyRes) {
+					if (!appliedFileContent) {
 						throw new Error('Failed to apply edit changes')
 					}
 					// return a Promise, which will be resolved after user makes a choice
@@ -393,9 +392,9 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 							type: APPLY_VIEW_TYPE,
 							active: true,
 							state: {
-								file: activeFile,
-								originalContent: activeFileContent,
-								newContent: applyRes,
+								file: opFile,
+								oldContent: fileContent,
+								newContent: appliedFileContent,
 								onClose: (applied: boolean) => {
 									const applyStatus = applied ? ApplyStatus.Applied : ApplyStatus.Rejected
 									const applyEditContent = applied ? 'Changes successfully applied'
@@ -418,13 +417,15 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						})
 					})
 				} else if (toolArgs.type === 'search_and_replace') {
-					const fileContent = activeFile.path === toolArgs.filepath ? activeFileContent : await readFileContent(app, toolArgs.filepath)
-					const applyRes = await SearchAndReplace(
-						activeFile,
+					if (!opFile) {
+						throw new Error(`File not found: ${toolArgs.filepath}`)
+					}
+					const fileContent = await readTFileContent(opFile, app.vault)
+					const appliedFileContent = await SearchAndReplace(
 						fileContent,
 						toolArgs.operations
 					)
-					if (!applyRes) {
+					if (!appliedFileContent) {
 						throw new Error('Failed to search_and_replace')
 					}
 					// return a Promise, which will be resolved after user makes a choice
@@ -433,9 +434,9 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 							type: APPLY_VIEW_TYPE,
 							active: true,
 							state: {
-								file: activeFile,
-								originalContent: activeFileContent,
-								newContent: applyRes,
+								file: opFile,
+								oldContent: fileContent,
+								newContent: appliedFileContent,
 								onClose: (applied: boolean) => {
 									const applyStatus = applied ? ApplyStatus.Applied : ApplyStatus.Rejected
 									const applyEditContent = applied ? 'Changes successfully applied'
@@ -458,12 +459,15 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						})
 					})
 				} else if (toolArgs.type === 'apply_diff') {
-					const diffResult = await diffStrategy.applyDiff(
-						activeFileContent,
+					if (!opFile) {
+						throw new Error(`File not found: ${toolArgs.filepath}`)
+					}
+					const fileContent = await readTFileContent(opFile, app.vault)
+					const appliedResult = await diffStrategy.applyDiff(
+						fileContent,
 						toolArgs.diff
 					)
-					if (!diffResult.success) {
-						console.log(diffResult)
+					if (!appliedResult || !appliedResult.success) {
 						throw new Error(`Failed to apply_diff`)
 					}
 					// return a Promise, which will be resolved after user makes a choice
@@ -472,9 +476,9 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 							type: APPLY_VIEW_TYPE,
 							active: true,
 							state: {
-								file: activeFile,
-								originalContent: activeFileContent,
-								newContent: diffResult.content,
+								file: opFile,
+								oldContent: fileContent,
+								newContent: appliedResult.content,
 								onClose: (applied: boolean) => {
 									const applyStatus = applied ? ApplyStatus.Applied : ApplyStatus.Rejected
 									const applyEditContent = applied ? 'Changes successfully applied'
@@ -497,7 +501,10 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						})
 					})
 				} else if (toolArgs.type === 'read_file') {
-					const fileContent = await readFileContent(app, toolArgs.filepath)
+					if (!opFile) {
+						throw new Error(`File not found: ${toolArgs.filepath}`)
+					}
+					const fileContent = await readTFileContent(opFile, app.vault)
 					const formattedContent = `[read_file for '${toolArgs.filepath}'] Result:\n${addLineNumbers(fileContent)}\n`;
 					return {
 						type: 'read_file',

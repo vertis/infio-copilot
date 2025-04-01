@@ -7,7 +7,7 @@ import { AppProvider } from './contexts/AppContext'
 
 export type ApplyViewState = {
 	file: TFile
-	originalContent: string
+	oldContent: string
 	newContent: string
 	onClose: (applied: boolean) => void
 }

@@ -28,7 +28,7 @@ export default function ApplyViewRoot({
   const app = useApp()
 
   const [diff, setDiff] = useState<Change[]>(
-    diffLines(state.originalContent, state.newContent),
+    diffLines(state.oldContent, state.newContent),
   )
 
   const handleAccept = async () => {

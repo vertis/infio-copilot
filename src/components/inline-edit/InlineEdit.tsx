@@ -241,8 +241,7 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
 			const endLine = parsedBlock?.endLine || defaultEndLine;
 
 			const updatedContent = await ApplyEditToFile(
-				activeFile,
-				await plugin.app.vault.read(activeFile),
+				await plugin.app.vault.cachedRead(activeFile),
 				finalContent,
 				startLine,
 				endLine
