@@ -607,7 +607,6 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						query: toolArgs.query,
 						scope: scope_folders,
 					})
-					console.log("results", results)
 					let snippets = results.map(({ path, content, metadata }) => {
 						const contentWithLineNumbers = addLineNumbers(content, metadata.startLine)
 						return `<file_block_content location="${path}#L${metadata.startLine}-${metadata.endLine}">\n${contentWithLineNumbers}\n</file_block_content>`

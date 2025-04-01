@@ -1835,3 +1835,39 @@ button.infio-chat-input-model-select {
   height: 100%;
   width: 100%;
 }
+
+.infio-chat-code-block-url-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.infio-chat-code-block-url-list li {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.infio-chat-code-block-url-list li:last-child {
+  border-bottom: none;
+}
+
+.infio-chat-code-block-url-link {
+  color: var(--text-accent);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.infio-chat-code-block-url-link:hover {
+  text-decoration: underline;
+}
+
+.infio-chat-code-block-status-button {
+  color: #008000;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

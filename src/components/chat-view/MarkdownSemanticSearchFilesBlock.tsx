@@ -25,9 +25,7 @@ export default function MarkdownSemanticSearchFilesBlock({
 	}
 
 	React.useEffect(() => {
-		console.log('finish', finish, applyStatus)
 		if (finish && applyStatus === ApplyStatus.Idle) {
-			console.log('finish auto semantic search files', path)
 			onApply({
 				type: 'semantic_search_files',
 				filepath: path,

@@ -5,8 +5,6 @@ import { McpHub } from "../../mcp/McpHub"
 import { getAccessMcpResourceDescription } from "./access-mcp-resource"
 import { getAskFollowupQuestionDescription } from "./ask-followup-question"
 import { getAttemptCompletionDescription } from "./attempt-completion"
-import { getBrowserActionDescription } from "./browser-action"
-import { getExecuteCommandDescription } from "./execute-command"
 import { getFetchUrlsContentDescription } from "./fetch-url-content"
 import { getInsertContentDescription } from "./insert-content"
 import { getListFilesDescription } from "./list-files"
@@ -22,7 +20,6 @@ import { getWriteToFileDescription } from "./write-to-file"
 
 // Map of tool names to their description functions
 const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined> = {
-	execute_command: (args) => getExecuteCommandDescription(args),
 	read_file: (args) => getReadFileDescription(args),
 	write_to_file: (args) => getWriteToFileDescription(args),
 	search_files: (args) => getSearchFilesDescription(args),
@@ -41,7 +38,7 @@ const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined>
 export function getToolDescriptionsForMode(
 	mode: Mode,
 	cwd: string,
-	searchTool: string, 
+	searchTool: string,
 	supportsComputerUse: boolean,
 	diffStrategy?: DiffStrategy,
 	browserViewportSize?: string,
@@ -95,8 +92,6 @@ export function getToolDescriptionsForMode(
 
 // Export individual description functions for backward compatibility
 export {
-	getAccessMcpResourceDescription, getAskFollowupQuestionDescription,
-	getAttemptCompletionDescription, getBrowserActionDescription, getExecuteCommandDescription, getInsertContentDescription,
-	getListFilesDescription, getReadFileDescription, getSearchAndReplaceDescription, getSearchFilesDescription, getSwitchModeDescription, getUseMcpToolDescription, getWriteToFileDescription
+	getAccessMcpResourceDescription, getAskFollowupQuestionDescription, getAttemptCompletionDescription, getInsertContentDescription, getListFilesDescription, getReadFileDescription, getSearchAndReplaceDescription, getSearchFilesDescription, getSwitchModeDescription, getUseMcpToolDescription, getWriteToFileDescription
 }
 

@@ -162,10 +162,6 @@ export class VectorRepository {
       }
 		}
 		
-		const queryVectorLength = `SELECT count(1) FROM "${tableName}"`;
-		const queryVectorLengthResult = await this.db.query(queryVectorLength)
-		console.log('queryVectorLengthResult, ', queryVectorLengthResult)
-
     const query = `
       SELECT 
         id, path, mtime, content, metadata,

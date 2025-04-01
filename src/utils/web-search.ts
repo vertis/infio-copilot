@@ -32,7 +32,7 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
 async function serperSearch(query: string, serperApiKey: string, serperSearchEngine: string): Promise<SearchResult[]> {
 	return new Promise((resolve, reject) => {
 		const url = `${SERPER_BASE_URL}?q=${encodeURIComponent(query)}&engine=${serperSearchEngine}&api_key=${serperApiKey}&num=20`;
-
+		console.log("serper search url: ", url)
 		https.get(url, (res: any) => {
 			let data = '';
 
@@ -67,6 +67,7 @@ async function serperSearch(query: string, serperApiKey: string, serperSearchEng
 				}
 			});
 		}).on('error', (error: Error) => {
+			console.error("serper search error: ", error)
 			reject(error);
 		});
 	});
@@ -195,8 +196,8 @@ export async function fetchUrlContent(url: string, apiKey: string): Promise<stri
 export async function webSearch(
 	query: string,
 	serperApiKey: string,
-	jinaApiKey: string,
 	serperSearchEngine: string,
+	jinaApiKey: string,
 	ragEngine: RAGEngine
 ): Promise<string> {
 	try {

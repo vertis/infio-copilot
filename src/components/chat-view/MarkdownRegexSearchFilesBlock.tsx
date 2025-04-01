@@ -25,9 +25,7 @@ export default function MarkdownRegexSearchFilesBlock({
 	}
 
 	React.useEffect(() => {
-		console.log('finish', finish, applyStatus)
 		if (finish && applyStatus === ApplyStatus.Idle) {
-			console.log('finish auto regex search files', path)
 			onApply({
 				type: 'regex_search_files',
 				filepath: path,

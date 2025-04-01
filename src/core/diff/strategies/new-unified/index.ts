@@ -27,7 +27,6 @@ export class NewUnifiedDiffStrategy implements DiffStrategy {
 	private parseUnifiedDiff(diff: string): Diff {
 		const MAX_CONTEXT_LINES = 6 // Number of context lines to keep before/after changes
 		const lines = diff.split("\n")
-		// console.log("lines: ", lines)
 		const hunks: Hunk[] = []
 		let currentHunk: Hunk | null = null
 
@@ -269,7 +268,7 @@ Your diff here
 				strategy,
 			} = findBestMatch(contextStr, result, 0, this.confidenceThreshold)
 			if (confidence < this.confidenceThreshold) {
-				console.log("Full hunk application failed, trying sub-hunks strategy")
+				console.warn("Full hunk application failed, trying sub-hunks strategy")
 				// Try splitting the hunk into smaller hunks
 				const subHunks = this.splitHunk(hunk)
 				let subHunkSuccess = true

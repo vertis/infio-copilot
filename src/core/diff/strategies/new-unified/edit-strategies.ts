@@ -157,7 +157,7 @@ export async function applyGitFallback(app: App, hunk: Hunk, content: string[]):
 	const vaultBasePath = adapter.getBasePath();
 	const tmpGitPath = normalizePath(path.join(vaultBasePath, ".tmp_git"));
 
-	console.log("tmpGitPath", tmpGitPath)
+	// console.log("tmpGitPath", tmpGitPath)
 
 	try {
 		const exists = await adapter.exists(tmpGitPath);
@@ -190,22 +190,22 @@ export async function applyGitFallback(app: App, hunk: Hunk, content: string[]):
 			fs.writeFileSync(filePath, originalText)
 			await git.add("file.txt")
 			const originalCommit = await git.commit("original")
-			console.log("Strategy 1 - Original commit:", originalCommit.commit)
+			// console.log("Strategy 1 - Original commit:", originalCommit.commit)
 
 			fs.writeFileSync(filePath, searchText)
 			await git.add("file.txt")
-			const searchCommit1 = await git.commit("search")
-			console.log("Strategy 1 - Search commit:", searchCommit1.commit)
+			// const searchCommit1 = await git.commit("search")
+			// console.log("Strategy 1 - Search commit:", searchCommit1.commit)
 
 			fs.writeFileSync(filePath, replaceText)
 			await git.add("file.txt")
 			const replaceCommit = await git.commit("replace")
-			console.log("Strategy 1 - Replace commit:", replaceCommit.commit)
+			// console.log("Strategy 1 - Replace commit:", replaceCommit.commit)
 
-			console.log("Strategy 1 - Attempting checkout of:", originalCommit.commit)
+			// console.log("Strategy 1 - Attempting checkout of:", originalCommit.commit)
 			await git.raw(["checkout", originalCommit.commit])
 			try {
-				console.log("Strategy 1 - Attempting cherry-pick of:", replaceCommit.commit)
+				// console.log("Strategy 1 - Attempting cherry-pick of:", replaceCommit.commit)
 				await git.raw(["cherry-pick", "--minimal", replaceCommit.commit])
 
 				const newText = fs.readFileSync(filePath, "utf-8")
@@ -231,23 +231,23 @@ export async function applyGitFallback(app: App, hunk: Hunk, content: string[]):
 			await git.add("file.txt")
 			const searchCommit = await git.commit("search")
 			const searchHash = searchCommit.commit.replace(/^HEAD /, "")
-			console.log("Strategy 2 - Search commit:", searchHash)
+			// console.log("Strategy 2 - Search commit:", searchHash)
 
 			fs.writeFileSync(filePath, replaceText)
 			await git.add("file.txt")
 			const replaceCommit = await git.commit("replace")
 			const replaceHash = replaceCommit.commit.replace(/^HEAD /, "")
-			console.log("Strategy 2 - Replace commit:", replaceHash)
+			// console.log("Strategy 2 - Replace commit:", replaceHash)
 
-			console.log("Strategy 2 - Attempting checkout of:", searchHash)
+			// console.log("Strategy 2 - Attempting checkout of:", searchHash)
 			await git.raw(["checkout", searchHash])
 			fs.writeFileSync(filePath, originalText)
 			await git.add("file.txt")
-			const originalCommit2 = await git.commit("original")
-			console.log("Strategy 2 - Original commit:", originalCommit2.commit)
+			// const originalCommit2 = await git.commit("original")
+			// console.log("Strategy 2 - Original commit:", originalCommit2.commit)
 
 			try {
-				console.log("Strategy 2 - Attempting cherry-pick of:", replaceHash)
+				// console.log("Strategy 2 - Attempting cherry-pick of:", replaceHash)
 				await git.raw(["cherry-pick", "--minimal", replaceHash])
 
 				const newText = fs.readFileSync(filePath, "utf-8")
@@ -287,7 +287,7 @@ export async function applyEdit(
 ): Promise<EditResult> {
 	// Don't attempt regular edits if confidence is too low
 	if (confidence < confidenceThreshold) {
-		console.log(
+		console.warn(
 			`Search confidence (${confidence}) below minimum threshold (${confidenceThreshold}), trying git fallback...`,
 		)
 		return applyGitFallback(app, hunk, content)

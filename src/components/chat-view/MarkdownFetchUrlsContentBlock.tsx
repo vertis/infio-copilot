@@ -1,10 +1,7 @@
-import { ChevronDown, ChevronRight, Globe } from 'lucide-react'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Check, ChevronDown, ChevronRight, Globe, Loader2, X } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
 
-import { useDarkModeContext } from '../../contexts/DarkModeContext'
 import { ApplyStatus, FetchUrlsContentToolArgs } from '../../types/apply'
-
-import { MemoizedSyntaxHighlighterWrapper } from './SyntaxHighlighterWrapper'
 
 export default function MarkdownFetchUrlsContentBlock({
 	applyStatus,
@@ -17,14 +14,11 @@ export default function MarkdownFetchUrlsContentBlock({
 	urls: string[],
 	finish: boolean
 }) {
-	const { isDarkMode } = useDarkModeContext()
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [isOpen, setIsOpen] = useState(true)
 
 	React.useEffect(() => {
-		console.log('finish', finish, applyStatus)
 		if (finish && applyStatus === ApplyStatus.Idle) {
-			console.log('finish auto fetch urls content', urls)
 			onApply({
 				type: 'fetch_urls_content',
 				urls: urls
@@ -32,48 +26,67 @@ export default function MarkdownFetchUrlsContentBlock({
 		}
 	}, [finish])
 
-	const urlsMarkdownContent = useMemo(() => {
-		return urls.map(url => {
-			return `${url}`
-		}).join('\n\n')
-	}, [urls])
-
 	useEffect(() => {
 		if (containerRef.current) {
 			containerRef.current.scrollTop = containerRef.current.scrollHeight
 		}
-	}, [urlsMarkdownContent])
+	}, [urls])
 
 	return (
-		urlsMarkdownContent && (
-			<div
-				className={`infio-chat-code-block has-filename infio-reasoning-block`}
-			>
-				<div className={'infio-chat-code-block-header'}>
-					<div className={'infio-chat-code-block-header-filename'}>
+		urls.length > 0 && (
+			<div className="infio-chat-code-block has-filename infio-reasoning-block">
+				<div className="infio-chat-code-block-header">
+					<div className="infio-chat-code-block-header-filename">
 						<Globe size={10} className="infio-chat-code-block-header-icon" />
 						Fetch URLs Content
 					</div>
-					<button
-						className="clickable-icon infio-chat-list-dropdown"
-						onClick={() => setIsOpen(!isOpen)}
-					>
-						{isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-					</button>
+					<div className="infio-chat-code-block-header-button">
+						<button
+							className="infio-chat-code-block-status-button"
+							disabled={true}
+						>
+							{
+								!finish || applyStatus === ApplyStatus.Idle ? (
+									<>
+										<Loader2 className="spinner" size={14} /> Fetching...
+									</>
+								) : applyStatus === ApplyStatus.Applied ? (
+									<>
+										<Check size={14} /> Done
+									</>
+								) : (
+									<>
+										<X size={14} /> Failed
+									</>
+								)}
+						</button>
+						<button
+							className="clickable-icon infio-chat-list-dropdown"
+							onClick={() => setIsOpen(!isOpen)}
+						>
+							{isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+						</button>
+					</div>
 				</div>
 				<div
 					ref={containerRef}
 					className="infio-reasoning-content-wrapper"
+					style={{ display: isOpen ? 'block' : 'none' }}
 				>
-					<MemoizedSyntaxHighlighterWrapper
-						isDarkMode={isDarkMode}
-						language="markdown"
-						hasFilename={true}
-						wrapLines={true}
-						isOpen={isOpen}
-					>
-						{urlsMarkdownContent}
-					</MemoizedSyntaxHighlighterWrapper>
+					<ul className="infio-chat-code-block-url-list">
+						{urls.map((url, index) => (
+							<li key={index}>
+								<a
+									href={url}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="infio-chat-code-block-url-link"
+								>
+									{url}
+								</a>
+							</li>
+						))}
+					</ul>
 				</div>
 			</div>
 		)

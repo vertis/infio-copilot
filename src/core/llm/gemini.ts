@@ -60,7 +60,6 @@ export class GeminiProvider implements BaseLLMProvider {
 				: undefined
 
 		try {
-			console.log(request)
 			const model = this.client.getGenerativeModel({
 				model: request.model,
 				generationConfig: {

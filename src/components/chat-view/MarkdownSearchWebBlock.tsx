@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react'
+import { Check, Loader2, Search, X } from 'lucide-react'
 import React from 'react'
 
 import { useSettings } from '../../contexts/SettingsContext'
@@ -47,6 +47,27 @@ export default function MarkdownWebSearchBlock({
 				<div className={'infio-chat-code-block-header-filename'}>
 					<Search size={14} className="infio-chat-code-block-header-icon" />
 					Web search: {query}
+				</div>
+				<div className={'infio-chat-code-block-header-button'}>
+					<button
+						style={{ color: '#008000' }}
+						disabled={true}
+					>
+						{
+							!finish || applyStatus === ApplyStatus.Idle ? (
+								<>
+									<Loader2 className="spinner" size={14} /> Searching...
+								</>
+							) : applyStatus === ApplyStatus.Applied ? (
+								<>
+									<Check size={14} /> Done
+								</>
+							) : (
+								<>
+									<X size={14} /> Failed
+								</>
+							)}
+					</button>
 				</div>
 			</div>
 		</div>

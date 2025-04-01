@@ -550,7 +550,7 @@ export function parseMsgBlocks(
 								urls = parsedUrls
 							}
 						} catch (error) {
-							console.error('Failed to parse URLs JSON', error)
+							// console.error('Failed to parse URLs JSON', error)
 						}
 					}
 				}

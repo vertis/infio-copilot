@@ -25,9 +25,7 @@ export default function MarkdownListFilesBlock({
 	}
 
 	React.useEffect(() => {
-		console.log('finish', finish, applyStatus)
 		if (finish && applyStatus === ApplyStatus.Idle) {
-			console.log('finish auto list files', path)
 			onApply({
 				type: 'list_files',
 				filepath: path,
