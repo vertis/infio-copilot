@@ -371,8 +371,50 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 				if ('filepath' in toolArgs && toolArgs.filepath) {
 					opFile = app.vault.getFileByPath(toolArgs.filepath)
 				}
-
-				if (toolArgs.type === 'write_to_file' || toolArgs.type === 'insert_content') {
+				if (toolArgs.type === 'write_to_file') {
+					let newFile = false
+					if (!opFile) {
+						opFile = await app.vault.create(toolArgs.filepath, '')
+						newFile = true
+					}
+					// return a Promise, which will be resolved after user makes a choice
+					return new Promise<{ type: string; applyMsgId: string; applyStatus: ApplyStatus; returnMsg?: ChatUserMessage }>((resolve) => {
+						app.workspace.getLeaf(true).setViewState({
+							type: APPLY_VIEW_TYPE,
+							active: true,
+							state: {
+								file: opFile,
+								oldContent: '',
+								newContent: toolArgs.content,
+								onClose: (applied: boolean) => {
+									const applyStatus = applied ? ApplyStatus.Applied : ApplyStatus.Rejected
+									const applyEditContent = applied ? 'Changes successfully applied'
+										: 'User rejected changes'
+									if (newFile) {
+										if (!applied) {
+											app.vault.delete(opFile) // delete the new file if user rejected changes
+										} else {
+											app.workspace.openLinkText(toolArgs.filepath, 'split', true)
+										}
+									}
+									resolve({
+										type: toolArgs.type,
+										applyMsgId,
+										applyStatus,
+										returnMsg: {
+											role: 'user',
+											applyStatus: ApplyStatus.Idle,
+											content: null,
+											promptContent: `[${toolArgs.type} for '${toolArgs.filepath}'] Result:\n${applyEditContent}\n`,
+											id: uuidv4(),
+											mentionables: [],
+										}
+									});
+								}
+							} satisfies ApplyViewState,
+						})
+					})
+				} else if (toolArgs.type === 'insert_content') {
 					if (!opFile) {
 						throw new Error(`File not found: ${toolArgs.filepath}`)
 					}
@@ -400,14 +442,14 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 									const applyEditContent = applied ? 'Changes successfully applied'
 										: 'User rejected changes'
 									resolve({
-										type: 'write_to_file',
+										type: toolArgs.type,
 										applyMsgId,
 										applyStatus,
 										returnMsg: {
 											role: 'user',
 											applyStatus: ApplyStatus.Idle,
 											content: null,
-											promptContent: `[write_to_file for '${toolArgs.filepath}'] Result:\n${applyEditContent}\n`,
+											promptContent: `[${toolArgs.type} for '${toolArgs.filepath}'] Result:\n${applyEditContent}\n`,
 											id: uuidv4(),
 											mentionables: [],
 										}
