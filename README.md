@@ -4,10 +4,6 @@
 
 [中文文档](README_zh-CN.md)
 
-[Chat with me on Twitter](https://x.com/buyiyouxi)
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/felixduan)
-
 ## Features
 
 ### Chat & Edit Flow
@@ -75,6 +71,10 @@ We value your input and want to ensure you can easily share your thoughts and re
 
 - **Bug Reports**: If you encounter any bugs or unexpected behavior, please submit an issue on our [GitHub Issues](https://github.com/infiolab/infio-copilot/issues) page. Be sure to include as much detail as possible to help us reproduce and address the problem.
 - **Feature Requests**: For new feature ideas or enhancements, please use our [GitHub Discussions - Ideas & Feature Requests](https://github.com/infiolab/infio-copilot/discussions/categories/ideas) page. Create a new discussion to share your suggestions.
+
+[Chat with me on Twitter](https://x.com/buyiyouxi)
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/felixduan)
 
 ## Acknowledgments
 
