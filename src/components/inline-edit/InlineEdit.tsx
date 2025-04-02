@@ -253,13 +253,15 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
 				return;
 			}
 
-			const originalContent = await plugin.app.vault.read(activeFile);
+			const oldContent = await plugin.app.vault.read(activeFile);
+			console.log(oldContent);
+			console.log(updatedContent);
 			await plugin.app.workspace.getLeaf(true).setViewState({
 				type: APPLY_VIEW_TYPE,
 				active: true,
 				state: {
 					file: activeFile,
-					originalContent: removeAITags(originalContent),
+					oldContent: removeAITags(oldContent),
 					newContent: removeAITags(updatedContent),
 				},
 			});
