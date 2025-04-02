@@ -254,8 +254,6 @@ export const InlineEdit: React.FC<InlineEditProps> = ({
 			}
 
 			const oldContent = await plugin.app.vault.read(activeFile);
-			console.log(oldContent);
-			console.log(updatedContent);
 			await plugin.app.workspace.getLeaf(true).setViewState({
 				type: APPLY_VIEW_TYPE,
 				active: true,
