@@ -172,8 +172,6 @@ export class PromptGenerator {
 		let filesSearchMethod = this.settings.filesSearchMethod
 		if (filesSearchMethod === 'auto' && this.settings.embeddingModelId && this.settings.embeddingModelId !== '') {
 			filesSearchMethod = 'semantic'
-		} else {
-			filesSearchMethod = 'regex'
 		}
 
 		const userLanguage = getFullLanguageName(getLanguage())

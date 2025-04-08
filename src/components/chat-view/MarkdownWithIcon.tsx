@@ -45,8 +45,13 @@ function CreateNewFileButton({ message }: { message: string }) {
 	const app = useApp()
 	const [created, setCreated] = useState(false)
 
+	const cleanMarkdownTitle = (text: string): string => {
+		// 移除所有 # 开头的标题标记
+		return text.replace(/^#+\s*/g, '');
+	}
+
 	const handleCreate = async () => {
-		const firstLine = message.trimStart().split('\n')[0].trim().replace(/[\\\/:]/g, '');
+		const firstLine = cleanMarkdownTitle(message.trimStart().split('\n')[0].trim()).replace(/[\\/:]/g, '');
 		const filename = firstLine.slice(0, 200) + (firstLine.length > 200 ? '...' : '') || 'untitled';
 		await app.vault.create(`/${filename}.md`, message)
 		await app.workspace.openLinkText(filename, 'split', true)
