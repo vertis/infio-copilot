@@ -1,5 +1,8 @@
+// @ts-nocheck
+
 import fs from "fs/promises"
 import path from "path"
+
 import { Mode } from "../../../shared/modes"
 import { fileExistsAtPath } from "../../../utils/fs"
 

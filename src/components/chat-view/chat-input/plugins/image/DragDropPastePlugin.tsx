@@ -16,7 +16,7 @@ export default function DragDropPaste({
 	useEffect(() => {
 		return editor.registerCommand(
 			DRAG_DROP_PASTE, // dispatched in RichTextPlugin
-			(files) => {
+			(files: File[]) => {
 				; (async () => {
 					const images = files.filter((file) => file.type.startsWith('image/'))
 					const mentionableImages = await Promise.all(

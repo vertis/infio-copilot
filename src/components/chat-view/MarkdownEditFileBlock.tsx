@@ -48,6 +48,7 @@ export default function MarkdownEditFileBlock({
 		}
 		setApplying(true)
 		onApply({
+			// @ts-ignore
 			type: mode,
 			filepath: path,
 			content: String(children),

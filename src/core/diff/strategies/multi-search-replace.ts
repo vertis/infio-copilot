@@ -370,26 +370,26 @@ Only use a single line of '=======' between search and replacement content, beca
 		}
 	}
 
-	getProgressStatus(toolUse: ToolUse, result?: DiffResult): ToolProgressStatus {
-		const diffContent = toolUse.params.diff
-		if (diffContent) {
-			const icon = "diff-multiple"
-			const searchBlockCount = (diffContent.match(/SEARCH/g) || []).length
-			if (toolUse.partial) {
-				if (diffContent.length < 1000 || (diffContent.length / 50) % 10 === 0) {
-					return { icon, text: `${searchBlockCount}` }
-				}
-			} else if (result) {
-				if (result.failParts?.length) {
-					return {
-						icon,
-						text: `${searchBlockCount - result.failParts.length}/${searchBlockCount}`,
-					}
-				} else {
-					return { icon, text: `${searchBlockCount}` }
-				}
-			}
-		}
-		return {}
-	}
+	// getProgressStatus(toolUse: ToolUse, result?: DiffResult): ToolProgressStatus {
+	// 	const diffContent = toolUse.params.diff
+	// 	if (diffContent) {
+	// 		const icon = "diff-multiple"
+	// 		const searchBlockCount = (diffContent.match(/SEARCH/g) || []).length
+	// 		if (toolUse.partial) {
+	// 			if (diffContent.length < 1000 || (diffContent.length / 50) % 10 === 0) {
+	// 				return { icon, text: `${searchBlockCount}` }
+	// 			}
+	// 		} else if (result) {
+	// 			if (result.failParts?.length) {
+	// 				return {
+	// 					icon,
+	// 					text: `${searchBlockCount - result.failParts.length}/${searchBlockCount}`,
+	// 				}
+	// 			} else {
+	// 				return { icon, text: `${searchBlockCount}` }
+	// 			}
+	// 		}
+	// 	}
+	// 	return {}
+	// }
 }

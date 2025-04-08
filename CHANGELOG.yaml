@@ -1,4 +1,7 @@
 releases:
+  - version: "0.1"
+		features:
+		
   - version: "0.0.4"
     features:
       - "Added new settings components for better organization"

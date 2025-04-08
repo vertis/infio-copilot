@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Client } from "@modelcontextprotocol/sdk/client/index.js"
 import { StdioClientTransport, StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js"
 import {

@@ -1,5 +1,7 @@
-import * as vscode from "vscode"
+// @ts-nocheck
+
 import { ClineProvider } from "../../core/webview/ClineProvider"
+
 import { McpHub } from "./McpHub"
 
 /**

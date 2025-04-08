@@ -1,7 +1,13 @@
-import { applyPatch } from "diff"
-import { DiffStrategy, DiffResult } from "../types"
+import { applyPatch } from "diff";
+
+import { DiffResult, DiffStrategy } from "../types";
 
 export class UnifiedDiffStrategy implements DiffStrategy {
+
+	getName(): string {
+		return "Unified"
+	}
+
 	getToolDescription(args: { cwd: string; toolOptions?: { [key: string]: string } }): string {
 		return `## apply_diff
 Description: Apply a unified diff to a file at the specified path. This tool is useful when you need to make specific modifications to a file based on a set of changes provided in unified diff format (diff -U3).

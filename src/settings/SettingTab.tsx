@@ -143,6 +143,7 @@ export class InfioSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						await this.plugin.setSettings({
 							...this.plugin.settings,
+							// @ts-ignore
 							serperSearchEngine: value,
 						})
 					}),

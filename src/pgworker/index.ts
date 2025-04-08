@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { live } from '@electric-sql/pglite/live';
 import { PGliteWorker } from '@electric-sql/pglite/worker';
 

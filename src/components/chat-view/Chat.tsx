@@ -578,6 +578,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						}
 					}
 				} else if (toolArgs.type === 'regex_search_files') {
+					// @ts-expect-error Obsidian API type mismatch
 					const baseVaultPath = app.vault.adapter.getBasePath()
 					const ripgrepPath = settings.ripgrepPath
 					const absolutePath = path.join(baseVaultPath, toolArgs.filepath)
