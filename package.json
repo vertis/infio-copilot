@@ -78,6 +78,7 @@
 		"groq-sdk": "^0.7.0",
 		"handlebars": "^4.7.7",
 		"js-tiktoken": "^1.0.15",
+		"js-yaml": "^4.1.0",
 		"json5": "^2.2.3",
 		"langchain": "^0.3.2",
 		"lexical": "^0.17.1",

@@ -14,10 +14,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-      - run: npm ci
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Type check
-        run: npm run type:check
+        run: pnpm run type:check
       - name: Lint check
-        run: npm run lint:check
+        run: pnpm run lint:check
       - name: Test
-        run: npm test
+        run: pnpm test

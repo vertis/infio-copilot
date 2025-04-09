@@ -22,17 +22,22 @@ jobs:
         with:
           node-version: 20.x
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
       - name: Build
         id: build
         run: |
-          npm install
-          npm install js-yaml
-          npm run build
+          pnpm install
+          pnpm add js-yaml
+          pnpm build
 
       - name: Test
         id: test
         run: |
-          npm run test
+          pnpm test
 
       - name: Get Tag Name
         id: get_tag
