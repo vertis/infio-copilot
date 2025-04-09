@@ -1,9 +1,9 @@
 releases:
   - version: "0.1"
-		features:
-			- "Added agent prompt with three modes (ask, research, write)"
-			- "Updated Ollama local proxy configuration"
-			- "Fixed PGlite database errors"
+    features:
+      - "Added agent prompt with three modes (ask, research, write)"
+      - "Updated Ollama local proxy configuration"
+      - "Fixed PGlite database errors"
 
   - version: "0.0.4"
     features:
