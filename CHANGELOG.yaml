@@ -1,5 +1,5 @@
 releases:
-  - version: "0.1"
+  - version: "0.1.1"
     features:
       - "Added agent prompt with three modes (ask, research, write)"
       - "Updated Ollama local proxy configuration"
