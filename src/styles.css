@@ -478,6 +478,10 @@ button:not(.clickable-icon).infio-chat-list-dropdown {
   max-width: 240px;
 }
 
+.infio-popover.infio-llm-setting-combobox-dropdown {
+  max-width: 340px;
+}
+
 .infio-popover ul {
   padding: 0;
   list-style: none;
