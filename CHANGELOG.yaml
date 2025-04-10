@@ -1,4 +1,9 @@
 releases:
+  - version: "0.1.2"
+    features:
+      - "Added default mention settings for new chat"
+      - "Added mode settings for new chat"
+
   - version: "0.1.1"
     features:
       - "Added agent prompt with three modes (ask, research, write)"
