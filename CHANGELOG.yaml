@@ -1,4 +1,9 @@
 releases:
+  - version: "0.1.3"
+    features:
+      - "updated model options settings for LLM"
+      - "removed unused options settings"
+
   - version: "0.1.2"
     features:
       - "Added default mention settings for new chat"
