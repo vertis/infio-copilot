@@ -4,6 +4,8 @@
 
 [中文文档](README_zh-CN.md)
 
+## New Version
+
 ## Features
 
 ### Chat & Edit Flow

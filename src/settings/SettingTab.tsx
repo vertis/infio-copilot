@@ -38,6 +38,7 @@ export class InfioSettingTab extends PluginSettingTab {
 		containerEl.empty()
 		this.renderModelsSection(containerEl)
 		this.renderFilesSearchSection(containerEl)
+		this.renderChatBehaviorSection(containerEl)
 		this.renderDeepResearchSection(containerEl)
 		this.renderRAGSection(containerEl)
 		this.renderAutoCompleteSection(containerEl)
@@ -91,6 +92,42 @@ export class InfioSettingTab extends PluginSettingTab {
 						})
 					}),
 			)
+	}
+
+	private renderChatBehaviorSection(containerEl: HTMLElement): void {
+		new Setting(containerEl).setHeading().setName('Chat Behavior');
+		new Setting(containerEl)
+			.setName('Default mention for new chat')
+			.setDesc('Choose the default file mention behavior when starting a new chat.')
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption('none', 'None')
+					.addOption('current-file', 'Current File')
+					.addOption('vault', 'Vault')
+					.setValue(this.plugin.settings.defaultMention || 'none')
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							defaultMention: value as 'none' | 'current-file' | 'vault',
+						});
+					}),
+		);
+		new Setting(containerEl)
+			.setName('Mode for new chat')
+			.setDesc('Choose the mode to use when starting a new chat.')
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption('ask', 'Ask')
+					.addOption('write', 'Write')
+					.addOption('research', 'Research')
+					.setValue(this.plugin.settings.mode || 'ask')
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							mode: value as 'ask' | 'write' | 'research',
+						});
+					}),
+			);
 	}
 
 	renderModelsSection(containerEl: HTMLElement): void {

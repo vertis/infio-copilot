@@ -32,6 +32,7 @@ import { useChatHistory } from '../../hooks/use-chat-history'
 import { ApplyStatus, ToolArgs } from '../../types/apply'
 import { ChatMessage, ChatUserMessage } from '../../types/chat'
 import {
+	Mentionable,
 	MentionableBlock,
 	MentionableBlockData,
 	MentionableCurrentFile,
@@ -47,15 +48,6 @@ import { openSettingsModalWithError } from '../../utils/open-settings-modal'
 import { PromptGenerator, addLineNumbers } from '../../utils/prompt-generator'
 import { fetchUrlsContent, webSearch } from '../../utils/web-search'
 
-// Simple file reading function that returns a placeholder content for testing
-const readFileContentByPath = async (app: App, filePath: string): Promise<string> => {
-	const file = app.vault.getFileByPath(filePath)
-	if (!file) {
-		throw new Error(`File not found: ${filePath}`)
-	}
-	return await readTFileContent(file, app.vault)
-}
-
 import { ModeSelect } from './chat-input/ModeSelect'
 import PromptInputWithActions, { ChatUserInputRef } from './chat-input/PromptInputWithActions'
 import { editorStateToPlainText } from './chat-input/utils/editor-state-to-plain-text'
@@ -67,19 +59,28 @@ import ShortcutInfo from './ShortcutInfo'
 import SimilaritySearchResults from './SimilaritySearchResults'
 
 // Add an empty line here
-const getNewInputMessage = (app: App): ChatUserMessage => {
+const getNewInputMessage = (app: App, defaultMention: string): ChatUserMessage => {
+	const mentionables: Mentionable[] = [];
+	if (defaultMention === 'current-file') {
+		const activeFile = app.workspace.getActiveFile();
+		if (activeFile) {
+			mentionables.push({
+				type: 'current-file',
+				file: activeFile,
+			});
+		}
+	} else if (defaultMention === 'vault') {
+		mentionables.push({
+			type: 'vault',
+		});
+	}
 	return {
 		role: 'user',
 		applyStatus: ApplyStatus.Idle,
 		content: null,
 		promptContent: null,
 		id: uuidv4(),
-		mentionables: [
-			{
-				type: 'current-file',
-				file: app.workspace.getActiveFile(),
-			},
-		],
+		mentionables: mentionables,
 	}
 }
 
@@ -113,7 +114,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 	}, [getRAGEngine, app, settings, diffStrategy])
 
 	const [inputMessage, setInputMessage] = useState<ChatUserMessage>(() => {
-		const newMessage = getNewInputMessage(app)
+		const newMessage = getNewInputMessage(app, settings.defaultMention)
 		if (props.selectedBlock) {
 			newMessage.mentionables = [
 				...newMessage.mentionables,
@@ -206,7 +207,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 			}
 			setCurrentConversationId(conversationId)
 			setChatMessages(conversation)
-			const newInputMessage = getNewInputMessage(app)
+			const newInputMessage = getNewInputMessage(app, settings.defaultMention)
 			setInputMessage(newInputMessage)
 			setFocusedMessageId(newInputMessage.id)
 			setQueryProgress({
@@ -221,7 +222,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 	const handleNewChat = (selectedBlock?: MentionableBlockData) => {
 		setCurrentConversationId(uuidv4())
 		setChatMessages([])
-		const newInputMessage = getNewInputMessage(app)
+		const newInputMessage = getNewInputMessage(app, settings.defaultMention)
 		if (selectedBlock) {
 			const mentionableBlock: MentionableBlock = {
 				type: 'block',
@@ -990,7 +991,7 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 						[...chatMessages, { ...inputMessage, content }],
 						useVaultSearch,
 					)
-					setInputMessage(getNewInputMessage(app))
+					setInputMessage(getNewInputMessage(app, settings.defaultMention))
 					preventAutoScrollRef.current = false
 					handleScrollToBottom()
 				}}
