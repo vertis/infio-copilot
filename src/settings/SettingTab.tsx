@@ -37,6 +37,7 @@ export class InfioSettingTab extends PluginSettingTab {
 		const { containerEl } = this
 		containerEl.empty()
 		this.renderModelsSection(containerEl)
+		this.renderModelParametersSection(containerEl)
 		this.renderFilesSearchSection(containerEl)
 		this.renderChatBehaviorSection(containerEl)
 		this.renderDeepResearchSection(containerEl)
@@ -58,6 +59,90 @@ export class InfioSettingTab extends PluginSettingTab {
 				}}
 			/>
 		);
+	}
+
+	private renderModelParametersSection(containerEl: HTMLElement): void {
+		new Setting(containerEl).setHeading().setName('Model parameters');
+		new Setting(containerEl)
+			.setName('Temperature')
+			.setDesc('This parameter affects randomness in the sampling. Lower values result in more repetitive and deterministic responses. Higher temperatures will result in more unexpected or creative responses. Default: 0.0, please don\'t change this if you don\'t know what you are doing.')
+			.addText((text) => {
+				text
+					.setValue(String(this.plugin.settings.modelOptions.temperature))
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							modelOptions: {
+								...this.plugin.settings.modelOptions,
+								temperature: parseFloat(value),
+							},
+						});
+					})
+			});
+		new Setting(containerEl)
+			.setName('TopP')
+			.setDesc("Like the temperature parameter, the Top P parameter affects the randomness in sampling. Lowering the value will limit the model's token selection to likelier tokens while increasing the value expands the model's token selection with lower likelihood tokens. Default: 1, please don't change this if you don't know what you are doing.")
+			.addText((text) => {
+				text
+					.setValue(String(this.plugin.settings.modelOptions.top_p))
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							modelOptions: {
+								...this.plugin.settings.modelOptions,
+								top_p: parseFloat(value),
+							},
+						});
+					})
+			});
+		new Setting(containerEl)
+			.setName('Frequency penalty')
+			.setDesc('This parameter reduces the chance of repeating a token proportionally based on how often it has appeared in the text so far. This decreases the likelihood of repeating the exact same text in a response. Default: 0.25')
+			.addText((text) => {
+				text
+					.setValue(String(this.plugin.settings.modelOptions.frequency_penalty))
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							modelOptions: {
+								...this.plugin.settings.modelOptions,
+								frequency_penalty: parseFloat(value),
+							},
+						});
+					})
+			});
+		new Setting(containerEl)
+			.setName('Presence penalty')
+			.setDesc("This parameter reduces the chance of repeating any token that has appeared in the text so far. This increases the likelihood of introducing new topics in a response. Default: 2")
+			.addText((text) => {
+				text
+					.setValue(String(this.plugin.settings.modelOptions.presence_penalty))
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							modelOptions: {
+								...this.plugin.settings.modelOptions,
+								presence_penalty: parseFloat(value),
+							},
+						});
+					})
+			});
+		new Setting(containerEl)
+			.setName('Max tokens')
+			.setDesc("This parameter changes the maximum number of tokens the model is allowed to generate. Default: 4096")
+			.addText((text) => {
+				text
+					.setValue(String(this.plugin.settings.modelOptions.max_tokens))
+					.onChange(async (value) => {
+						await this.plugin.setSettings({
+							...this.plugin.settings,
+							modelOptions: {
+								...this.plugin.settings.modelOptions,
+								max_tokens: parseInt(value),
+							},
+						});
+					})
+			});
 	}
 
 	private renderFilesSearchSection(containerEl: HTMLElement): void {
@@ -95,7 +180,7 @@ export class InfioSettingTab extends PluginSettingTab {
 	}
 
 	private renderChatBehaviorSection(containerEl: HTMLElement): void {
-		new Setting(containerEl).setHeading().setName('Chat Behavior');
+		new Setting(containerEl).setHeading().setName('Chat behavior');
 		new Setting(containerEl)
 			.setName('Default mention for new chat')
 			.setDesc('Choose the default file mention behavior when starting a new chat.')
@@ -111,7 +196,7 @@ export class InfioSettingTab extends PluginSettingTab {
 							defaultMention: value as 'none' | 'current-file' | 'vault',
 						});
 					}),
-		);
+			);
 	}
 
 	renderModelsSection(containerEl: HTMLElement): void {
@@ -151,7 +236,7 @@ export class InfioSettingTab extends PluginSettingTab {
 				}
 				return t;
 			})
-		
+
 		new Setting(containerEl)
 			.setName('Serper search engine')
 			.setDesc('Choose the search engine to use for web search.')
@@ -392,16 +477,6 @@ export class InfioSettingTab extends PluginSettingTab {
 			<BasicAutoCompleteSettings
 				settings={this.plugin.settings}
 				updateSettings={updateSettings}
-			/>
-		);
-
-		// Model parameters
-		new Setting(containerEl).setName('Model parameters').setHeading();
-		this.renderComponent(containerEl,
-			<ModelParametersSettings
-				settings={this.plugin.settings}
-				updateSettings={updateSettings}
-				errors={errors}
 			/>
 		);
 

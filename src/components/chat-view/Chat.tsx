@@ -290,9 +290,13 @@ const Chat = forwardRef<ChatRef, ChatProps>((props, ref) => {
 				const stream = await streamResponse(
 					chatModel,
 					{
-						model: chatModel.modelId,
-						temperature: 0,
 						messages: requestMessages,
+						model: chatModel.modelId,
+						max_tokens: settings.modelOptions.max_tokens,
+						temperature: settings.modelOptions.temperature,
+						// top_p: settings.modelOptions.top_p,
+						// frequency_penalty: settings.modelOptions.frequency_penalty,
+						// presence_penalty: settings.modelOptions.presence_penalty,
 						stream: true,
 					},
 					{
