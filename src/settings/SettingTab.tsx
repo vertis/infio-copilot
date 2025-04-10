@@ -112,22 +112,6 @@ export class InfioSettingTab extends PluginSettingTab {
 						});
 					}),
 		);
-		new Setting(containerEl)
-			.setName('Mode for new chat')
-			.setDesc('Choose the mode to use when starting a new chat.')
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOption('ask', 'Ask')
-					.addOption('write', 'Write')
-					.addOption('research', 'Research')
-					.setValue(this.plugin.settings.mode || 'ask')
-					.onChange(async (value) => {
-						await this.plugin.setSettings({
-							...this.plugin.settings,
-							mode: value as 'ask' | 'write' | 'research',
-						});
-					}),
-			);
 	}
 
 	renderModelsSection(containerEl: HTMLElement): void {

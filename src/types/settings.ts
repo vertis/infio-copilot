@@ -229,7 +229,7 @@ export const InfioSettingsSchema = z.object({
 	multiSearchReplaceDiffStrategy: z.boolean().catch(true),
 
 	// Mode
-	mode: z.enum(['ask', 'write', 'research']).catch('ask'),
+	mode: z.string().catch('ask'),
 	defaultMention: z.enum(['none', 'current-file', 'vault']).catch('none'),
 
 	// web search
