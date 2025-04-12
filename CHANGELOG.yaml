@@ -1,4 +1,7 @@
 releases:
+  - version: "0.1.4"
+    features:
+      - "Better model selection"
   - version: "0.1.1"
     features:
       - "Added agent prompt with three modes (ask, research, write)"
